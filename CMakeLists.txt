@@ -13,3 +13,4 @@ project ("RagTag")
 
 # Include sub-projects.
 add_subdirectory ("RagTag")
+add_subdirectory ("wxWidgets")
