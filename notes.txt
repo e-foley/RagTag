@@ -1,6 +1,21 @@
+# Recursive submodules
+
 wxWidgets is a submodule that itself uses submodules.
 
 Per https://stackoverflow.com/a/1032653...
 
 * The first time a repo is checked out, run `git submodule update --init --recursive`.
 * Subsequently, use `git submodule update --recursive`.
+
+
+# Installing Catch 2
+
+Use following commands within Catch2 directory on admin-elevated terminal (per instructions on
+https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md).
+
+```
+$ git clone https://github.com/catchorg/Catch2.git
+$ cd Catch2
+$ cmake -B build -S . -DBUILD_TESTING=OFF
+$ sudo cmake --build build/ --target install
+```
