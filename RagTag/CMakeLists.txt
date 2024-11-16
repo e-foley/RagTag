@@ -3,7 +3,7 @@
 #
 
 # Add source to this project's executable.
-add_executable (RagTag "RagTag.cpp" "RagTag.h")
+add_executable (RagTag "RagTag.cpp" "RagTag.h" "tag_map.h" "tag_map.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET RagTag PROPERTY CXX_STANDARD 20)
