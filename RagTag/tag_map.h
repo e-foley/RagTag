@@ -12,6 +12,7 @@ public:
 
   TagMap();
   bool addTag(id_t id, tag_t tag);
+  bool removeTag(id_t id);
   std::optional<tag_t> getTag(id_t id) const;
 
 private:

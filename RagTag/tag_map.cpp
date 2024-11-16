@@ -7,6 +7,11 @@ bool TagMap::addTag(id_t id, tag_t tag)
   return id_to_tag_map_.emplace(id, tag).second;
 }
 
+bool TagMap::removeTag(id_t id) {
+  // erase returns number of elements removed
+  return id_to_tag_map_.erase(id) > 0;
+}
+
 std::optional<TagMap::tag_t> TagMap::getTag(id_t id) const
 {
   const auto tag_it = id_to_tag_map_.find(id);
