@@ -5,7 +5,12 @@
 find_package(Catch2 3 REQUIRED)
 
 # Add source to this project's executable.
-add_executable (Tests "Tests.cpp")
+add_executable (Tests
+                "Tests.cpp"
+                "../RagTag/tag_map.cpp")
+
+target_include_directories(Tests PRIVATE
+                           "../RagTag")
 
 target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain)
 
