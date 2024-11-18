@@ -4,6 +4,8 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <utility>  // std::pair
+#include <vector>
 
 class TagMap {
 public:
@@ -16,6 +18,7 @@ public:
   bool addTag(id_t id, tag_t tag);
   bool removeTag(id_t id);
   std::optional<tag_t> getTag(id_t id) const;
+  std::vector<std::pair<id_t, tag_t>> getAllTags() const;
   int numTags() const;
 
 private:

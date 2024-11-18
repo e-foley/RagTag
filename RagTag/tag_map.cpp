@@ -28,6 +28,16 @@ std::optional<TagMap::tag_t> TagMap::getTag(id_t id) const
   return tag_it->second;
 }
 
+std::vector<std::pair<TagMap::id_t, TagMap::tag_t>> TagMap::getAllTags() const
+{
+  std::vector<std::pair<id_t, tag_t>> tag_vector;
+  tag_vector.reserve(id_to_tag_map_.size());
+  for (const auto map_it : id_to_tag_map_) {
+    tag_vector.emplace_back(map_it);
+  }
+  return tag_vector;
+}
+
 int TagMap::numTags() const
 {
   // Safe conversion provided MAX_NUM_TAGS is enforced.
