@@ -4,3 +4,6 @@
 [submodule "wxWidgets"]
 	path = wxWidgets
 	url = https://github.com/wxWidgets/wxWidgets
+[submodule "json"]
+	path = json
+	url = https://github.com/nlohmann/json
