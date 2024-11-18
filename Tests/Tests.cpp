@@ -38,7 +38,7 @@ TEST_CASE("TagMap addTag(), getTag(), removeTag(), numTags()", "[all][TagMap-1]"
   CHECK_FALSE(tag_ret.has_value());
 }
 
-TEST_CASE("TagMap tag re-registration with new value", "[all][TagMap-1]") {
+TEST_CASE("TagMap tag re-registration with new value", "[all][TagMap-2]") {
   TagMap map;
   REQUIRE_FALSE(map.getTag(555).has_value());
 
