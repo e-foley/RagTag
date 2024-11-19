@@ -39,3 +39,15 @@ int TagMap::numTags() const {
   // Safe conversion provided MAX_NUM_TAGS is enforced.
   return static_cast<int>(id_to_tag_map_.size());
 }
+
+nlohmann::json TagMap::toJson() const {
+  nlohmann::json id_tag_array_json;
+  // TODO: Investigate a more compact, specialized way of handling key-value pairs.
+  for (const auto& map_it : id_to_tag_map_) {
+    nlohmann::json adding;
+    adding["id"] = map_it.first;
+    adding["tag"] = map_it.second;
+    id_tag_array_json.push_back(adding);
+  }
+  return id_tag_array_json;
+}

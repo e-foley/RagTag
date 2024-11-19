@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>  // std::pair
 #include <vector>
+#include <nlohmann/json.hpp>
 
 class TagMap {
 public:
@@ -20,6 +21,7 @@ public:
   std::optional<tag_t> getTag(id_t id) const;
   std::vector<std::pair<id_t, tag_t>> getAllTags() const;
   int numTags() const;
+  nlohmann::json toJson() const;
 
 private:
   std::map<id_t, tag_t> id_to_tag_map_{};
