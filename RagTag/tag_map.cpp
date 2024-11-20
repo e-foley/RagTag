@@ -1,8 +1,9 @@
 #include "tag_map.h"
 
 namespace ragtag {
-  // Ensure this is no larger than max int so that we can safely cast size_t to int in numTags().
+  // Ensure these are no larger than max int so that we can safely cast size_t to int.
   const int TagMap::MAX_NUM_TAGS = std::numeric_limits<int>::max();
+  const int TagMap::MAX_NUM_FILES = std::numeric_limits<int>::max();
 
   TagMap::TagMap() {}
 
@@ -43,6 +44,45 @@ namespace ragtag {
   int TagMap::numTags() const {
     // Safe conversion provided MAX_NUM_TAGS is enforced.
     return static_cast<int>(tag_registry_.size());
+  }
+
+  bool TagMap::addFile(const path_t& path) {
+    return addFile(path, FileProperties{});
+  }
+
+  bool TagMap::addFile(const path_t& path, const FileProperties& properties) {
+    if (numFiles() >= MAX_NUM_FILES) {
+      return false;
+    }
+
+    return file_map_.emplace(path, properties).second;
+  }
+
+  bool TagMap::removeFile(const path_t& path) {
+    // erase() returns number of elements removed.
+    return file_map_.erase(path) > 0;
+  }
+
+  std::optional<FileProperties> TagMap::getFileProperties(const path_t& path) const {
+    const auto file_it = file_map_.find(path);
+    if (file_it == file_map_.end()) {
+      return {};
+    }
+    return file_it->second;
+  }
+
+  std::vector<std::pair<path_t, FileProperties>> TagMap::getAllFiles() const {
+    std::vector<std::pair<path_t, FileProperties>> file_vector;
+    file_vector.reserve(file_map_.size());
+    for (const auto map_it : file_map_) {
+      file_vector.emplace_back(map_it);
+    }
+    return file_vector;
+  }
+
+  int TagMap::numFiles() const {
+    // Safe conversion provided MAX_NUM_FILES is enforced.
+    return static_cast<int>(file_map_.size());
   }
 
   nlohmann::json TagMap::toJson() const {

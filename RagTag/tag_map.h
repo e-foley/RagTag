@@ -11,6 +11,7 @@
 
 namespace ragtag {
   typedef std::string tag_t;
+  typedef std::filesystem::path path_t;
 
   struct TagProperties {
     bool foo{false};  // Temp placeholder
@@ -30,14 +31,27 @@ namespace ragtag {
   class TagMap {
   public:
     static const int MAX_NUM_TAGS;
+    static const int MAX_NUM_FILES;
 
     TagMap();
+
+    // Tag-centric operations
     bool registerTag(tag_t tag);
     bool registerTag(tag_t tag, const TagProperties& properties);
     bool deleteTag(tag_t tag);
     std::optional<TagProperties> getTagProperties(tag_t tag) const;
     std::vector<std::pair<tag_t, TagProperties>> getAllTags() const;
     int numTags() const;
+
+    // File-centric operations
+    bool addFile(const path_t& path);
+    bool addFile(const path_t& path, const FileProperties& properties);
+    bool removeFile(const path_t& path);
+    std::optional<FileProperties> getFileProperties(const path_t& path) const;
+    std::vector<std::pair<path_t, FileProperties>> getAllFiles() const;
+    int numFiles() const;
+
+    // Reading and writing
     nlohmann::json toJson() const;
 
   private:

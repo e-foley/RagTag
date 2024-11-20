@@ -4,3 +4,4 @@
 * Decide how consistently it's appropriate to say "registered" in accessors for registered tags.
 * Where appropriate, consider replacing std::pair with explicit struct.
 * Where appropriate, consider replacing bool with explicit enum.
+* Use std::map::max_size() in relevant functions that check capacity.
