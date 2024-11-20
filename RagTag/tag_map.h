@@ -10,7 +10,6 @@
 #include <nlohmann/json.hpp>
 
 namespace ragtag {
-  typedef int id_t;
   typedef std::string tag_t;
 
   struct TagProperties {
