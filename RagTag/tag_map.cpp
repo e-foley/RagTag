@@ -63,6 +63,28 @@ namespace ragtag {
     return file_map_.erase(path) > 0;
   }
 
+  bool TagMap::setTag(const path_t& path, const tag_t tag, const TagSetting setting) {
+    const auto file_it = file_map_.find(path);
+    if (file_it == file_map_.end()) {
+      // File is not in our list.
+      return false;
+    }
+
+    const auto tag_it = tag_registry_.find(tag);
+    if (tag_it == tag_registry_.end()) {
+      // Tag is not registered.
+      return false;
+    }
+
+    // TODO: Perform validation on the setting that's appropriate for the configuration of the tag.
+    if (setting < TagSetting::NO || setting > TagSetting::UNCOMMITTED) {
+      return false;
+    }
+
+    // The .second refers to the success of the insertion-or-assignment operation.
+    return file_it->second.tags.insert_or_assign(tag, setting).second;
+  }
+
   std::optional<FileProperties> TagMap::getFileProperties(const path_t& path) const {
     const auto file_it = file_map_.find(path);
     if (file_it == file_map_.end()) {
