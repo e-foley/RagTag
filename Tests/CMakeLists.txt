@@ -10,7 +10,8 @@ add_executable (Tests
                 "../RagTag/tag_map.cpp")
 
 target_include_directories(Tests PRIVATE
-                           "../RagTag")
+                           "../RagTag"
+                           "../json/include")
 
 target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain)
 
