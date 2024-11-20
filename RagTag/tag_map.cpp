@@ -6,31 +6,35 @@ namespace ragtag {
 
   TagMap::TagMap() {}
 
-  bool TagMap::registerTag(id_t id, tag_t tag) {
+  bool TagMap::registerTag(tag_t tag) {
+    return registerTag(tag, TagProperties{});
+  }
+
+  bool TagMap::registerTag(tag_t tag, const TagProperties& properties) {
     if (numTags() >= MAX_NUM_TAGS) {
       return false;
     }
 
-    return id_to_tag_map_.emplace(id, tag).second;
+    return tag_registry_.emplace(tag, properties).second;
   }
 
-  bool TagMap::deleteTag(id_t id) {
-    // erase returns number of elements removed
-    return id_to_tag_map_.erase(id) > 0;
+  bool TagMap::deleteTag(tag_t tag) {
+    // erase() returns number of elements removed.
+    return tag_registry_.erase(tag) > 0;
   }
 
-  std::optional<tag_t> TagMap::getTag(id_t id) const {
-    const auto tag_it = id_to_tag_map_.find(id);
-    if (tag_it == id_to_tag_map_.end()) {
+  std::optional<TagProperties> TagMap::getTagProperties(tag_t tag) const {
+    const auto tag_it = tag_registry_.find(tag);
+    if (tag_it == tag_registry_.end()) {
       return {};
     }
     return tag_it->second;
   }
 
-  std::vector<std::pair<id_t, tag_t>> TagMap::getAllTags() const {
-    std::vector<std::pair<id_t, tag_t>> tag_vector;
-    tag_vector.reserve(id_to_tag_map_.size());
-    for (const auto map_it : id_to_tag_map_) {
+  std::vector<std::pair<tag_t, TagProperties>> TagMap::getAllTags() const {
+    std::vector<std::pair<tag_t, TagProperties>> tag_vector;
+    tag_vector.reserve(tag_registry_.size());
+    for (const auto map_it : tag_registry_) {
       tag_vector.emplace_back(map_it);
     }
     return tag_vector;
@@ -38,18 +42,18 @@ namespace ragtag {
 
   int TagMap::numTags() const {
     // Safe conversion provided MAX_NUM_TAGS is enforced.
-    return static_cast<int>(id_to_tag_map_.size());
+    return static_cast<int>(tag_registry_.size());
   }
 
   nlohmann::json TagMap::toJson() const {
     nlohmann::json id_tag_array_json;
     // TODO: Investigate a more compact, specialized way of handling key-value pairs.
-    for (const auto& map_it : id_to_tag_map_) {
-      nlohmann::json adding;
-      adding["id"] = map_it.first;
-      adding["tag"] = map_it.second;
-      id_tag_array_json.push_back(adding);
-    }
+    //for (const auto& map_it : tag_registry_) {
+    //  nlohmann::json adding;
+    //  adding["id"] = map_it.first;
+    //  adding["tag"] = map_it.second;
+    //  id_tag_array_json.push_back(adding);
+    //}
     return id_tag_array_json;
   }
 }  // namespace ragtag

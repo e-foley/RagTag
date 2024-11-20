@@ -1,3 +1,6 @@
 * Consider ways of separating JSON read/write functions from data-centric TagMap container.
 * Document all classes, functions, fields, etc.
 * Update root CMakeLists to build only required configuration of wxWidgets.
+* Decide how consistently it's appropriate to say "registered" in accessors for registered tags.
+* Where appropriate, consider replacing std::pair with explicit struct.
+* Where appropriate, consider replacing bool with explicit enum.

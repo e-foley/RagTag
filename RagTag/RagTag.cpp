@@ -10,9 +10,9 @@ using namespace std;
 
 int main() {
   ragtag::TagMap tag_map;
-  tag_map.registerTag(5, "Five");
-  tag_map.registerTag(3, "Three");
-  tag_map.registerTag(11, "Eleven");
+  tag_map.registerTag("Banana");
+  tag_map.registerTag("Cantaloupe");
+  tag_map.registerTag("Apple");
   nlohmann::json j;
   j["tag_list"] = tag_map.toJson();
   std::ofstream o("test.json");

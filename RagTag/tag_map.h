@@ -13,6 +13,10 @@ namespace ragtag {
   typedef int id_t;
   typedef std::string tag_t;
 
+  struct TagProperties {
+    bool foo{false};  // Temp placeholder
+  };
+
   struct FileProperties {
     std::optional<float> rating;
     std::map<tag_t, std::optional<bool>> tags;
@@ -23,15 +27,16 @@ namespace ragtag {
     static const int MAX_NUM_TAGS;
 
     TagMap();
-    bool registerTag(id_t id, tag_t tag);
-    bool deleteTag(id_t id);
-    std::optional<tag_t> getTag(id_t id) const;
-    std::vector<std::pair<id_t, tag_t>> getAllTags() const;
+    bool registerTag(tag_t tag);
+    bool registerTag(tag_t tag, const TagProperties& properties);
+    bool deleteTag(tag_t tag);
+    std::optional<TagProperties> getTagProperties(tag_t tag) const;
+    std::vector<std::pair<tag_t, TagProperties>> getAllTags() const;
     int numTags() const;
     nlohmann::json toJson() const;
 
   private:
-    std::map<id_t, tag_t> id_to_tag_map_{};
+    std::map<tag_t, TagProperties> tag_registry_{};
     std::map<std::filesystem::path, FileProperties> file_map_{};
   };
 }  // namespace ragtag
