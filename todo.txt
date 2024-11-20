@@ -1,2 +1,3 @@
 * Consider ways of separating JSON read/write functions from data-centric TagMap container.
 * Document all classes, functions, fields, etc.
+* Update root CMakeLists to build only required configuration of wxWidgets.
