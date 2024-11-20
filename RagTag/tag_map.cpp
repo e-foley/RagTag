@@ -6,7 +6,7 @@ namespace ragtag {
 
   TagMap::TagMap() {}
 
-  bool TagMap::addTag(id_t id, tag_t tag) {
+  bool TagMap::registerTag(id_t id, tag_t tag) {
     if (numTags() >= MAX_NUM_TAGS) {
       return false;
     }
@@ -14,7 +14,7 @@ namespace ragtag {
     return id_to_tag_map_.emplace(id, tag).second;
   }
 
-  bool TagMap::removeTag(id_t id) {
+  bool TagMap::deleteTag(id_t id) {
     // erase returns number of elements removed
     return id_to_tag_map_.erase(id) > 0;
   }

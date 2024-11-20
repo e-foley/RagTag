@@ -23,8 +23,8 @@ namespace ragtag {
     static const int MAX_NUM_TAGS;
 
     TagMap();
-    bool addTag(id_t id, tag_t tag);
-    bool removeTag(id_t id);
+    bool registerTag(id_t id, tag_t tag);
+    bool deleteTag(id_t id);
     std::optional<tag_t> getTag(id_t id) const;
     std::vector<std::pair<id_t, tag_t>> getAllTags() const;
     int numTags() const;
