@@ -17,7 +17,7 @@ namespace ragtag {
     bool foo{false};  // Temp placeholder
   };
 
-  enum TagSetting {
+  enum class TagSetting {
     NO = 0,
     YES = 1,
     UNCOMMITTED = 2
@@ -47,6 +47,7 @@ namespace ragtag {
     bool addFile(const path_t& path);
     bool addFile(const path_t& path, const FileProperties& properties);
     bool removeFile(const path_t& path);
+    bool setTag(const path_t& path, tag_t tag, TagSetting setting);
     std::optional<FileProperties> getFileProperties(const path_t& path) const;
     std::vector<std::pair<path_t, FileProperties>> getAllFiles() const;
     int numFiles() const;
