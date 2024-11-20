@@ -1,6 +1,7 @@
 #ifndef INCLUDE_TAG_MAP_H
 #define INCLUDE_TAG_MAP_H
 
+#include <filesystem>
 #include <map>
 #include <optional>
 #include <string>
@@ -8,23 +9,31 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 
-class TagMap {
-public:
+namespace ragtag {
   typedef int id_t;
   typedef std::string tag_t;
 
-  static const int MAX_NUM_TAGS;
+  struct FileProperties {
+    std::optional<float> rating;
+    std::map<tag_t, std::optional<bool>> tags;
+  };
 
-  TagMap();
-  bool addTag(id_t id, tag_t tag);
-  bool removeTag(id_t id);
-  std::optional<tag_t> getTag(id_t id) const;
-  std::vector<std::pair<id_t, tag_t>> getAllTags() const;
-  int numTags() const;
-  nlohmann::json toJson() const;
+  class TagMap {
+  public:
+    static const int MAX_NUM_TAGS;
 
-private:
-  std::map<id_t, tag_t> id_to_tag_map_{};
-};
+    TagMap();
+    bool addTag(id_t id, tag_t tag);
+    bool removeTag(id_t id);
+    std::optional<tag_t> getTag(id_t id) const;
+    std::vector<std::pair<id_t, tag_t>> getAllTags() const;
+    int numTags() const;
+    nlohmann::json toJson() const;
+
+  private:
+    std::map<id_t, tag_t> id_to_tag_map_{};
+    std::map<std::filesystem::path, FileProperties> file_map_{};
+  };
+}  // namespace ragtag
 
 #endif  // INCLUDE_TAG_MAP_H

@@ -9,7 +9,7 @@
 using namespace std;
 
 int main() {
-  TagMap tag_map;
+  ragtag::TagMap tag_map;
   tag_map.addTag(5, "Five");
   tag_map.addTag(3, "Three");
   tag_map.addTag(11, "Eleven");
