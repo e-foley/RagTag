@@ -16,9 +16,15 @@ namespace ragtag {
     bool foo{false};  // Temp placeholder
   };
 
+  enum TagSetting {
+    NO = 0,
+    YES = 1,
+    UNCOMMITTED = 2
+  };
+
   struct FileProperties {
     std::optional<float> rating;
-    std::map<tag_t, std::optional<bool>> tags;
+    std::map<tag_t, TagSetting> tags;
   };
 
   class TagMap {
