@@ -128,7 +128,7 @@ namespace ragtag {
     return id_tag_array_json;
   }
 
-  static TagMap fromJson(const nlohmann::json& json) {
+  TagMap TagMap::fromJson(const nlohmann::json& json) {
     return TagMap{};
   }
 }  // namespace ragtag
