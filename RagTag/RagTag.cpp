@@ -13,8 +13,7 @@ int main() {
   tag_map.registerTag("Banana");
   tag_map.registerTag("Cantaloupe");
   tag_map.registerTag("Apple");
-  nlohmann::json j;
-  j["tag_list"] = tag_map.toJson();
+  nlohmann::json j = tag_map.toJson();
   std::ofstream o("test.json");
   o << std::setw(2) << j << std::endl;
 }
