@@ -54,7 +54,7 @@ namespace ragtag {
 
     // Reading and writing
     nlohmann::json toJson() const;
-    static TagMap fromJson(const nlohmann::json& json);
+    static std::optional<TagMap> fromJson(const nlohmann::json& json);
 
   private:
     std::map<tag_t, TagProperties> tag_registry_{};

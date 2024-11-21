@@ -117,6 +117,7 @@ namespace ragtag {
       ++id;
     }
 
+    nlohmann::json json;
     nlohmann::json id_tag_array_json;
     // TODO: Investigate a more compact, specialized way of handling key-value pairs.
     for (const auto& tag_it : tag_to_id) {
@@ -125,10 +126,12 @@ namespace ragtag {
       adding["tag"] = tag_it.first;
       id_tag_array_json.push_back(adding);
     }
-    return id_tag_array_json;
+
+    json["tags"] = id_tag_array_json;
+    return json;
   }
 
-  TagMap TagMap::fromJson(const nlohmann::json& json) {
+  std::optional<TagMap> TagMap::fromJson(const nlohmann::json& json) {
     return TagMap{};
   }
 }  // namespace ragtag

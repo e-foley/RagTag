@@ -5,3 +5,5 @@
 * Where appropriate, consider replacing std::pair with explicit struct.
 * Where appropriate, consider replacing bool with explicit enum.
 * Use std::map::max_size() in relevant functions that check capacity.
+* Define JSON labels ("id", "tag", etc.) as constants rather than using them as magic strings.
+* Add appropriate licenses.
