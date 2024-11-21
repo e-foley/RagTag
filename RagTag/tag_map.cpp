@@ -1,4 +1,5 @@
 #include "tag_map.h"
+#include <iostream>
 
 namespace ragtag {
   // Ensure these are no larger than max int so that we can safely cast size_t to int.
@@ -137,6 +138,54 @@ namespace ragtag {
   }
 
   std::optional<TagMap> TagMap::fromJson(const nlohmann::json& json) {
-    return TagMap{};
+    TagMap tag_map;  // Empty TagMap that we will populate with JSON-specified contents.
+
+    const auto tag_map_json_it = json.find("tags");
+    if (tag_map_json_it == json.end()) {
+      // Can't find "tags" definition.
+      std::cerr << "Can't find \"tags\" definition within JSON." << std::endl;
+      return {};
+    }
+
+    std::map<int, tag_t> id_to_tag_map;
+    const nlohmann::json& tag_map_json = *tag_map_json_it;  // Alias for convenience
+    for (const auto& tag_it : tag_map_json) {
+      const auto id_json = tag_it.find("id");
+      if (id_json == tag_it.end()) {
+        // Tag doesn't have "id" attribute.
+        std::cerr << "Tag lacks \"id\" attribute." << std::endl;
+        continue;
+      }
+      const auto tag_json = tag_it.find("tag");
+      if (tag_json == tag_it.end()) {
+        // Tag doesn't have "tag" attribute.
+        std::cerr << "Tag lacks \"tag\" attribute." << std::endl;
+        continue;
+      }
+
+      // If we've made it here, the tag entry has both "id" and "tag".
+      if (id_to_tag_map.contains(*id_json)) {
+        // Duplicate ID...
+        std::cerr << "Tag ID " << *id_json << " is duplicated." << std::endl;
+        continue;
+      }
+
+      bool insertion_successful = id_to_tag_map.try_emplace(*id_json, *tag_json).second;
+      if (!insertion_successful) {
+        // Memory allocation issue? We generally shouldn't see this.
+        std::cerr << "Couldn't insert tag ID " << *id_json << " into internal map." << std::endl;
+        continue;
+      }
+
+      // All is good! Add the tag to our fledgling TagMap.
+      bool register_tag_result = tag_map.registerTag(*tag_json);
+      if (!register_tag_result) {
+        // Unclear what would cause this error.
+        std::cerr << "Failed to register tag " << *tag_json << " with TagMap object." << std::endl;
+        continue;
+      }
+    }
+
+    return tag_map;
   }
 }  // namespace ragtag
