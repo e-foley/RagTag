@@ -2,6 +2,7 @@ using namespace std;
 
 #include "tag_map.h"
 #include <catch2/catch_test_macros.hpp>
+#include <fstream>
 #include <iostream>
 
 namespace ragtag {
@@ -88,4 +89,41 @@ namespace ragtag {
   //  CHECK(all_tags.at(0) == std::pair<id_t, tag_t>(200, "#200"));
   //  CHECK(all_tags.at(1) == std::pair<id_t, tag_t>(400, "#400"));
   //}
+
+  TEST_CASE("TagMap JSON read/write reflection", "[all][TagMap-4]") {
+    // It's important that this test use every feature of the TagMap interface.
+    TagMap tag_map_in;
+    tag_map_in.registerTag("Banana");
+    tag_map_in.registerTag("Cantaloupe");
+    tag_map_in.registerTag("Durian");
+    tag_map_in.registerTag("Apple");
+    tag_map_in.deleteTag("Durian");
+    tag_map_in.registerTag("Dragonfruit");
+    nlohmann::json j = tag_map_in.toJson();
+
+    SECTION("JSON read/write") {
+      auto from_json_ret = TagMap::fromJson(j);
+      REQUIRE(from_json_ret.has_value());
+      CHECK(*from_json_ret == tag_map_in);
+
+      // Sanity check to make sure we didn't write/read empty file or something.
+      CHECK(from_json_ret->numTags() == 4);
+    }
+
+    SECTION("File read/write") {
+      std::ofstream o("io.json");
+      o << std::setw(2) << j << std::endl;
+      o.close();
+
+      std::ifstream i("io.json");
+      nlohmann::json parsed = nlohmann::json::parse(i);
+      i.close();
+      auto constructed_from_file = TagMap::fromJson(parsed);
+      REQUIRE(constructed_from_file.has_value());
+      CHECK(*constructed_from_file == tag_map_in);
+      CHECK(constructed_from_file->numTags() == 4);
+
+      std::remove("io.json");
+    }
+  }
 }  // namespace ragtag
