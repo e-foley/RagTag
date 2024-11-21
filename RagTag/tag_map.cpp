@@ -7,6 +7,11 @@ namespace ragtag {
 
   TagMap::TagMap() {}
 
+  bool TagMap::operator==(const TagMap& rhs) const noexcept {
+    return tag_registry_ == rhs.tag_registry_ &&
+      file_map_ == rhs.file_map_;
+  }
+
   bool TagMap::registerTag(tag_t tag) {
     return registerTag(tag, TagProperties{});
   }

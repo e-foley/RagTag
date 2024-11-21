@@ -15,6 +15,10 @@ namespace ragtag {
 
   struct TagProperties {
     bool foo{false};  // Temp placeholder
+
+    bool operator==(const TagProperties& rhs) const noexcept {
+      return foo == rhs.foo;
+    }
   };
 
   enum class TagSetting {
@@ -26,6 +30,11 @@ namespace ragtag {
   struct FileProperties {
     std::optional<float> rating;
     std::map<tag_t, TagSetting> tags;
+
+    bool operator==(const FileProperties& rhs) const noexcept {
+      return rating == rhs.rating &&
+        tags == rhs.tags;
+    }
   };
 
   class TagMap {
@@ -34,6 +43,7 @@ namespace ragtag {
     static const int MAX_NUM_FILES;
 
     TagMap();
+    bool operator==(const TagMap& rhs) const noexcept;
 
     // Tag-centric operations
     bool registerTag(tag_t tag);
