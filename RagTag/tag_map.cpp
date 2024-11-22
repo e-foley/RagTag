@@ -25,7 +25,7 @@ namespace ragtag {
     return tag_registry_.emplace(tag, properties).second;
   }
 
-  bool TagMap::deleteTag(tag_t tag) {
+  bool TagMap::deleteTag(const tag_t tag) {
     // erase() returns number of elements removed.
     return tag_registry_.erase(tag) > 0;
   }
@@ -36,6 +36,10 @@ namespace ragtag {
       return {};
     }
     return tag_it->second;
+  }
+
+  bool TagMap::isTagRegistered(const tag_t tag) const {
+    return tag_registry_.contains(tag);
   }
 
   std::vector<std::pair<tag_t, TagProperties>> TagMap::getAllTags() const {
@@ -89,6 +93,10 @@ namespace ragtag {
 
     // The .second refers to the success of the insertion-or-assignment operation.
     return file_it->second.tags.insert_or_assign(tag, setting).second;
+  }
+
+  bool TagMap::hasFile(const path_t& path) const {
+    return file_map_.contains(path);
   }
 
   std::optional<FileProperties> TagMap::getFileProperties(const path_t& path) const {

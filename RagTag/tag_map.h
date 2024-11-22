@@ -49,6 +49,7 @@ namespace ragtag {
     bool registerTag(tag_t tag);
     bool registerTag(tag_t tag, const TagProperties& properties);
     bool deleteTag(tag_t tag);
+    bool isTagRegistered(tag_t tag) const;
     std::optional<TagProperties> getTagProperties(tag_t tag) const;
     std::vector<std::pair<tag_t, TagProperties>> getAllTags() const;
     int numTags() const;
@@ -58,6 +59,7 @@ namespace ragtag {
     bool addFile(const path_t& path, const FileProperties& properties);
     bool removeFile(const path_t& path);
     bool setTag(const path_t& path, tag_t tag, TagSetting setting);
+    bool hasFile(const path_t& path) const;
     std::optional<FileProperties> getFileProperties(const path_t& path) const;
     std::vector<std::pair<path_t, FileProperties>> getAllFiles() const;
     int numFiles() const;
