@@ -29,26 +29,55 @@ namespace ragtag {
     CHECK_FALSE(map.isTagRegistered("Benny"));
   }
 
-  //TEST_CASE("TagMap tag re-registration with new properties", "[all][TagMap-2]") {
-  //  TagMap map;
-  //  REQUIRE_FALSE(map.getTag(555).has_value());
+  TEST_CASE("TagMap registerTag() with non-default TagProperties", "[all][TagMap-2]") {
+    TagMap map;
 
-  //  CHECK(map.registerTag(555, "Tag A"));
-  //  CHECK(map.numTags() == 1);
-  //  auto tag_ret = map.getTag(555);
-  //  REQUIRE(tag_ret.has_value());
-  //  CHECK(*tag_ret == "Tag A");
+    TagProperties props1;
+    props1.default_setting = TagSetting::NO;
+    REQUIRE(map.registerTag("Defaults to NO", props1));
+    auto props_get = map.getTagProperties("Defaults to NO");
+    REQUIRE(props_get.has_value());
+    CHECK(props_get->default_setting == TagSetting::NO);
 
-  //  REQUIRE(map.deleteTag(555));
-  //  CHECK(map.numTags() == 0);
-  //  CHECK(map.registerTag(555, "Tag Z"));
-  //  CHECK(map.numTags() == 1);
-  //  tag_ret = map.getTag(555);
-  //  REQUIRE(tag_ret.has_value());
-  //  CHECK(*tag_ret == "Tag Z");
-  //}
+    TagProperties props2;
+    props2.default_setting = TagSetting::YES;
+    REQUIRE(map.registerTag("Defaults to YES", props2));
+    props_get = map.getTagProperties("Defaults to YES");
+    REQUIRE(props_get.has_value());
+    CHECK(props_get->default_setting == TagSetting::YES);
 
-  TEST_CASE("TagMap getAllTags()", "[all][TagMap-3]") {
+    TagProperties props3;
+    props3.default_setting = TagSetting::UNCOMMITTED;
+    REQUIRE(map.registerTag("Defaults to UNCOMMITTED", props3));
+    props_get = map.getTagProperties("Defaults to UNCOMMITTED");
+    REQUIRE(props_get.has_value());
+    CHECK(props_get->default_setting == TagSetting::UNCOMMITTED);
+  }
+
+  TEST_CASE("TagMap tag re-registration with new properties", "[all][TagMap-3]") {
+    TagMap map;
+    REQUIRE_FALSE(map.getTagProperties("tag").has_value());
+
+    TagProperties props;
+    props.default_setting = TagSetting::YES;
+    REQUIRE(map.registerTag("tag", props));
+    CHECK(map.numTags() == 1);
+    auto props_get = map.getTagProperties("tag");
+    REQUIRE(props_get.has_value());
+    CHECK(props_get->default_setting == TagSetting::YES);
+
+    REQUIRE(map.deleteTag("tag"));
+    CHECK(map.numTags() == 0);
+
+    props.default_setting = TagSetting::NO;
+    REQUIRE(map.registerTag("tag", props));
+    CHECK(map.numTags() == 1);
+    props_get = map.getTagProperties("tag");
+    REQUIRE(props_get.has_value());
+    CHECK(props_get->default_setting == TagSetting::NO);
+  }
+
+  TEST_CASE("TagMap getAllTags()", "[all][TagMap-4]") {
     TagMap map;
     CHECK(map.getAllTags().size() == 0);
 
@@ -79,7 +108,7 @@ namespace ragtag {
     CHECK(all_tags.at(1) == std::pair<tag_t, TagProperties>("400", TagProperties{}));
   }
 
-  TEST_CASE("TagMap JSON read/write reflection", "[all][TagMap-4]") {
+  TEST_CASE("TagMap JSON read/write reflection", "[all][TagMap-5]") {
     // It's important that this test use every feature of the TagMap interface.
     TagMap tag_map_in;
     tag_map_in.registerTag("Banana");

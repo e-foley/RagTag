@@ -13,18 +13,18 @@ namespace ragtag {
   typedef std::string tag_t;
   typedef std::filesystem::path path_t;
 
-  struct TagProperties {
-    bool foo{false};  // Temp placeholder
-
-    bool operator==(const TagProperties& rhs) const noexcept {
-      return foo == rhs.foo;
-    }
-  };
-
   enum class TagSetting {
     NO = 0,
     YES = 1,
     UNCOMMITTED = 2
+  };
+
+  struct TagProperties {
+    TagSetting default_setting{TagSetting::NO};
+
+    bool operator==(const TagProperties& rhs) const noexcept {
+      return default_setting == rhs.default_setting;
+    }
   };
 
   struct FileProperties {
