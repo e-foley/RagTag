@@ -12,7 +12,8 @@ endif()
 project ("RagTag")
 
 # Include sub-projects.
-# add_subdirectory ("Catch2")
 add_subdirectory ("RagTag")
 add_subdirectory ("Tests")
-# add_subdirectory ("wxWidgets")
+add_subdirectory ("libs/Catch2")
+add_subdirectory ("libs/json")
+add_subdirectory ("libs/wxWidgets")

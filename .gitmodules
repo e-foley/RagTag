@@ -1,9 +1,9 @@
-[submodule "Catch2"]
-	path = Catch2
+[submodule "libs/Catch2"]
+	path = libs/Catch2
 	url = https://github.com/catchorg/Catch2
-[submodule "wxWidgets"]
-	path = wxWidgets
-	url = https://github.com/wxWidgets/wxWidgets
-[submodule "json"]
-	path = json
+[submodule "libs/json"]
+	path = libs/json
 	url = https://github.com/nlohmann/json
+[submodule "libs/wxWidgets"]
+	path = libs/wxWidgets
+	url = https://github.com/wxWidgets/wxWidgets
