@@ -13,11 +13,11 @@ namespace ragtag {
       file_map_ == rhs.file_map_;
   }
 
-  bool TagMap::registerTag(tag_t tag) {
+  bool TagMap::registerTag(const tag_t tag) {
     return registerTag(tag, TagProperties{});
   }
 
-  bool TagMap::registerTag(tag_t tag, const TagProperties& properties) {
+  bool TagMap::registerTag(const tag_t tag, const TagProperties& properties) {
     if (numTags() >= MAX_NUM_TAGS) {
       return false;
     }
@@ -30,7 +30,7 @@ namespace ragtag {
     return tag_registry_.erase(tag) > 0;
   }
 
-  std::optional<TagProperties> TagMap::getTagProperties(tag_t tag) const {
+  std::optional<TagProperties> TagMap::getTagProperties(const tag_t tag) const {
     const auto tag_it = tag_registry_.find(tag);
     if (tag_it == tag_registry_.end()) {
       return {};
