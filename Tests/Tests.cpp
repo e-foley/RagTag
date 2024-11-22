@@ -6,7 +6,7 @@ using namespace std;
 #include <iostream>
 
 namespace ragtag {
-  TEST_CASE("TagMap registerTag(), deleteTag(), numTags()", "[all][TagMap-1]") {
+  TEST_CASE("TagMap registerTag(), deleteTag(), isTagRegistered(), numTags()", "[all][TagMap-1]") {
     TagMap map;
 
     CHECK(map.numTags() == 0);
