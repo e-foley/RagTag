@@ -2,8 +2,6 @@
 set(SRC_FILES
     main_frame.h
     main_frame.cpp
-    RagTag.h
-    RagTag.cpp
     rag_tag_app.h
     rag_tag_app.cpp
     tag_map.h
