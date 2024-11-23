@@ -6,3 +6,5 @@ bool RagTagApp::OnInit() {
   frame->Show();
   return true;
 }
+
+wxIMPLEMENT_APP(RagTagApp);

@@ -13,6 +13,7 @@ project ("RagTag")
 
 add_compile_definitions(_UNICODE)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)  # Because wxWidgets throws a ton of these warnings
+set(wxBUILD_SHARED OFF)
 
 # Include sub-projects.
 add_subdirectory ("RagTag")
