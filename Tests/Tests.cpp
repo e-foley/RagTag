@@ -144,4 +144,89 @@ namespace ragtag {
       std::remove("io.json");
     }
   }
+
+  TEST_CASE("TagMap selectFiles()", "[all][TagMap-6]") {
+    TagMap tag_map;
+    REQUIRE(tag_map.registerTag("2 legs"));
+    REQUIRE(tag_map.registerTag("4 legs"));
+    REQUIRE(tag_map.registerTag("6 legs"));
+    REQUIRE(tag_map.registerTag("flies"));
+
+    REQUIRE(tag_map.addFile("eagle"));
+    REQUIRE(tag_map.setTag("eagle", "2 legs", TagSetting::YES));
+    REQUIRE(tag_map.setTag("eagle", "4 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("eagle", "6 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("eagle", "flies", TagSetting::YES));
+    REQUIRE(tag_map.setRating("eagle", 4.5f));
+
+    REQUIRE(tag_map.addFile("human"));
+    REQUIRE(tag_map.setTag("human", "2 legs", TagSetting::YES));
+    REQUIRE(tag_map.setTag("human", "4 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("human", "6 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("human", "flies", TagSetting::NO));
+    REQUIRE(tag_map.setRating("human", 4.0f));
+
+    REQUIRE(tag_map.addFile("spider"));
+    REQUIRE(tag_map.setTag("spider", "2 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("spider", "4 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("spider", "6 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("spider", "flies", TagSetting::NO));
+    REQUIRE(tag_map.setRating("spider", 2.0f));
+
+    REQUIRE(tag_map.addFile("dog"));
+    REQUIRE(tag_map.setTag("dog", "2 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("dog", "4 legs", TagSetting::YES));
+    REQUIRE(tag_map.setTag("dog", "6 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("dog", "flies", TagSetting::NO));
+    REQUIRE(tag_map.setRating("dog", 5.0f));
+
+    REQUIRE(tag_map.addFile("dragonfly"));
+    REQUIRE(tag_map.setTag("dragonfly", "2 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("dragonfly", "4 legs", TagSetting::NO));
+    REQUIRE(tag_map.setTag("dragonfly", "6 legs", TagSetting::YES));
+    REQUIRE(tag_map.setTag("dragonfly", "flies", TagSetting::YES));
+    REQUIRE(tag_map.setRating("dragonfly", 3.5f));
+
+    REQUIRE(tag_map.addFile("ditto"));
+    REQUIRE(tag_map.setTag("ditto", "2 legs", TagSetting::UNCOMMITTED));
+    REQUIRE(tag_map.setTag("ditto", "4 legs", TagSetting::UNCOMMITTED));
+    REQUIRE(tag_map.setTag("ditto", "6 legs", TagSetting::UNCOMMITTED));
+    REQUIRE(tag_map.setTag("ditto", "flies", TagSetting::UNCOMMITTED));
+    REQUIRE(tag_map.setRating("ditto", 123.4f));
+
+    // Note: The predicates don't have to be assigned a variable, but doing so makes it easier to
+    // compose them into more complex predicates.
+
+    const TagMap::file_qualifier_t has_two_legs = [](const FileProperties& p) {
+      return p.tags.contains("2 legs") && p.tags.at("2 legs") == TagSetting::YES;
+    };
+    const auto two_legged_creatures = tag_map.selectFiles(has_two_legs);
+    CHECK(two_legged_creatures.size() == 2);
+
+    const TagMap::file_qualifier_t is_flightless = [](const FileProperties& p) {
+      return p.tags.contains("flies") && p.tags.at("flies") == TagSetting::NO;
+    };
+    const auto flightless_creatures = tag_map.selectFiles(is_flightless);
+    CHECK(flightless_creatures.size() == 3);
+
+    const TagMap::file_qualifier_t is_rated_at_least_four = [](const FileProperties& p) {
+      return p.rating >= 4.0f;
+    };
+    const auto creatures_rated_at_least_four = tag_map.selectFiles(is_rated_at_least_four);
+    CHECK(creatures_rated_at_least_four.size() == 4);
+
+    const TagMap::file_qualifier_t plausibly_has_four_legs = [](const FileProperties& p) {
+      return p.tags.contains("4 legs") &&
+        (p.tags.at("4 legs") == TagSetting::YES || p.tags.at("4 legs") == TagSetting::UNCOMMITTED);
+    };
+    const auto creatures_plausibly_with_four_legs = tag_map.selectFiles(plausibly_has_four_legs);
+    CHECK(creatures_plausibly_with_four_legs.size() == 2);
+
+    // Meta: There's probably an easier way than this to compose function predicates.
+    const auto flightless_or_high_rated_creatures =
+      tag_map.selectFiles([&is_flightless, &is_rated_at_least_four](const FileProperties& p) {
+        return is_flightless(p) || is_rated_at_least_four(p);
+      });
+    CHECK(flightless_or_high_rated_creatures.size() == 5);
+  }
 }  // namespace ragtag

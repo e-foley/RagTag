@@ -10,3 +10,8 @@
 * Make sure we add functions setting and retrieving TagProperties.
 * Revisit the confusing matter of how to link libraries for wxWidgets. I don't think that including
   them one-by-one is the intended use, but I struggled for hours in vain to find the "right" way.
+* Add coverage checks.
+* Update addFile() to validate FileProperties for registered tags... Or else, modify the interface.
+* Implement a setTags() function that can set multiple tags on a file at once?
+* Handle exclusive settings radio-button style where setting one clears another?
+* Perhaps I should automatically consider a tag UNCOMMITTED when missing from a file.

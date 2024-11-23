@@ -2,6 +2,7 @@
 #define INCLUDE_TAG_MAP_H
 
 #include <filesystem>
+#include <functional>
 #include <map>
 #include <optional>
 #include <string>
@@ -62,8 +63,12 @@ namespace ragtag {
     bool setTag(const path_t& path, tag_t tag, TagSetting setting);
     bool setRating(const path_t& path, rating_t rating);
     bool hasFile(const path_t& path) const;
+    // TODO: Implement getTags(), getRating()
     std::optional<FileProperties> getFileProperties(const path_t& path) const;
     std::vector<std::pair<path_t, FileProperties>> getAllFiles() const;
+
+    typedef std::function<bool(const FileProperties&)> file_qualifier_t;
+    std::vector<std::pair<path_t, FileProperties>> selectFiles(const file_qualifier_t& fn) const;
     int numFiles() const;
 
     // Reading and writing

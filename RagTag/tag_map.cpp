@@ -1,4 +1,5 @@
 #include "tag_map.h"
+#include <algorithm>
 #include <iostream>
 
 namespace ragtag {
@@ -65,6 +66,8 @@ namespace ragtag {
       return false;
     }
 
+    // TODO: Enforce valid FileProperties, which means confirming tags therein are registered.
+
     return file_map_.emplace(path, properties).second;
   }
 
@@ -125,6 +128,13 @@ namespace ragtag {
       file_vector.emplace_back(map_it);
     }
     return file_vector;
+  }
+
+  std::vector<std::pair<path_t, FileProperties>> TagMap::selectFiles(const file_qualifier_t& fn) const {
+    std::vector<std::pair<path_t, FileProperties>> qualified_file_vector;
+    std::copy_if(file_map_.begin(), file_map_.end(), std::back_inserter(qualified_file_vector),
+      [&fn](const auto& p) {return std::invoke(fn, p.second);});
+    return qualified_file_vector;
   }
 
   int TagMap::numFiles() const {
