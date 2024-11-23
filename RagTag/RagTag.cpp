@@ -4,6 +4,7 @@
 #include "RagTag.h"
 #include "tag_map.h"
 #include <nlohmann/json.hpp>
+#include <wx/wx.h>
 #include <fstream>
 
 using namespace std;

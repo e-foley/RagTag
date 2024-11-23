@@ -8,4 +8,5 @@
 * Define JSON labels ("id", "tag", etc.) as constants rather than using them as magic strings.
 * Add appropriate licenses.
 * Make sure we add functions setting and retrieving TagProperties.
-
+* Revisit the confusing matter of how to link libraries for wxWidgets. I don't think that including
+  them one-by-one is the intended use, but I struggled for hours in vain to find the "right" way.

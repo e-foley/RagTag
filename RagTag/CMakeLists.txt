@@ -1,6 +1,4 @@
-﻿set(wxBUILD_SHARED OFF)
-
-# Group source files
+﻿# Group source files
 set(SRC_FILES
     main_frame.h
     main_frame.cpp
@@ -11,15 +9,34 @@ set(SRC_FILES
     tag_map.h
     tag_map.cpp)
 
-add_executable(RagTag WIN32 ${SRC_FILES})
-
+add_executable(RagTag ${SRC_FILES})
 
 target_include_directories(RagTag PRIVATE
-                           "../json/include"
-                           "../wxWidgets/include"
-                           "../wxWidgets/include/msvc")
+                           "../libs/json/include"
+                           "../libs/wxWidgets/include"
+                           "../libs/wxWidgets/include/msvc")
 
-add_compile_definitions(_UNICODE)
+# TODO: The following line doesn't seem to link the expected libraries. Learn why.
+target_link_libraries(RagTag wx::net wx::core wx::base)
+
+# Instead, link libraries one by one.
+set(VC_X64_DLL_DIR ${CMAKE_BINARY_DIR}/libs/wxWidgets/lib/vc_x64_dll)
+target_link_libraries(RagTag
+                      ${VC_X64_DLL_DIR}/wxbase33ud_xml.lib
+                      ${VC_X64_DLL_DIR}/wxexpatd.lib
+                      ${VC_X64_DLL_DIR}/wxscintillad.lib
+                      ${VC_X64_DLL_DIR}/wxlexillad.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_html.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_qa.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_xrc.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_aui.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_propgrid.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_ribbon.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_richtext.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_media.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_stc.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_webview.lib
+                      ${VC_X64_DLL_DIR}/wxmsw33ud_gl.lib)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET RagTag PROPERTY CXX_STANDARD 20)

@@ -11,7 +11,7 @@ add_executable (Tests
 
 target_include_directories(Tests PRIVATE
                            "../RagTag"
-                           "../json/include")
+                           "../libs/json/include")
 
 target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain)
 
