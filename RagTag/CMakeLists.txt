@@ -7,7 +7,7 @@ set(SRC_FILES
     tag_map.h
     tag_map.cpp)
 
-add_executable(RagTag ${SRC_FILES})
+add_executable(RagTag WIN32 ${SRC_FILES})
 
 target_include_directories(RagTag PRIVATE
                            "../libs/json/include"
