@@ -12,6 +12,7 @@
 namespace ragtag {
   typedef std::string tag_t;
   typedef std::filesystem::path path_t;
+  typedef float rating_t;
 
   enum class TagSetting {
     NO = 0,
@@ -28,7 +29,7 @@ namespace ragtag {
   };
 
   struct FileProperties {
-    std::optional<float> rating;
+    std::optional<rating_t> rating;
     std::map<tag_t, TagSetting> tags;
 
     bool operator==(const FileProperties& rhs) const noexcept {
@@ -59,6 +60,7 @@ namespace ragtag {
     bool addFile(const path_t& path, const FileProperties& properties);
     bool removeFile(const path_t& path);
     bool setTag(const path_t& path, tag_t tag, TagSetting setting);
+    bool setRating(const path_t& path, rating_t rating);
     bool hasFile(const path_t& path) const;
     std::optional<FileProperties> getFileProperties(const path_t& path) const;
     std::vector<std::pair<path_t, FileProperties>> getAllFiles() const;

@@ -95,6 +95,17 @@ namespace ragtag {
     return file_it->second.tags.insert_or_assign(tag, setting).second;
   }
 
+  bool TagMap::setRating(const path_t& path, const rating_t rating) {
+    const auto file_it = file_map_.find(path);
+    if (file_it == file_map_.end()) {
+      // File is not in our list.
+      return false;
+    }
+
+    file_it->second.rating = rating;
+    return true;
+  }
+
   bool TagMap::hasFile(const path_t& path) const {
     return file_map_.contains(path);
   }
