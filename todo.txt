@@ -15,3 +15,4 @@
 * Implement a setTags() function that can set multiple tags on a file at once?
 * Handle exclusive settings radio-button style where setting one clears another?
 * Perhaps I should automatically consider a tag UNCOMMITTED when missing from a file.
+* Resolve Catch2 debug issue (PDB warnings upon build).
