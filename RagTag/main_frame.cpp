@@ -19,6 +19,20 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Hello World") {
   CreateStatusBar();
   SetStatusText("Welcome to wxWidgets!");
 
+
+  // Temporary: Build a panel as a proof of concept...
+  wxPanel* panel = new wxPanel(this, wxID_ANY);
+  wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
+
+  wxPanel* panel_l = new wxPanel(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxPanel* panel_r = new wxPanel(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  hbox->Add(panel_l, 1, wxEXPAND | wxALL, 5);
+  hbox->Add(panel_r, 1, wxEXPAND | wxALL, 5);
+
+  panel->SetSizer(hbox);
+
+
+
   Bind(wxEVT_MENU, &MainFrame::OnHello, this, ID_HELLO);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
