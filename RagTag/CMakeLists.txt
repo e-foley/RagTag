@@ -5,7 +5,9 @@ set(SRC_FILES
     rag_tag_app.h
     rag_tag_app.cpp
     tag_map.h
-    tag_map.cpp)
+    tag_map.cpp
+    tag_toggle_panel.h
+    tag_toggle_panel.cpp)
 
 add_executable(RagTag WIN32 ${SRC_FILES})
 
