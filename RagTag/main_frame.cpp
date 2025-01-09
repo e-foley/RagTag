@@ -23,30 +23,29 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1") {
   // Temporary: Build a panel as a proof of concept...
   wxPanel* p_main = new wxPanel(this, wxID_ANY);
   wxBoxSizer* sz_main = new wxBoxSizer(wxHORIZONTAL);
-
+  p_main->SetSizer(sz_main);
 
   wxPanel* p_left = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_left = new wxBoxSizer(wxVERTICAL);
+  p_left->SetSizer(sz_left);
 
   wxPanel* p_tag_display = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_tag_display = new wxBoxSizer(wxHORIZONTAL);
-
-  wxCheckBox* cb_tag_toggle = new wxCheckBox(p_tag_display, wxID_ANY, "Test");  // Second argument is checkbox ID.
-  sz_tag_display->Add(cb_tag_toggle, 1, wxEXPAND, 5);
-  wxButton* b_tag_edit = new wxButton(p_tag_display, wxID_ANY, "Edit");
-  sz_tag_display->Add(b_tag_edit, 1, wxEXPAND, 5);
-
   p_tag_display->SetSizer(sz_tag_display);
 
-  sz_left->Add(p_tag_display, 1, wxEXPAND, 5);
-  p_left->SetSizer(sz_left);
+  wxCheckBox* cb_tag_toggle = new wxCheckBox(p_tag_display, wxID_ANY, "Testing a longer string",
+      wxDefaultPosition, wxDefaultSize, wxCHK_3STATE | wxCHK_ALLOW_3RD_STATE_FOR_USER);
+  sz_tag_display->Add(cb_tag_toggle, 1, wxALIGN_CENTER, 5);
+  wxButton* b_tag_edit = new wxButton(p_tag_display, wxID_ANY, "Edit");
+  sz_tag_display->Add(b_tag_edit, 0, 0, 5);
+  wxButton* b_tag_delete = new wxButton(p_tag_display, wxID_ANY, "X");
+  sz_tag_display->Add(b_tag_delete, 0, 0, 5);
+
+  sz_left->Add(p_tag_display, 0, 0, 5);
 
   wxPanel* p_right = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   sz_main->Add(p_left, 1, wxEXPAND | wxALL, 5);
   sz_main->Add(p_right, 1, wxEXPAND | wxALL, 5);
-
-  p_main->SetSizer(sz_main);
-
 
 
   Bind(wxEVT_MENU, &MainFrame::OnHello, this, ID_HELLO);
