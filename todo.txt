@@ -16,3 +16,4 @@
 * Handle exclusive settings radio-button style where setting one clears another?
 * Perhaps I should automatically consider a tag UNCOMMITTED when missing from a file.
 * Resolve Catch2 debug issue (PDB warnings upon build).
+* Add ability to drag tags around.

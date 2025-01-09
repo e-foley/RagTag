@@ -27,19 +27,34 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_main = new wxBoxSizer(wxHORIZONTAL);
   p_main->SetSizer(sz_main);
 
-  wxScrolledWindow* p_left = new wxScrolledWindow(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxPanel* p_left = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_left = new wxBoxSizer(wxVERTICAL);
   p_left->SetSizer(sz_left);
 
+  wxScrolledWindow* p_tag_toggles = new wxScrolledWindow(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxBoxSizer* sz_tag_toggles = new wxBoxSizer(wxVERTICAL);
+  p_tag_toggles->SetSizer(sz_tag_toggles);
+
   for (int i = 0; i < 10; ++i) {
-    TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_left, "Demo");
-    sz_left->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
+    TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_tag_toggles, "Demo");
+    sz_tag_toggles->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
   }
 
-  p_left->FitInside();
-  p_left->SetScrollRate(5, 5);
+  p_tag_toggles->FitInside();
+  p_tag_toggles->SetScrollRate(5, 5);
+
+  sz_left->Add(p_tag_toggles, 1, wxEXPAND | wxALL, 5);
+
+  wxPanel* p_tag_toggles_button_bar = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxBoxSizer* sz_tag_toggles_button_bar = new wxBoxSizer(wxHORIZONTAL);
+  p_tag_toggles_button_bar->SetSizer(sz_tag_toggles_button_bar);
+  wxButton* b_define_new_tag = new wxButton(p_tag_toggles_button_bar, wxID_ANY, "Define New Tag...");
+  sz_tag_toggles_button_bar->AddStretchSpacer(1);  // Empty space at left to force right-alignment.
+  sz_tag_toggles_button_bar->Add(b_define_new_tag, 0, wxALL, 5);
+  sz_left->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 5);
 
   wxPanel* p_right = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+
   sz_main->Add(p_left, 1, wxEXPAND | wxALL, 5);
   sz_main->Add(p_right, 1, wxEXPAND | wxALL, 5);
 
