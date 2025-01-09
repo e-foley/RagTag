@@ -33,7 +33,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   for (int i = 0; i < 10; ++i) {
     TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_left, "Demo");
-    sz_left->Add(p_tag_toggle, 0, 0, 5);
+    sz_left->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
   }
 
   p_left->FitInside();
