@@ -1,7 +1,8 @@
 #include "main_frame.h"
 #include "tag_toggle_panel.h"
+#include <wx/scrolwin.h>
 
-MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1") {
+MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition, wxSize(800, 600)) {
   wxMenu* menuFile = new wxMenu;
   menuFile->Append(ID_HELLO, "&Hello...\tCtrl-H",
     "Help string shown in status bar for this menu item");
@@ -26,12 +27,17 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1") {
   wxBoxSizer* sz_main = new wxBoxSizer(wxHORIZONTAL);
   p_main->SetSizer(sz_main);
 
-  wxPanel* p_left = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxScrolledWindow* p_left = new wxScrolledWindow(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_left = new wxBoxSizer(wxVERTICAL);
   p_left->SetSizer(sz_left);
 
-  TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_left, "Demo");
-  sz_left->Add(p_tag_toggle, 0, 0, 5);
+  for (int i = 0; i < 10; ++i) {
+    TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_left, "Demo");
+    sz_left->Add(p_tag_toggle, 0, 0, 5);
+  }
+
+  p_left->FitInside();
+  p_left->SetScrollRate(5, 5);
 
   wxPanel* p_right = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   sz_main->Add(p_left, 1, wxEXPAND | wxALL, 5);
