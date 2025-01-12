@@ -20,23 +20,23 @@ target_include_directories(RagTag PRIVATE
 target_link_libraries(RagTag wx::net wx::core wx::base)
 
 # Instead, link libraries one by one.
-set(VC_X64_DLL_DIR ${CMAKE_BINARY_DIR}/libs/wxWidgets/lib/vc_x64_dll)
+set(VC_X64_DIR ${CMAKE_BINARY_DIR}/libs/wxWidgets/lib/vc_x64_lib)
 target_link_libraries(RagTag
-                      ${VC_X64_DLL_DIR}/wxbase33ud_xml.lib
-                      ${VC_X64_DLL_DIR}/wxexpatd.lib
-                      ${VC_X64_DLL_DIR}/wxscintillad.lib
-                      ${VC_X64_DLL_DIR}/wxlexillad.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_html.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_qa.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_xrc.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_aui.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_propgrid.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_ribbon.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_richtext.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_media.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_stc.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_webview.lib
-                      ${VC_X64_DLL_DIR}/wxmsw33ud_gl.lib)
+                      ${VC_X64_DIR}/wxbase33ud_xml.lib
+                      ${VC_X64_DIR}/wxexpatd.lib
+                      ${VC_X64_DIR}/wxscintillad.lib
+                      ${VC_X64_DIR}/wxlexillad.lib
+                      ${VC_X64_DIR}/wxmsw33ud_html.lib
+                      ${VC_X64_DIR}/wxmsw33ud_qa.lib
+                      ${VC_X64_DIR}/wxmsw33ud_xrc.lib
+                      ${VC_X64_DIR}/wxmsw33ud_aui.lib
+                      ${VC_X64_DIR}/wxmsw33ud_propgrid.lib
+                      ${VC_X64_DIR}/wxmsw33ud_ribbon.lib
+                      ${VC_X64_DIR}/wxmsw33ud_richtext.lib
+                      ${VC_X64_DIR}/wxmsw33ud_media.lib
+                      ${VC_X64_DIR}/wxmsw33ud_stc.lib
+                      ${VC_X64_DIR}/wxmsw33ud_webview.lib
+                      ${VC_X64_DIR}/wxmsw33ud_gl.lib)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET RagTag PROPERTY CXX_STANDARD 20)
