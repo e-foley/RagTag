@@ -2,11 +2,13 @@
 #define INCLUDE_MAIN_FRAME
 
 #include <wx/wx.h>
+#include <wx/mediactrl.h>
 
 class MainFrame : public wxFrame {
 public:
   enum {
-    ID_HELLO = 1
+    ID_HELLO = 1,
+    ID_MEDIA_CTRL = 2
   };
 
   MainFrame();
@@ -15,6 +17,9 @@ private:
   void OnHello(wxCommandEvent& event);
   void OnExit(wxCommandEvent& event);
   void OnAbout(wxCommandEvent& event);
+  void OnMediaLoaded(wxMediaEvent& event);
+
+  wxMediaCtrl* mc_media_display_;
 };
 
 #endif  // INCLUDE_MAIN_FRAME

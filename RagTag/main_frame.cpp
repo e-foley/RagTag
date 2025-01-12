@@ -1,6 +1,8 @@
 #include "main_frame.h"
 #include "tag_toggle_panel.h"
+#include <wx/mediactrl.h>
 #include <wx/scrolwin.h>
+#include <wx/stdpaths.h>
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition, wxSize(800, 600)) {
   wxMenu* menuFile = new wxMenu;
@@ -54,14 +56,33 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_left->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 5);
 
   wxPanel* p_right = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxBoxSizer* sz_right = new wxBoxSizer(wxVERTICAL);
+  p_right->SetSizer(sz_right);
+
+  // Note: Even though wxWidgets says we should "almost certainly leave [the backend selection] up
+  //       to wxMediaCtrl," a documented bug involving wxWidgets' interaction with the DirectShow
+  //       API suppresses the media-loaded event. This also affects the mediaplayer demo provided by
+  //       wxWidgets itself. To circumvent this, we explicitly choose the Windows Media Player
+  //       backend.
+  // See: https://docs.wxwidgets.org/stable/classwx_media_ctrl.html
+  // See: https://forums.wxwidgets.org/viewtopic.php?t=47476
+  // See: https://github.com/wxWidgets/wxWidgets/issues/18976   
+  mc_media_display_ = new wxMediaCtrl(p_right, ID_MEDIA_CTRL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxMEDIABACKEND_WMP10);
+  sz_right->Add(mc_media_display_, 1, wxEXPAND | wxALL, 0);
+
+  // TODO: Replace this temporary location with real paths once application is stable.
+  const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
+  mc_media_display_->Load(debug_media_dir + "videomp4.mp4");
+  //mc_media_display_->Load(debug_media_dir + "imagejpg.jpg");
+  //mc_media_display_->Load(debug_media_dir + "imagepng.png");
 
   sz_main->Add(p_left, 1, wxEXPAND | wxALL, 5);
   sz_main->Add(p_right, 1, wxEXPAND | wxALL, 5);
 
-
   Bind(wxEVT_MENU, &MainFrame::OnHello, this, ID_HELLO);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
+  Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
 }
 
 void MainFrame::OnExit(wxCommandEvent& event) {
@@ -75,4 +96,8 @@ void MainFrame::OnAbout(wxCommandEvent& event) {
 
 void MainFrame::OnHello(wxCommandEvent& event) {
   wxLogMessage("Hello world from wxWidgets!");
+}
+
+void MainFrame::OnMediaLoaded(wxMediaEvent& event) {
+  mc_media_display_->Play();
 }
