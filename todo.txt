@@ -17,3 +17,5 @@
 * Perhaps I should automatically consider a tag UNCOMMITTED when missing from a file.
 * Resolve Catch2 debug issue (PDB warnings upon build).
 * Add ability to drag tags around.
+* Figure out how to configure startup project via CMake such that I can simply F5 from VS to build
+  and execute RagTag.exe without needing to modify solution settings.
