@@ -67,7 +67,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   // See: https://docs.wxwidgets.org/stable/classwx_media_ctrl.html
   // See: https://forums.wxwidgets.org/viewtopic.php?t=47476
   // See: https://github.com/wxWidgets/wxWidgets/issues/18976   
-  mc_media_display_ = new wxMediaCtrl(p_right, ID_MEDIA_CTRL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxMEDIABACKEND_WMP10);
+  mc_media_display_ = new wxMediaCtrl(p_right, ID_MEDIA_CTRL, wxEmptyString, wxDefaultPosition,
+      wxDefaultSize, wxMC_NO_AUTORESIZE, wxMEDIABACKEND_WMP10);
   sz_right->Add(mc_media_display_, 1, wxEXPAND | wxALL, 0);
 
   // TODO: Replace this temporary location with real paths once application is stable.
