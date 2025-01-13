@@ -73,8 +73,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   // TODO: Replace this temporary location with real paths once application is stable.
   const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
-  mc_media_display_->Load(debug_media_dir + "videomp4.mp4");
-  //mc_media_display_->Load(debug_media_dir + "imagejpg.jpg");
+  //mc_media_display_->Load(debug_media_dir + "videomp4.mp4");
+  mc_media_display_->Load(debug_media_dir + "imagejpg.jpg");
   //mc_media_display_->Load(debug_media_dir + "imagepng.png");
 
   sz_main->Add(p_left, 1, wxEXPAND | wxALL, 5);
