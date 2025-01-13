@@ -10,8 +10,11 @@
 class MainFrame : public wxFrame {
 public:
   enum {
-    ID_HELLO = 1,
-    ID_MEDIA_CTRL = 2
+    ID_NEW = 1,
+    ID_OPEN,
+    ID_SAVE,
+    ID_SAVE_AS,
+    ID_MEDIA_CTRL,
   };
 
   MainFrame();
@@ -22,7 +25,9 @@ private:
   void OnAbout(wxCommandEvent& event);
   void OnMediaLoaded(wxMediaEvent& event);
 
-  wxMediaCtrl* mc_media_display_;
+  wxMediaCtrl* mc_media_display_{ nullptr };
+  std::optional<ragtag::TagMap> tag_map_{};
+  std::filesystem::path project_path_{};
 };
 
 #endif  // INCLUDE_MAIN_FRAME

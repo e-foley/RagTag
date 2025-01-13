@@ -6,8 +6,10 @@
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition, wxSize(800, 600)) {
   wxMenu* menuFile = new wxMenu;
-  menuFile->Append(ID_HELLO, "&Hello...\tCtrl-H",
-    "Help string shown in status bar for this menu item");
+  menuFile->Append(ID_NEW, "&New Project...\tCtrl-N");
+  menuFile->Append(ID_OPEN, "&Open Project...\tCtrl-O");
+  menuFile->Append(ID_SAVE, "&Save Project...\tCtrl-S");
+  menuFile->Append(ID_SAVE_AS, "Save &As...\tCtrl-Shift-S");
   menuFile->AppendSeparator();
   menuFile->Append(wxID_EXIT);
 
@@ -21,8 +23,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   SetMenuBar(menuBar);
 
   CreateStatusBar();
-  SetStatusText("Welcome to wxWidgets!");
-
 
   // Temporary: Build a panel as a proof of concept...
   wxPanel* p_main = new wxPanel(this, wxID_ANY);
@@ -80,7 +80,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_main->Add(p_left, 1, wxEXPAND | wxALL, 5);
   sz_main->Add(p_right, 1, wxEXPAND | wxALL, 5);
 
-  Bind(wxEVT_MENU, &MainFrame::OnHello, this, ID_HELLO);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
@@ -91,8 +90,13 @@ void MainFrame::OnExit(wxCommandEvent& event) {
 }
 
 void MainFrame::OnAbout(wxCommandEvent& event) {
-  wxMessageBox("This is a (slightly modified) wxWidgets Hello World example",
-    "About Hello World", wxOK | wxICON_INFORMATION);
+  wxString about_string("RagTag v0.0.1\n\n(c) 2025 by Ed Foley");
+#if wxUSE_UNICODE
+  const wxString copyright_symbol = wxString::FromUTF8("\xc2\xa9");
+  about_string.Replace("(c)", copyright_symbol);
+#endif
+
+  wxMessageBox(about_string, "About", wxOK | wxICON_INFORMATION);
 }
 
 void MainFrame::OnHello(wxCommandEvent& event) {
