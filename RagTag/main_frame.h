@@ -1,6 +1,9 @@
 #ifndef INCLUDE_MAIN_FRAME
 #define INCLUDE_MAIN_FRAME
 
+#include "tag_map.h"
+#include <filesystem>
+#include <optional>
 #include <wx/wx.h>
 #include <wx/mediactrl.h>
 
@@ -12,6 +15,9 @@ public:
   };
 
   MainFrame();
+
+  static bool writeTagMapToFile(const ragtag::TagMap& tag_map, const std::filesystem::path& path);
+  static std::optional<ragtag::TagMap> readTagMapFromFile(const std::filesystem::path& path);
 
 private:
   void OnHello(wxCommandEvent& event);
