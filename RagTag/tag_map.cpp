@@ -1,5 +1,6 @@
 #include "tag_map.h"
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 
 namespace ragtag {
@@ -216,5 +217,42 @@ namespace ragtag {
     }
 
     return tag_map;
+  }
+
+  bool TagMap::toFile(const path_t& path) {
+    const nlohmann::json tag_map_as_json = toJson();
+    std::ofstream output_file(path);
+    if (!output_file.good()) {
+      return false;
+    }
+
+    output_file << tag_map_as_json;
+
+    if (!output_file.good()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  std::optional<ragtag::TagMap> TagMap::fromFile(const path_t& path) {
+    std::ifstream input_file(path);
+    if (!input_file.good()) {
+      return {};
+    }
+
+    nlohmann::json tag_map_as_json;
+    input_file >> tag_map_as_json;
+
+    if (!input_file.good()) {
+      return {};
+    }
+
+    const auto tag_map_result = fromJson(tag_map_as_json);
+    if (!tag_map_result) {
+      return {};
+    }
+
+    return *tag_map_result;
   }
 }  // namespace ragtag

@@ -1,6 +1,5 @@
 #include "main_frame.h"
 #include "tag_toggle_panel.h"
-#include <fstream>
 #include <wx/mediactrl.h>
 #include <wx/scrolwin.h>
 #include <wx/stdpaths.h>
@@ -85,43 +84,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
-}
-
-bool MainFrame::writeTagMapToFile(const ragtag::TagMap& tag_map, const std::filesystem::path& path) {
-  const nlohmann::json tag_map_as_json = tag_map.toJson();
-  std::ofstream output_file(path);
-  if (!output_file.good()) {
-    return false;
-  }
-
-  output_file << tag_map_as_json;
-
-  if (!output_file.good()) {
-    return false;
-  }
-
-  return true;
-}
-
-std::optional<ragtag::TagMap> MainFrame::readTagMapFromFile(const std::filesystem::path& path) {
-  std::ifstream input_file(path);
-  if (!input_file.good()) {
-    return {};
-  }
-
-  nlohmann::json tag_map_as_json;
-  input_file >> tag_map_as_json;
-
-  if (!input_file.good()) {
-    return {};
-  }
-
-  const auto tag_map_result = ragtag::TagMap::fromJson(tag_map_as_json);
-  if (!tag_map_result) {
-    return {};
-  }
-
-  return *tag_map_result;
 }
 
 void MainFrame::OnExit(wxCommandEvent& event) {

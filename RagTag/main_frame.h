@@ -16,9 +16,6 @@ public:
 
   MainFrame();
 
-  static bool writeTagMapToFile(const ragtag::TagMap& tag_map, const std::filesystem::path& path);
-  static std::optional<ragtag::TagMap> readTagMapFromFile(const std::filesystem::path& path);
-
 private:
   void OnHello(wxCommandEvent& event);
   void OnExit(wxCommandEvent& event);
