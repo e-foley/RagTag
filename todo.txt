@@ -20,3 +20,4 @@
 * Figure out how to configure startup project via CMake such that I can simply F5 from VS to build
   and execute RagTag.exe without needing to modify solution settings.
 * Allow more granularity in communicating ofstream/ifstream errors in TagMap to/from file ops.
+* Reduce duplicated code within OnNew(), OnOpen().
