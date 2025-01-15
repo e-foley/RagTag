@@ -28,6 +28,8 @@ public:
   MainFrame();
 
 private:
+  void refreshTagToggles();
+
   void OnNew(wxCommandEvent& event);
   void OnOpen(wxCommandEvent& event);
   void OnSave(wxCommandEvent& event);
@@ -42,9 +44,12 @@ private:
   bool saveProject();
   bool saveProjectAs(const std::filesystem::path& path);
 
+  wxScrolledWindow* p_tag_toggles_{ nullptr };
+  wxBoxSizer* sz_tag_toggles_{ nullptr };
   wxMediaCtrl* mc_media_display_{ nullptr };
   ragtag::TagMap tag_map_{};
   std::optional<std::filesystem::path> project_path_{};
+  std::optional<std::filesystem::path> active_file_{};
   bool is_dirty_{ false };
 };
 

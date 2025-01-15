@@ -34,19 +34,22 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_left = new wxBoxSizer(wxVERTICAL);
   p_left->SetSizer(sz_left);
 
-  wxScrolledWindow* p_tag_toggles = new wxScrolledWindow(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
-  wxBoxSizer* sz_tag_toggles = new wxBoxSizer(wxVERTICAL);
-  p_tag_toggles->SetSizer(sz_tag_toggles);
+  p_tag_toggles_ = new wxScrolledWindow(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  sz_tag_toggles_ = new wxBoxSizer(wxVERTICAL);
+  p_tag_toggles_->SetSizer(sz_tag_toggles_);
 
-  for (int i = 0; i < 10; ++i) {
-    TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_tag_toggles, "Demo");
-    sz_tag_toggles->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
+  // DEBUG
+  for (int i = 0; i < 25; ++i) {
+    tag_map_.registerTag("Tag " + std::to_string(i));
   }
 
-  p_tag_toggles->FitInside();
-  p_tag_toggles->SetScrollRate(5, 5);
+  // Contents of this sizer added dynamically via refreshTagToggles().
+  refreshTagToggles();
 
-  sz_left->Add(p_tag_toggles, 1, wxEXPAND | wxALL, 5);
+  p_tag_toggles_->FitInside();
+  p_tag_toggles_->SetScrollRate(5, 5);
+
+  sz_left->Add(p_tag_toggles_, 1, wxEXPAND | wxALL, 5);
 
   wxPanel* p_tag_toggles_button_bar = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_tag_toggles_button_bar = new wxBoxSizer(wxHORIZONTAL);
@@ -88,6 +91,23 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
+}
+
+void MainFrame::refreshTagToggles() {
+  bool is_file_active = active_file_.has_value();  // Shorthand
+
+  auto all_tags = tag_map_.getAllTags();
+  for (const auto& tag_element : all_tags) {
+    TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_tag_toggles_, tag_element.first);
+    sz_tag_toggles_->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
+    if (is_file_active) {
+      // If file is active, configure the checked/unchecked marks to match applied tags.
+      // TODO: Implement this!
+    } else {
+      // If no file is active, just use the tag configuration default.
+      p_tag_toggle->setCheckBoxState(tag_element.second.default_setting);
+    }
+  }
 }
 
 void MainFrame::OnNew(wxCommandEvent& event) {
