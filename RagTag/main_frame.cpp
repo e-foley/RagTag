@@ -62,9 +62,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   // Note: Even though wxWidgets says we should "almost certainly leave [the backend selection] up
   //       to wxMediaCtrl," a documented bug involving wxWidgets' interaction with the DirectShow
-  //       API suppresses the media-loaded event. This also affects the mediaplayer demo provided by
-  //       wxWidgets itself. To circumvent this, we explicitly choose the Windows Media Player
-  //       backend.
+  //       API used by default suppresses the media-loaded event. This also affects the mediaplayer
+  //       demo provided by wxWidgets itself. To circumvent this, we explicitly choose the Windows
+  //       Media Player backend.
   // See: https://docs.wxwidgets.org/stable/classwx_media_ctrl.html
   // See: https://forums.wxwidgets.org/viewtopic.php?t=47476
   // See: https://github.com/wxWidgets/wxWidgets/issues/18976   
