@@ -101,8 +101,23 @@ void MainFrame::refreshTagToggles() {
     TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_tag_toggles_, tag_element.first);
     sz_tag_toggles_->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
     if (is_file_active) {
-      // If file is active, configure the checked/unchecked marks to match applied tags.
-      // TODO: Implement this!
+      // If file is active, configure the checked/unchecked mark to match applied tag.
+      if (tag_map_.hasFile(*active_file_)) {
+        // File is registered with the TagMap. (This generally should be the case.)
+        const auto file_properties = *(tag_map_.getFileProperties(*active_file_));
+        const auto tag_it = file_properties.tags.find(tag_element.first);
+        if (tag_it == file_properties.tags.end()) {
+          // File doesn't describe this tag at all, so apply the tag's default.
+          p_tag_toggle->setCheckBoxState(tag_element.second.default_setting);
+        } else {
+          p_tag_toggle->setCheckBoxState(tag_it->second);
+        }
+      } else {
+        // Active file is not registered with TagMap. This might cause issues, but it's not this
+        // function's responsibility to prevent it or deal with it.
+        // TODO: Log debug warning?
+        p_tag_toggle->setCheckBoxState(ragtag::TagSetting::UNCOMMITTED);
+      }
     } else {
       // If no file is active, just use the tag configuration default.
       p_tag_toggle->setCheckBoxState(tag_element.second.default_setting);

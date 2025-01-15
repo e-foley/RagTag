@@ -21,3 +21,6 @@
   and execute RagTag.exe without needing to modify solution settings.
 * Allow more granularity in communicating ofstream/ifstream errors in TagMap to/from file ops.
 * Reduce duplicated code within OnNew(), OnOpen().
+* Add a fileDeclaresTag() into the TagMap API, which would spare the developer the need to look up
+  the file, look up the file's tags, search the file's tags for the tag in question, etc. And after
+  doing this, replace the logic within refreshTagToggles() to make use of this new function.
