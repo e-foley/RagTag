@@ -214,7 +214,7 @@ void MainFrame::OnOpen(wxCommandEvent& event) {
   project_path_ = path_pending;
   // TODO: Redraw dialog
   is_dirty_ = false;
-  SetStatusText(L"Opened project " + project_path_->wstring() + L".");
+  SetStatusText(L"Opened project '" + project_path_->wstring() + L"'.");
 }
 
 void MainFrame::OnSave(wxCommandEvent& event) {
@@ -236,7 +236,7 @@ void MainFrame::OnSave(wxCommandEvent& event) {
   }
 
   is_dirty_ = false;
-  SetStatusText(L"Saved project " + project_path_->wstring() + L".");
+  SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
 }
 
 void MainFrame::OnSaveAs(wxCommandEvent& event) {
@@ -252,7 +252,7 @@ void MainFrame::OnSaveAs(wxCommandEvent& event) {
   }
   project_path_ = path;
   is_dirty_ = false;
-  SetStatusText(L"Saved project " + project_path_->wstring() + L".");
+  SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
 }
 
 void MainFrame::OnExit(wxCommandEvent& event) {
