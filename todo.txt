@@ -25,3 +25,8 @@
   the file, look up the file's tags, search the file's tags for the tag in question, etc. And after
   doing this, replace the logic within refreshTagToggles() to make use of this new function.
 * For debugging purposes, create backup files when saving. (Maybe this would be in production too?)
+* What would be the best way to store information about the order of tags in the UI, theoretical
+  colors assigned to each tag, etc.? If this were to end up in the tagdef JSON, it would transform
+  it from a utilitarian, data-centric structure to something more frontend-oriented, but if we
+  were to maintain separate files, then there would be tight links the two that the utility would
+  have to maintain. This too doesn't seem like good design.
