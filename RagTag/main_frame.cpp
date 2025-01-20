@@ -91,6 +91,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnSaveAs, this, ID_SAVE_AS);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
+  Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
 }
 
@@ -303,6 +304,12 @@ void MainFrame::OnAbout(wxCommandEvent& event) {
 #endif
 
   wxMessageBox(about_string, "About", wxOK | wxICON_INFORMATION);
+}
+
+void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
+  TagEntryFrame* tag_entry_frame = new TagEntryFrame(this);
+  tag_entry_frame->ShowModal();
+  SetStatusText("Done");
 }
 
 void MainFrame::OnMediaLoaded(wxMediaEvent& event) {

@@ -30,12 +30,16 @@ public:
 private:
   void refreshTagToggles();
 
+  // Menu events
   void OnNew(wxCommandEvent& event);
   void OnOpen(wxCommandEvent& event);
   void OnSave(wxCommandEvent& event);
   void OnSaveAs(wxCommandEvent& event);
   void OnExit(wxCommandEvent& event);
   void OnAbout(wxCommandEvent& event);
+  // Button events
+  void OnDefineNewTag(wxCommandEvent& event);
+  // Miscellaneous events
   void OnMediaLoaded(wxMediaEvent& event);
   UserIntention promptUnsavedChanges();
   std::optional<std::filesystem::path> promptSaveAs();
