@@ -1,5 +1,5 @@
 #include "main_frame.h"
-#include "tag_entry_frame.h"
+#include "tag_entry_dialog.h"
 #include "tag_toggle_panel.h"
 #include <wx/filedlg.h>
 #include <wx/mediactrl.h>
@@ -307,7 +307,7 @@ void MainFrame::OnAbout(wxCommandEvent& event) {
 }
 
 void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
-  TagEntryFrame* tag_entry_frame = new TagEntryFrame(this);
+  TagEntryDialog* tag_entry_frame = new TagEntryDialog(this);
   tag_entry_frame->ShowModal();
   SetStatusText("Done");
 }

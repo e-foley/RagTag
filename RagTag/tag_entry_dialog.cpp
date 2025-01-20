@@ -1,4 +1,4 @@
-#include "tag_entry_dialog.h"
+#include "tag_entry_frame.h"
 
 TagEntryDialog::TagEntryDialog(wxWindow* parent)
   : TagEntryDialog(parent, std::optional<tag_entry_t>{}) {};
