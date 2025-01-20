@@ -16,4 +16,4 @@ private:
   std::optional<std::pair<ragtag::tag_t, ragtag::TagProperties>> entry_{};
 };
 
-#endif
+#endif  // INCLUDE_TAG_ENTRY_DIALOG
