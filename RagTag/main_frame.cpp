@@ -1,4 +1,5 @@
 #include "main_frame.h"
+#include "tag_entry_frame.h"
 #include "tag_toggle_panel.h"
 #include <wx/filedlg.h>
 #include <wx/mediactrl.h>
