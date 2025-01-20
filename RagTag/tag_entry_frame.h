@@ -4,7 +4,7 @@
 #include "tag_map.h"
 #include <wx/frame.h>
 
-class TagEntryFrame : wxFrame {
+class TagEntryFrame : public wxFrame {
 public:
   typedef std::pair<ragtag::tag_t, ragtag::TagProperties> tag_entry_t;
 
