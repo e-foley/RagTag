@@ -15,6 +15,7 @@ public:
     ID_OPEN,
     ID_SAVE,
     ID_SAVE_AS,
+    ID_DEFINE_NEW_TAG,
     ID_MEDIA_CTRL,
   };
 

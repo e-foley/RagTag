@@ -55,7 +55,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxPanel* p_tag_toggles_button_bar = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_tag_toggles_button_bar = new wxBoxSizer(wxHORIZONTAL);
   p_tag_toggles_button_bar->SetSizer(sz_tag_toggles_button_bar);
-  wxButton* b_define_new_tag = new wxButton(p_tag_toggles_button_bar, wxID_ANY, "Define New Tag...");
+  wxButton* b_define_new_tag = new wxButton(p_tag_toggles_button_bar, ID_DEFINE_NEW_TAG, "Define New Tag...");
   sz_tag_toggles_button_bar->AddStretchSpacer(1);  // Empty space at left to force right-alignment.
   sz_tag_toggles_button_bar->Add(b_define_new_tag, 0, wxALL, 5);
   sz_left->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 5);
@@ -91,7 +91,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnSaveAs, this, ID_SAVE_AS);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
-  Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this);
+  Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
 }
 
