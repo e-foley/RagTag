@@ -40,6 +40,7 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, const std::optional<tag_entry_t
   wxButton* b_cancel = new wxButton(this, ID_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize);
   sz_button_row->Add(b_cancel, 0);
   wxButton* b_ok = new wxButton(this, ID_OK, "OK", wxDefaultPosition, wxDefaultSize);
+  b_ok->SetDefault();
   sz_button_row->Add(b_ok, 0);
   sz_rows->Add(sz_button_row, 0, wxEXPAND | wxALL, 5);
 
