@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <wx/stdpaths.h>
+#include <wx/txtstrm.h>
+#include <wx/wfstream.h>
 
 namespace ragtag {
   // Ensure these are no larger than max int so that we can safely cast size_t to int.
@@ -155,6 +158,11 @@ namespace ragtag {
       nlohmann::json adding;
       adding["id"] = id;
       adding["tag"] = map_it.first;
+      // TODO: Another place that needs error handling attention.
+      auto default_setting_num = tagSettingToNumber(map_it.second.default_setting);
+      if (default_setting_num.has_value()) {
+        adding["default"] = *default_setting_num;
+      }
       id_tag_array_json.push_back(adding);
       ++id;
     }
@@ -164,12 +172,17 @@ namespace ragtag {
   }
 
   std::optional<TagMap> TagMap::fromJson(const nlohmann::json& json) {
+    // TODO: DEBUG
+    const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
+    wxFFileOutputStream output(debug_media_dir + "debug.txt");
+    wxTextOutputStream log(output);
+
     TagMap tag_map;  // Empty TagMap that we will populate with JSON-specified contents.
 
     const auto tag_map_json_it = json.find("tags");
     if (tag_map_json_it == json.end()) {
       // Can't find "tags" definition.
-      std::cerr << "Can't find \"tags\" definition within JSON." << std::endl;
+      log << "Can't find \"tags\" definition within JSON.\n";
       return {};
     }
 
@@ -179,35 +192,58 @@ namespace ragtag {
       const auto id_json = tag_it.find("id");
       if (id_json == tag_it.end()) {
         // Tag doesn't have "id" attribute.
-        std::cerr << "Tag lacks \"id\" attribute." << std::endl;
+        log << "Tag lacks \"id\" attribute.\n";
         continue;
       }
       const auto tag_json = tag_it.find("tag");
       if (tag_json == tag_it.end()) {
         // Tag doesn't have "tag" attribute.
-        std::cerr << "Tag lacks \"tag\" attribute." << std::endl;
+        log << "Tag lacks \"tag\" attribute.\n";
         continue;
       }
 
-      // If we've made it here, the tag entry has both "id" and "tag".
+      const auto default_json = tag_it.find("default");
+      if (default_json == tag_it.end()) {
+        // Tag doesn't have "default" attribute.
+        log << "Tag lacks \"default\" attribute.\n";
+        continue;
+      }
+
+      // If we've made it here, the tag entry has "id", "tag", and "default".
       if (id_to_tag_map.contains(*id_json)) {
         // Duplicate ID...
-        std::cerr << "Tag ID " << *id_json << " is duplicated." << std::endl;
+        log << "Tag ID " << int(*id_json) << " is duplicated.\n";
         continue;
       }
 
-      bool insertion_successful = id_to_tag_map.try_emplace(*id_json, *tag_json).second;
+      TagProperties properties_pending;
+      auto default_setting = numberToTagSetting(*default_json);
+      if (!default_setting.has_value()) {
+        // The stated default setting isn't one that we know how to interpret.
+        log << "Tag has an unrecognized default value.\n";
+        continue;
+      }
+      properties_pending.default_setting = *default_setting;
+
+      bool insertion_successful =
+        id_to_tag_map.try_emplace(*id_json, *tag_json).second;
       if (!insertion_successful) {
         // Memory allocation issue? We generally shouldn't see this.
-        std::cerr << "Couldn't insert tag ID " << *id_json << " into internal map." << std::endl;
+        // NOTE: I wish I could concatenate these three lines, but the wxWidgets interface doesn't
+        // allow me to.
+        log << "Couldn't insert tag ID ";
+        log << std::string(*id_json);
+        log << " into internal map.\n";
         continue;
       }
 
       // All is good! Add the tag to our fledgling TagMap.
-      bool register_tag_result = tag_map.registerTag(*tag_json);
+      bool register_tag_result = tag_map.registerTag(*tag_json, properties_pending);
       if (!register_tag_result) {
         // Unclear what would cause this error.
-        std::cerr << "Failed to register tag " << *tag_json << " with TagMap object." << std::endl;
+        log << "Failed to register tag ";
+        log << std::string(*tag_json);
+        log << " with TagMap object.\n";
         continue;
       }
     }
