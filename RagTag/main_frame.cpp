@@ -93,6 +93,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
   Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
+  Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
 }
 
 void MainFrame::refreshTagToggles() {
@@ -301,6 +302,54 @@ void MainFrame::OnExit(wxCommandEvent& event) {
 
   // If we've gotten this far, we have permission to close.
   Close(true);
+}
+
+void MainFrame::OnClose(wxCloseEvent& event) {
+  if (!event.CanVeto() || !is_dirty_) {
+    Destroy();
+    return;
+  }
+
+  auto intention = promptUnsavedChanges();
+  switch (intention) {
+  case UserIntention::SAVE:
+    if (project_path_.has_value()) {
+      if (!saveProject()) {
+        // TODO: Report error.
+        event.Veto();
+        return;
+      }
+
+      Destroy();
+    }
+    else {
+      const std::optional<std::filesystem::path> path = promptSaveAs();
+      if (!path.has_value()) {
+        // User canceled dialog.
+        event.Veto();
+        return;
+      }
+      if (!saveProjectAs(*path)) {
+        // Failed to save.
+        // TODO: Report error.
+        event.Veto();
+        return;
+      }
+
+      Destroy();
+    }
+    break;
+  case UserIntention::DONT_SAVE:
+    Destroy();
+    return;
+  case UserIntention::CANCEL:
+    event.Veto();
+    return;
+  default:
+    // TODO: Log error.
+    event.Veto();
+    return;
+  }
 }
 
 void MainFrame::OnAbout(wxCommandEvent& event) {

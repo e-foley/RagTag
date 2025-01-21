@@ -37,6 +37,7 @@ private:
   void OnSave(wxCommandEvent& event);
   void OnSaveAs(wxCommandEvent& event);
   void OnExit(wxCommandEvent& event);
+  void OnClose(wxCloseEvent& event);
   void OnAbout(wxCommandEvent& event);
   // Button events
   void OnDefineNewTag(wxCommandEvent& event);
