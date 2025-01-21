@@ -30,3 +30,5 @@
   it from a utilitarian, data-centric structure to something more frontend-oriented, but if we
   were to maintain separate files, then there would be tight links the two that the utility would
   have to maintain. This too doesn't seem like good design.
+* Figure out why last tag gets smooshed when redrawing when the list occupies the visible extents
+  of the panel.
