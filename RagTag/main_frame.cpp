@@ -308,8 +308,33 @@ void MainFrame::OnAbout(wxCommandEvent& event) {
 
 void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
   TagEntryDialog* tag_entry_frame = new TagEntryDialog(this);
-  tag_entry_frame->ShowModal();
-  SetStatusText("Done");
+  auto tag_entry_result = tag_entry_frame->promptTagEntry();
+  if (!tag_entry_result.has_value()) {
+    // Prompt was canceled. Don't do anything.
+    // TODO: Remove this debug message.
+    SetStatusText("Tag entry prompt canceled.");
+    return;
+  }
+
+  if (tag_map_.isTagRegistered(tag_entry_result->first)) {
+    // The "newly created" tag has a name that's already registered.
+    // TODO: Report error.
+    SetStatusText("Tag '" + tag_entry_result->first + "' is already registered.");
+    return;
+  }
+
+  bool tag_register_result =
+    tag_map_.registerTag(tag_entry_result->first, tag_entry_result->second);
+
+  if (!tag_register_result) {
+    // TODO: Report error.
+    SetStatusText("Could not register tag '" + tag_entry_result->first + "'.");
+    return;
+  }
+
+  // Looks like everything was successful. Refresh the panel to show our new tag.
+  is_dirty_ = true;
+  refreshTagToggles();
 }
 
 void MainFrame::OnMediaLoaded(wxMediaEvent& event) {
