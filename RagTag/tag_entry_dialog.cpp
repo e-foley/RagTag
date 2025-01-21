@@ -55,7 +55,7 @@ std::optional<TagEntryDialog::tag_entry_t> TagEntryDialog::promptTagEntry() {
 
 void TagEntryDialog::OnOk(wxCommandEvent& event) {
   tag_entry_t tag_entry_pending{};
-  tag_entry_pending.first = tc_tag_name_->GetLineText(1);
+  tag_entry_pending.first = tc_tag_name_->GetLineText(0);
 
   ragtag::TagProperties& tag_properties = tag_entry_pending.second;
 
