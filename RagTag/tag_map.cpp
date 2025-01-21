@@ -146,21 +146,17 @@ namespace ragtag {
   nlohmann::json TagMap::toJson() const {
     // To allow a (relatively) compact representation of our table, assign each tag an ID.
     std::map<tag_t, int> tag_to_id;
+    nlohmann::json json;
+    nlohmann::json id_tag_array_json;
     int id = 1;  // Start at 1 so that we can use 0 as some kind of default value if we want.
     for (auto map_it : tag_registry_) {
       // TODO: Implement error handling.
       tag_to_id.try_emplace(map_it.first, id);
-      ++id;
-    }
-
-    nlohmann::json json;
-    nlohmann::json id_tag_array_json;
-    // TODO: Investigate a more compact, specialized way of handling key-value pairs.
-    for (const auto& tag_it : tag_to_id) {
       nlohmann::json adding;
-      adding["id"] = tag_it.second;
-      adding["tag"] = tag_it.first;
+      adding["id"] = id;
+      adding["tag"] = map_it.first;
       id_tag_array_json.push_back(adding);
+      ++id;
     }
 
     json["tags"] = id_tag_array_json;
