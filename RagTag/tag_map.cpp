@@ -229,11 +229,7 @@ namespace ragtag {
         id_to_tag_map.try_emplace(*id_json, *tag_json).second;
       if (!insertion_successful) {
         // Memory allocation issue? We generally shouldn't see this.
-        // NOTE: I wish I could concatenate these three lines, but the wxWidgets interface doesn't
-        // allow me to.
-        log << "Couldn't insert tag ID ";
-        log << std::string(*id_json);
-        log << " into internal map.\n";
+        log << "Couldn't insert tag ID " << std::string(*id_json) << " into internal map.\n";
         continue;
       }
 
@@ -241,9 +237,7 @@ namespace ragtag {
       bool register_tag_result = tag_map.registerTag(*tag_json, properties_pending);
       if (!register_tag_result) {
         // Unclear what would cause this error.
-        log << "Failed to register tag ";
-        log << std::string(*tag_json);
-        log << " with TagMap object.\n";
+        log << "Failed to register tag " << std::string(*tag_json) << " with TagMap object.\n";
         continue;
       }
     }
