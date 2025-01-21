@@ -96,6 +96,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 }
 
 void MainFrame::refreshTagToggles() {
+  // Clear out existing UI entries.
+  sz_tag_toggles_->Clear(true);
+
   bool is_file_active = active_file_.has_value();  // Shorthand
 
   auto all_tags = tag_map_.getAllTags();
@@ -125,6 +128,10 @@ void MainFrame::refreshTagToggles() {
       p_tag_toggle->setCheckBoxState(tag_element.second.default_setting);
     }
   }
+
+  // Invoking Layout() on the p_tag_toggles_ parent redraws the scrollbar if needed, whereas
+  // invoking it on p_tag_toggles_ itself crunches entries into the existing unscrollable area.
+  p_tag_toggles_->GetParent()->Layout();
 }
 
 void MainFrame::OnNew(wxCommandEvent& event) {
@@ -162,6 +169,7 @@ void MainFrame::OnNew(wxCommandEvent& event) {
 
   // If we've made it this far, we have permission to create a new project.
   newProject();
+  refreshTagToggles();
   SetStatusText("Created new project.");
 }
 
@@ -214,7 +222,7 @@ void MainFrame::OnOpen(wxCommandEvent& event) {
   // Loaded successfully!
   tag_map_ = *tag_map_pending;
   project_path_ = path_pending;
-  // TODO: Redraw dialog
+  refreshTagToggles();
   is_dirty_ = false;
   SetStatusText(L"Opened project '" + project_path_->wstring() + L"'.");
 }
