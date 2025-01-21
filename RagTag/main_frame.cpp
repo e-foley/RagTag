@@ -40,7 +40,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   p_tag_toggles_->SetSizer(sz_tag_toggles_);
 
   // DEBUG
-  for (int i = 0; i < 25; ++i) {
+  for (int i = 0; i < 10; ++i) {
     tag_map_.registerTag("Tag " + std::to_string(i));
   }
 
