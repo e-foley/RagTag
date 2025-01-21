@@ -32,3 +32,4 @@
   have to maintain. This too doesn't seem like good design.
 * Figure out why last tag gets smooshed when redrawing when the list occupies the visible extents
   of the panel.
+* Get serious about versioning the protocol of the JSON file representing the TagMap.

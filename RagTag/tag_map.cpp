@@ -255,4 +255,33 @@ namespace ragtag {
 
     return *tag_map_result;
   }
+
+  // These numbers don't have to match the enumerator mapping so long as they form a one-to-one
+  // mapping exactly reversed by numberToTagSetting().
+  std::optional<int> TagMap::tagSettingToNumber(TagSetting setting) {
+    switch (setting) {
+    case TagSetting::NO:
+      return 0;
+    case TagSetting::YES:
+      return 1;
+    case TagSetting::UNCOMMITTED:
+      return 2;
+    default:
+      return {};
+    }
+  }
+
+  // See note on tagSettingToNumber().
+  std::optional<TagSetting> TagMap::numberToTagSetting(int number) {
+    switch (number) {
+    case 0:
+      return TagSetting::NO;
+    case 1:
+      return TagSetting::YES;
+    case 2:
+      return TagSetting::UNCOMMITTED;
+    default:
+      return {};
+    }
+  }
 }  // namespace ragtag

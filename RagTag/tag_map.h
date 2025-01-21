@@ -78,6 +78,8 @@ namespace ragtag {
     static std::optional<TagMap> fromFile(const path_t& path);
 
   private:
+    static std::optional<int> tagSettingToNumber(TagSetting setting);
+    static std::optional<TagSetting> numberToTagSetting(int number);
     std::map<tag_t, TagProperties> tag_registry_{};
     std::map<std::filesystem::path, FileProperties> file_map_{};
   };
