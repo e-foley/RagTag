@@ -174,7 +174,9 @@ namespace ragtag {
     for (auto file_it : file_map_) {
       nlohmann::json adding;
       adding["path"] = file_it.first;
-      adding["rating"] = file_it.second.rating;
+      if (file_it.second.rating.has_value()) {
+        adding["rating"] = *file_it.second.rating;
+      }
       nlohmann::json yes_tags;
       nlohmann::json no_tags;
       // Anything neither yes nor no is uncommitted.
