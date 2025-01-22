@@ -2,9 +2,6 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <wx/stdpaths.h>
-#include <wx/txtstrm.h>
-#include <wx/wfstream.h>
 
 namespace ragtag {
   // Ensure these are no larger than max int so that we can safely cast size_t to int.
@@ -184,7 +181,7 @@ namespace ragtag {
         auto tag_id_it = tag_to_id.find(tag_it.first);
         if (tag_id_it == tag_to_id.end()) {
           // TODO: Invoke global log here.
-          //log << "Tag " << tag_it.first << " does not appear in internal tag-to-id map.\n";
+          std::cerr << "Tag " << tag_it.first << " does not appear in internal tag-to-id map.\n";
           continue;
         }
 
@@ -216,17 +213,12 @@ namespace ragtag {
   }
 
   std::optional<TagMap> TagMap::fromJson(const nlohmann::json& json) {
-    // TODO: DEBUG
-    const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
-    wxFFileOutputStream output(debug_media_dir + "debug.txt");
-    wxTextOutputStream log(output);
-
     TagMap tag_map;  // Empty TagMap that we will populate with JSON-specified contents.
 
     const auto tag_map_json_it = json.find("tags");
     if (tag_map_json_it == json.end()) {
       // Can't find "tags" definition.
-      log << "Can't find \"tags\" definition within JSON.\n";
+      std::cerr << "Can't find \"tags\" definition within JSON.\n";
       return {};
     }
 
@@ -236,27 +228,27 @@ namespace ragtag {
       const auto id_json = tag_it.find("id");
       if (id_json == tag_it.end()) {
         // Tag doesn't have "id" attribute.
-        log << "Tag lacks \"id\" attribute.\n";
+        std::cerr << "Tag lacks \"id\" attribute.\n";
         continue;
       }
       const auto tag_json = tag_it.find("tag");
       if (tag_json == tag_it.end()) {
         // Tag doesn't have "tag" attribute.
-        log << "Tag lacks \"tag\" attribute.\n";
+        std::cerr << "Tag lacks \"tag\" attribute.\n";
         continue;
       }
 
       const auto default_json = tag_it.find("default");
       if (default_json == tag_it.end()) {
         // Tag doesn't have "default" attribute.
-        log << "Tag lacks \"default\" attribute.\n";
+        std::cerr << "Tag lacks \"default\" attribute.\n";
         continue;
       }
 
       // If we've made it here, the tag entry has "id", "tag", and "default".
       if (id_to_tag_map.contains(*id_json)) {
         // Duplicate ID...
-        log << "Tag ID " << int(*id_json) << " is duplicated.\n";
+        std::cerr << "Tag ID " << int(*id_json) << " is duplicated.\n";
         continue;
       }
 
@@ -264,7 +256,7 @@ namespace ragtag {
       auto default_setting = numberToTagSetting(*default_json);
       if (!default_setting.has_value()) {
         // The stated default setting isn't one that we know how to interpret.
-        log << "Tag has an unrecognized default value.\n";
+        std::cerr << "Tag has an unrecognized default value.\n";
         continue;
       }
       properties_pending.default_setting = *default_setting;
@@ -273,7 +265,7 @@ namespace ragtag {
         id_to_tag_map.try_emplace(*id_json, *tag_json).second;
       if (!insertion_successful) {
         // Memory allocation issue? We generally shouldn't see this.
-        log << "Couldn't insert tag ID " << std::string(*id_json) << " into internal map.\n";
+        std::cerr << "Couldn't insert tag ID " << std::string(*id_json) << " into internal map.\n";
         continue;
       }
 
@@ -281,7 +273,7 @@ namespace ragtag {
       bool register_tag_success = tag_map.registerTag(*tag_json, properties_pending);
       if (!register_tag_success) {
         // Unclear what would cause this error.
-        log << "Failed to register tag " << std::string(*tag_json) << " with TagMap object.\n";
+        std::cerr << "Failed to register tag " << std::string(*tag_json) << " with TagMap object.\n";
         continue;
       }
     }
@@ -289,7 +281,7 @@ namespace ragtag {
     const auto file_map_json_it = json.find("files");
     if (file_map_json_it == json.end()) {
       // Can't find "files" definition.
-      log << "Can't find \"files\" definition within JSON.\n";
+      std::cerr << "Can't find \"files\" definition within JSON.\n";
       return {};
     }
 
@@ -298,7 +290,7 @@ namespace ragtag {
       const auto path_json = file_it.find("path");
       if (path_json == file_it.end()) {
         // File doesn't have "path" attribute.
-        log << "File lacks \"path\" attribute.\n";
+        std::cerr << "File lacks \"path\" attribute.\n";
         continue;
       }
       std::filesystem::path path = *path_json;
@@ -316,7 +308,7 @@ namespace ragtag {
       const auto yes_tags_json_it = file_it.find("yes_tags");
       if (yes_tags_json_it == file_it.end()) {
         // Can't find "yes_tags" definition.
-        log << "File lacks \"yes_tags\" definition.\n";
+        std::cerr << "File lacks \"yes_tags\" definition.\n";
         continue;
       }
       nlohmann::json yes_tags_json = *yes_tags_json_it;
@@ -324,7 +316,7 @@ namespace ragtag {
         const int yes_tag_id = yes_tag_id_json;
         const auto yes_tag_it = id_to_tag_map.find(yes_tag_id);
         if (yes_tag_it == id_to_tag_map.end()) {
-          log << "Couldn't find yes-tag ID " << yes_tag_id << " within internal map.\n";
+          std::cerr << "Couldn't find yes-tag ID " << yes_tag_id << " within internal map.\n";
           continue;
         }
         properties.tags.emplace(yes_tag_it->second, TagSetting::YES);
@@ -333,7 +325,7 @@ namespace ragtag {
       const auto no_tags_json_it = file_it.find("no_tags");
       if (no_tags_json_it == file_it.end()) {
         // Can't find "no_tags" definition.
-        log << "File lacks \"no_tags\" definition.\n";
+        std::cerr << "File lacks \"no_tags\" definition.\n";
         continue;
       }
       nlohmann::json no_tags_json = *no_tags_json_it;
@@ -341,7 +333,7 @@ namespace ragtag {
         const int no_tag_id = no_tag_id_json;
         const auto no_tag_it = id_to_tag_map.find(no_tag_id);
         if (no_tag_it == id_to_tag_map.end()) {
-          log << "Couldn't find yes-tag ID " << no_tag_id << " within internal map.\n";
+          std::cerr << "Couldn't find yes-tag ID " << no_tag_id << " within internal map.\n";
           continue;
         }
         properties.tags.emplace(no_tag_it->second, TagSetting::NO);
@@ -350,7 +342,7 @@ namespace ragtag {
       bool add_file_success = tag_map.addFile(path, properties);
       if (!add_file_success) {
         // Unclear what would cause this error.
-        log << L"Failed to add file '" << path.generic_wstring() << L"' to TagMap object.\n";
+        std::cerr << "Failed to add file '" << path.generic_string() << "' to TagMap object.\n";
         continue;
       }
     }

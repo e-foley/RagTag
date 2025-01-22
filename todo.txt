@@ -33,3 +33,11 @@
 * Figure out why last tag gets smooshed when redrawing when the list occupies the visible extents
   of the panel.
 * Get serious about versioning the protocol of the JSON file representing the TagMap.
+
+When resuming debug log efforts, use this code:
+```
+    // TODO: DEBUG
+    const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
+    wxFFileOutputStream output(debug_media_dir + "debug.txt");
+    wxTextOutputStream log(output);
+```
