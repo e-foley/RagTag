@@ -147,19 +147,20 @@ namespace ragtag {
   }
 
   nlohmann::json TagMap::toJson() const {
+    nlohmann::json json;
+
     // To allow a (relatively) compact representation of our table, assign each tag an ID.
     std::map<tag_t, int> tag_to_id;
-    nlohmann::json json;
     nlohmann::json id_tag_array_json;
     int id = 1;  // Start at 1 so that we can use 0 as some kind of default value if we want.
-    for (auto map_it : tag_registry_) {
+    for (auto tag_it : tag_registry_) {
       // TODO: Implement error handling.
-      tag_to_id.try_emplace(map_it.first, id);
+      tag_to_id.try_emplace(tag_it.first, id);
       nlohmann::json adding;
       adding["id"] = id;
-      adding["tag"] = map_it.first;
+      adding["tag"] = tag_it.first;
       // TODO: Another place that needs error handling attention.
-      auto default_setting_num = tagSettingToNumber(map_it.second.default_setting);
+      auto default_setting_num = tagSettingToNumber(tag_it.second.default_setting);
       if (default_setting_num.has_value()) {
         adding["default"] = *default_setting_num;
       }
@@ -168,6 +169,47 @@ namespace ragtag {
     }
 
     json["tags"] = id_tag_array_json;
+
+    nlohmann::json file_array_json;
+    for (auto file_it : file_map_) {
+      nlohmann::json adding;
+      adding["path"] = file_it.first;
+      adding["rating"] = file_it.second.rating;
+      nlohmann::json yes_tags;
+      nlohmann::json no_tags;
+      // Anything neither yes nor no is uncommitted.
+      for (auto tag_it : file_it.second.tags) {
+        auto tag_id_it = tag_to_id.find(tag_it.first);
+        if (tag_id_it == tag_to_id.end()) {
+          // TODO: Invoke global log here.
+          //log << "Tag " << tag_it.first << " does not appear in internal tag-to-id map.\n";
+          continue;
+        }
+
+        const int& tag_id = tag_id_it->second;  // Alias for convenience and readability
+
+        switch (tag_it.second) {
+        case ragtag::TagSetting::YES:
+          yes_tags.push_back(tag_id);
+          break;
+        case ragtag::TagSetting::NO:
+          no_tags.push_back(tag_id);
+          break;
+        case ragtag::TagSetting::UNCOMMITTED:
+          break;
+        default:
+          // TODO: Record error.
+          break;
+        }
+      }
+
+      adding["yes_tags"] = yes_tags;
+      adding["no_tags"] = no_tags;
+      file_array_json.push_back(adding);
+    }
+
+    json["files"] = file_array_json;
+
     return json;
   }
 
