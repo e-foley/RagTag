@@ -191,13 +191,13 @@ namespace ragtag {
         const int& tag_id = tag_id_it->second;  // Alias for convenience and readability
 
         switch (tag_it.second) {
-        case ragtag::TagSetting::YES:
+        case TagSetting::YES:
           yes_tags.push_back(tag_id);
           break;
-        case ragtag::TagSetting::NO:
+        case TagSetting::NO:
           no_tags.push_back(tag_id);
           break;
-        case ragtag::TagSetting::UNCOMMITTED:
+        case TagSetting::UNCOMMITTED:
           break;
         default:
           // TODO: Record error.
