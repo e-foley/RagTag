@@ -278,10 +278,79 @@ namespace ragtag {
       }
 
       // All is good! Add the tag to our fledgling TagMap.
-      bool register_tag_result = tag_map.registerTag(*tag_json, properties_pending);
-      if (!register_tag_result) {
+      bool register_tag_success = tag_map.registerTag(*tag_json, properties_pending);
+      if (!register_tag_success) {
         // Unclear what would cause this error.
         log << "Failed to register tag " << std::string(*tag_json) << " with TagMap object.\n";
+        continue;
+      }
+    }
+
+    const auto file_map_json_it = json.find("files");
+    if (file_map_json_it == json.end()) {
+      // Can't find "files" definition.
+      log << "Can't find \"files\" definition within JSON.\n";
+      return {};
+    }
+
+    const nlohmann::json file_map_json = *file_map_json_it;
+    for (const auto& file_it : file_map_json) {
+      const auto path_json = file_it.find("path");
+      if (path_json == file_it.end()) {
+        // File doesn't have "path" attribute.
+        log << "File lacks \"path\" attribute.\n";
+        continue;
+      }
+      std::filesystem::path path = *path_json;
+
+      FileProperties properties;
+      const auto rating_json = file_it.find("rating");
+      if (rating_json == file_it.end()) {
+        // Not an issue, since "rating" is optional.
+        properties.rating = {};
+      }
+      else {
+        properties.rating = *rating_json;
+      }
+
+      const auto yes_tags_json_it = file_it.find("yes_tags");
+      if (yes_tags_json_it == file_it.end()) {
+        // Can't find "yes_tags" definition.
+        log << "File lacks \"yes_tags\" definition.\n";
+        continue;
+      }
+      nlohmann::json yes_tags_json = *yes_tags_json_it;
+      for (const auto& yes_tag_id_json : yes_tags_json) {
+        const int yes_tag_id = yes_tag_id_json;
+        const auto yes_tag_it = id_to_tag_map.find(yes_tag_id);
+        if (yes_tag_it == id_to_tag_map.end()) {
+          log << "Couldn't find yes-tag ID " << yes_tag_id << " within internal map.\n";
+          continue;
+        }
+        properties.tags.emplace(yes_tag_it->second, TagSetting::YES);
+      }
+
+      const auto no_tags_json_it = file_it.find("no_tags");
+      if (no_tags_json_it == file_it.end()) {
+        // Can't find "no_tags" definition.
+        log << "File lacks \"no_tags\" definition.\n";
+        continue;
+      }
+      nlohmann::json no_tags_json = *no_tags_json_it;
+      for (const auto& no_tag_id_json : no_tags_json) {
+        const int no_tag_id = no_tag_id_json;
+        const auto no_tag_it = id_to_tag_map.find(no_tag_id);
+        if (no_tag_it == id_to_tag_map.end()) {
+          log << "Couldn't find yes-tag ID " << no_tag_id << " within internal map.\n";
+          continue;
+        }
+        properties.tags.emplace(no_tag_it->second, TagSetting::NO);
+      }
+
+      bool add_file_success = tag_map.addFile(path, properties);
+      if (!add_file_success) {
+        // Unclear what would cause this error.
+        log << L"Failed to add file '" << path.generic_wstring() << L"' to TagMap object.\n";
         continue;
       }
     }
