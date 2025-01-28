@@ -1,40 +1,52 @@
-* Consider ways of separating JSON read/write functions from data-centric TagMap container.
-* Document all classes, functions, fields, etc.
-* Update root CMakeLists to build only required configuration of wxWidgets.
+ARCHITECTURE
 * Decide how consistently it's appropriate to say "registered" in accessors for registered tags.
-* Where appropriate, consider replacing std::pair with explicit struct.
-* Where appropriate, consider replacing bool with explicit enum.
-* Use std::map::max_size() in relevant functions that check capacity.
-* Define JSON labels ("id", "tag", etc.) as constants rather than using them as magic strings.
-* Add appropriate licenses.
-* Make sure we add functions setting and retrieving TagProperties.
-* Revisit the confusing matter of how to link libraries for wxWidgets. I don't think that including
-  them one-by-one is the intended use, but I struggled for hours in vain to find the "right" way.
-* Add coverage checks.
-* Update addFile() to validate FileProperties for registered tags... Or else, modify the interface.
-* Implement a setTags() function that can set multiple tags on a file at once?
-* Handle exclusive settings radio-button style where setting one clears another?
-* Perhaps I should automatically consider a tag UNCOMMITTED when missing from a file.
-* Resolve Catch2 debug issue (PDB warnings upon build).
-* Add ability to drag tags around.
-* Figure out how to configure startup project via CMake such that I can simply F5 from VS to build
-  and execute RagTag.exe without needing to modify solution settings.
-* Allow more granularity in communicating ofstream/ifstream errors in TagMap to/from file ops.
-* Reduce duplicated code within OnNew(), OnOpen().
-* Add a fileDeclaresTag() into the TagMap API, which would spare the developer the need to look up
-  the file, look up the file's tags, search the file's tags for the tag in question, etc. And after
-  doing this, replace the logic within refreshTagToggles() to make use of this new function.
-* For debugging purposes, create backup files when saving. (Maybe this would be in production too?)
+* Decide whether addFile() should be updated to validate FileProperties for registered tags...
+* Decide whether appropriate to include a setTags() function for multiple tags on a file at once
+* If a tag is missing from a file, should it automatically be considered UNCOMMITTED?
 * What would be the best way to store information about the order of tags in the UI, theoretical
   colors assigned to each tag, etc.? If this were to end up in the tagdef JSON, it would transform
   it from a utilitarian, data-centric structure to something more frontend-oriented, but if we
   were to maintain separate files, then there would be tight links the two that the utility would
   have to maintain. This too doesn't seem like good design.
-* Figure out why last tag gets smooshed when redrawing when the list occupies the visible extents
-  of the panel.
+
+CODE DESIGN
+* Consider ways of separating JSON read/write functions from data-centric TagMap container.
+* Where appropriate, consider replacing std::pair with explicit struct.
+* Where appropriate, consider replacing bool with explicit enum.
+* Allow more granularity in communicating ofstream/ifstream errors in TagMap to/from file ops.
+* Reduce duplicated code within OnNew(), OnOpen().
 * Get serious about versioning the protocol of the JSON file representing the TagMap.
 
-When resuming debug log efforts, use this code:
+PROJECT INFRASTRUCTURE
+* Update root CMakeLists to build only required configuration of wxWidgets.
+* Revisit the confusing matter of how to link libraries for wxWidgets. I don't think that including
+  them one-by-one is the intended use, but I struggled for hours in vain to find the "right" way.
+* Resolve Catch2 debug issue (PDB warnings upon build).
+* Figure out how to configure startup project via CMake such that I can simply F5 from VS to build
+  and execute RagTag.exe without needing to modify solution settings.
+* For debugging purposes, create backup files when saving. (Maybe this would be in production too?)
+
+EXECUTION
+* Document all classes, functions, fields, etc.
+* Use std::map::max_size() in relevant functions that check capacity.
+* Define JSON labels ("id", "tag", etc.) as constants rather than use them as magic strings.
+* Add appropriate licenses (wxWidgets, Catch, nlohmann JSON).
+* Make sure we add functions setting and retrieving TagProperties.
+* Add coverage checks.
+* Add a fileDeclaresTag() into the TagMap API, which would spare the developer the need to look up
+  the file, look up the file's tags, search the file's tags for the tag in question, etc. And after
+  doing this, replace the logic within refreshTagToggles() to make use of this new function.
+
+FEATURES
+* Add ability to drag tags around.
+* Add exclusive settings whereby assigning one tag removes another.
+
+BUGS
+* Figure out why last tag gets smooshed when redrawing when the list occupies the visible extents
+  of the panel.
+
+NOTES
+* When resuming debug log efforts, use this code:
 ```
     // TODO: DEBUG
     const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
