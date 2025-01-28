@@ -85,6 +85,17 @@ namespace ragtag {
       return false;
     }
 
+    // If UNCOMMITTED, remove any existing mention of tag from the file.
+    if (setting == TagSetting::UNCOMMITTED) {
+      const auto current_tag_it = file_it->second.tags.find(tag);
+      if (current_tag_it == file_it->second.tags.end()) {
+        // Already the tag is not described by the file.
+        return true;
+      }
+      file_it->second.tags.erase(current_tag_it);
+      return true;
+    }
+
     // The .second refers to the success of the insertion-or-assignment operation.
     return file_it->second.tags.insert_or_assign(tag, setting).second;
   }
