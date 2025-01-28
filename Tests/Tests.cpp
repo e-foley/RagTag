@@ -111,12 +111,44 @@ namespace ragtag {
   TEST_CASE("TagMap JSON read/write reflection", "[all][TagMap-5]") {
     // It's important that this test use every feature of the TagMap interface.
     TagMap tag_map_in;
-    tag_map_in.registerTag("Banana");
-    tag_map_in.registerTag("Cantaloupe");
-    tag_map_in.registerTag("Durian");
-    tag_map_in.registerTag("Apple");
-    tag_map_in.deleteTag("Durian");
+
+    TagProperties default_no;
+    default_no.default_setting = TagSetting::NO;
+    TagProperties default_yes;
+    default_yes.default_setting = TagSetting::YES;
+    TagProperties default_uncommitted;
+    default_uncommitted.default_setting = TagSetting::UNCOMMITTED;
+
+    // Registering tags...
+    tag_map_in.registerTag("Banana", default_no);
+    tag_map_in.registerTag("Cantaloupe", default_uncommitted);
+    tag_map_in.registerTag("Durian", default_no);
+    tag_map_in.registerTag("Apple", default_yes);
+    tag_map_in.deleteTag("Durian");  // Testing that deletion leaves no lingering artifacts
     tag_map_in.registerTag("Dragonfruit");
+
+    // Registering files...
+    tag_map_in.addFile("test1.madeup");
+    FileProperties test2_props;
+    test2_props.rating = 3.1f;
+    test2_props.tags.emplace("Dragonfruit", TagSetting::YES);
+    test2_props.tags.emplace("Cantaloupe", TagSetting::NO);
+    test2_props.tags.emplace("Banana", TagSetting::UNCOMMITTED);
+    tag_map_in.addFile("test2.madeup", test2_props);
+    FileProperties test3_props;
+    // Intentionally don't assign rating here.
+    test3_props.tags.emplace("Banana", TagSetting::NO);
+    test3_props.tags.emplace("Cantaloupe", TagSetting::YES);
+    test3_props.tags.emplace("Dragonfruit", TagSetting::NO);
+    test3_props.tags.emplace("Apple", TagSetting::YES);
+    tag_map_in.addFile("test3.madeup", test3_props);
+    FileProperties test4_props;
+    test4_props.rating = 1.9f;
+    test4_props.tags.emplace("Apple", TagSetting::NO);
+    tag_map_in.addFile("test4.madeup", test4_props);
+    tag_map_in.removeFile("test4.madeup");  // Testing that deletion leaves no lingering artifacts
+    
+    // Convert to JSON
     nlohmann::json j = tag_map_in.toJson();
 
     SECTION("JSON read/write") {
@@ -126,6 +158,13 @@ namespace ragtag {
 
       // Sanity check to make sure we didn't write/read empty file or something.
       CHECK(from_json_ret->numTags() == 4);
+      const auto test2_prop_ret = from_json_ret->getFileProperties("test2.madeup");
+      REQUIRE(test2_prop_ret.has_value());
+      REQUIRE(test2_prop_ret->rating.has_value());
+      CHECK(*test2_prop_ret->rating == 3.1f);
+      const auto tag_setting_it = test2_prop_ret->tags.find("Dragonfruit");
+      REQUIRE(tag_setting_it != test2_prop_ret->tags.end());
+      CHECK(tag_setting_it->second == TagSetting::YES);
     }
 
     SECTION("File read/write") {
@@ -139,9 +178,17 @@ namespace ragtag {
       auto constructed_from_file = TagMap::fromJson(parsed);
       REQUIRE(constructed_from_file.has_value());
       CHECK(*constructed_from_file == tag_map_in);
-      CHECK(constructed_from_file->numTags() == 4);
 
-      std::remove("io.json");
+      // Sanity check to make sure we didn't write/read empty file or something.
+      CHECK(constructed_from_file->numTags() == 4);
+      const auto test3_prop_ret = constructed_from_file->getFileProperties("test3.madeup");
+      REQUIRE(test3_prop_ret.has_value());
+      REQUIRE_FALSE(test3_prop_ret->rating.has_value());
+      const auto tag_setting_it = test3_prop_ret->tags.find("Banana");
+      REQUIRE(tag_setting_it != test3_prop_ret->tags.end());
+      CHECK(tag_setting_it->second == TagSetting::NO);
+
+      //std::remove("io.json");
     }
   }
 
