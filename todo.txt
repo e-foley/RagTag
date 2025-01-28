@@ -25,6 +25,7 @@ PROJECT INFRASTRUCTURE
 * Figure out how to configure startup project via CMake such that I can simply F5 from VS to build
   and execute RagTag.exe without needing to modify solution settings.
 * For debugging purposes, create backup files when saving. (Maybe this would be in production too?)
+* Generate Doxygen documentation pages for the API?
 
 EXECUTION
 * Document all classes, functions, fields, etc.
