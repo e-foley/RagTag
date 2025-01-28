@@ -29,16 +29,6 @@ namespace ragtag {
     }
   };
 
-  struct FileProperties {
-    std::optional<rating_t> rating;
-    std::map<tag_t, TagSetting> tags;
-
-    bool operator==(const FileProperties& rhs) const noexcept {
-      return rating == rhs.rating &&
-        tags == rhs.tags;
-    }
-  };
-
   class TagMap {
   public:
     static const int MAX_NUM_TAGS;
@@ -58,17 +48,19 @@ namespace ragtag {
 
     // File-centric operations
     bool addFile(const path_t& path);
-    bool addFile(const path_t& path, const FileProperties& properties);
     bool removeFile(const path_t& path);
     bool setTag(const path_t& path, tag_t tag, TagSetting setting);
+    std::optional<TagSetting> getTagSetting(const path_t& path, tag_t tag) const;
     bool setRating(const path_t& path, rating_t rating);
+    bool clearRating(const path_t& path);
     bool hasFile(const path_t& path) const;
+    std::optional<std::vector<path_t>> getFileTags(const path_t& path) const;
     // TODO: Implement getTags(), getRating()
-    std::optional<FileProperties> getFileProperties(const path_t& path) const;
-    std::vector<std::pair<path_t, FileProperties>> getAllFiles() const;
+    //std::optional<FileProperties> getFileProperties(const path_t& path) const;
+    //std::vector<std::pair<path_t, FileProperties>> getAllFiles() const;
 
-    typedef std::function<bool(const FileProperties&)> file_qualifier_t;
-    std::vector<std::pair<path_t, FileProperties>> selectFiles(const file_qualifier_t& fn) const;
+    //typedef std::function<bool(const FileProperties&)> file_qualifier_t;
+    //std::vector<std::pair<path_t, FileProperties>> selectFiles(const file_qualifier_t& fn) const;
     int numFiles() const;
 
     // Reading and writing
@@ -78,6 +70,16 @@ namespace ragtag {
     static std::optional<TagMap> fromFile(const path_t& path);
 
   private:
+    struct FileProperties {
+      std::optional<rating_t> rating;
+      std::map<tag_t, TagSetting> tags;
+
+      bool operator==(const FileProperties& rhs) const noexcept {
+        return rating == rhs.rating &&
+          tags == rhs.tags;
+      }
+    };
+
     static std::optional<int> tagSettingToNumber(TagSetting setting);
     static std::optional<TagSetting> numberToTagSetting(int number);
     std::map<tag_t, TagProperties> tag_registry_{};

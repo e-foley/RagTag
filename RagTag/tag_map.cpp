@@ -59,17 +59,7 @@ namespace ragtag {
   }
 
   bool TagMap::addFile(const path_t& path) {
-    return addFile(path, FileProperties{});
-  }
-
-  bool TagMap::addFile(const path_t& path, const FileProperties& properties) {
-    if (numFiles() >= MAX_NUM_FILES) {
-      return false;
-    }
-
-    // TODO: Enforce valid FileProperties, which means confirming tags therein are registered.
-
-    return file_map_.emplace(path, properties).second;
+    return file_map_.emplace(path, FileProperties{}).second;
   }
 
   bool TagMap::removeFile(const path_t& path) {
@@ -99,6 +89,23 @@ namespace ragtag {
     return file_it->second.tags.insert_or_assign(tag, setting).second;
   }
 
+  std::optional<TagSetting> TagMap::getTagSetting(const path_t& path, tag_t tag) const
+  {
+    const auto file_it = file_map_.find(path);
+    if (file_it == file_map_.end()) {
+      // File is not in our list.
+      return {};
+    }
+
+    const auto tag_it = file_it->second.tags.find(tag);
+    if (tag_it == file_it->second.tags.end()) {
+      // If tag isn't explicitly declared, it's uncommitted.
+      return TagSetting::UNCOMMITTED;
+    }
+
+    return tag_it->second;
+  }
+
   bool TagMap::setRating(const path_t& path, const rating_t rating) {
     const auto file_it = file_map_.find(path);
     if (file_it == file_map_.end()) {
@@ -110,33 +117,60 @@ namespace ragtag {
     return true;
   }
 
+  bool TagMap::clearRating(const path_t& path)
+  {
+    const auto file_it = file_map_.find(path);
+    if (file_it == file_map_.end()) {
+      // File is not in our list.
+      return false;
+    }
+
+    file_it->second.rating = {};
+    return true;
+  }
+
   bool TagMap::hasFile(const path_t& path) const {
     return file_map_.contains(path);
   }
 
-  std::optional<FileProperties> TagMap::getFileProperties(const path_t& path) const {
+  std::optional<std::vector<path_t>> TagMap::getFileTags(const path_t& path) const
+  {
     const auto file_it = file_map_.find(path);
     if (file_it == file_map_.end()) {
+      // File is not in our list.
       return {};
     }
-    return file_it->second;
-  }
 
-  std::vector<std::pair<path_t, FileProperties>> TagMap::getAllFiles() const {
-    std::vector<std::pair<path_t, FileProperties>> file_vector;
-    file_vector.reserve(file_map_.size());
-    for (const auto map_it : file_map_) {
-      file_vector.emplace_back(map_it);
+    std::vector<path_t> paths_returning;
+    for (const auto& tag_it : file_it->second.tags) {
+      paths_returning.push_back(tag_it.first);
     }
-    return file_vector;
+    return paths_returning;
   }
 
-  std::vector<std::pair<path_t, FileProperties>> TagMap::selectFiles(const file_qualifier_t& fn) const {
-    std::vector<std::pair<path_t, FileProperties>> qualified_file_vector;
-    std::copy_if(file_map_.begin(), file_map_.end(), std::back_inserter(qualified_file_vector),
-      [&fn](const auto& p) {return std::invoke(fn, p.second);});
-    return qualified_file_vector;
-  }
+  //std::optional<FileProperties> TagMap::getFileProperties(const path_t& path) const {
+  //  const auto file_it = file_map_.find(path);
+  //  if (file_it == file_map_.end()) {
+  //    return {};
+  //  }
+  //  return file_it->second;
+  //}
+
+  //std::vector<std::pair<path_t, FileProperties>> TagMap::getAllFiles() const {
+  //  std::vector<std::pair<path_t, FileProperties>> file_vector;
+  //  file_vector.reserve(file_map_.size());
+  //  for (const auto map_it : file_map_) {
+  //    file_vector.emplace_back(map_it);
+  //  }
+  //  return file_vector;
+  //}
+
+  //std::vector<std::pair<path_t, FileProperties>> TagMap::selectFiles(const file_qualifier_t& fn) const {
+  //  std::vector<std::pair<path_t, FileProperties>> qualified_file_vector;
+  //  std::copy_if(file_map_.begin(), file_map_.end(), std::back_inserter(qualified_file_vector),
+  //    [&fn](const auto& p) {return std::invoke(fn, p.second);});
+  //  return qualified_file_vector;
+  //}
 
   int TagMap::numFiles() const {
     // Safe conversion provided MAX_NUM_FILES is enforced.
@@ -295,20 +329,31 @@ namespace ragtag {
       }
       std::filesystem::path path = *path_json;
 
-      FileProperties properties;
+      bool add_file_success = tag_map.addFile(path);
+      if (!add_file_success) {
+        std::cerr << "Failed to add file '" << path.generic_string() << "' to TagMap object.\n";
+        continue;
+      }
+
       const auto rating_json = file_it.find("rating");
       if (rating_json == file_it.end()) {
         // Not an issue, since "rating" is optional.
-        properties.rating = {};
+        if (!tag_map.clearRating(path)) {
+          std::cerr << "Couldn't clear rating for file '" << path.generic_string() << "'\n";
+          continue;
+        }
       }
       else {
-        properties.rating = *rating_json;
+        if (!tag_map.setRating(path, *rating_json)) {
+          // TODO: Shouldn't happen; log error.
+          continue;
+        }
       }
 
       const auto yes_tags_json_it = file_it.find("yes_tags");
       if (yes_tags_json_it == file_it.end()) {
         // Can't find "yes_tags" definition.
-        std::cerr << "File lacks \"yes_tags\" definition.\n";
+        std::cerr << "File '" << path.generic_string() << "' lacks 'yes_tags' definition.\n";
         continue;
       }
       nlohmann::json yes_tags_json = *yes_tags_json_it;
@@ -316,16 +361,21 @@ namespace ragtag {
         const int yes_tag_id = yes_tag_id_json;
         const auto yes_tag_it = id_to_tag_map.find(yes_tag_id);
         if (yes_tag_it == id_to_tag_map.end()) {
-          std::cerr << "Couldn't find yes-tag ID " << yes_tag_id << " within internal map.\n";
+          std::cerr << "Couldn't find yes-tag ID " << yes_tag_id
+            << " within internal map for file '" << path.generic_string() << "'.\n";
           continue;
         }
-        properties.tags.emplace(yes_tag_it->second, TagSetting::YES);
+        if (!tag_map.setTag(path, yes_tag_it->second, TagSetting::YES)) {
+          std::cerr << "Couldn't set tag '" << yes_tag_it->second << "' to YES for file '"
+            << path.generic_string() << "'.\n";
+          continue;
+        }
       }
 
       const auto no_tags_json_it = file_it.find("no_tags");
       if (no_tags_json_it == file_it.end()) {
         // Can't find "no_tags" definition.
-        std::cerr << "File lacks \"no_tags\" definition.\n";
+        std::cerr << "File '" << path.generic_string() << "' lacks 'no_tags' definition.\n";
         continue;
       }
       nlohmann::json no_tags_json = *no_tags_json_it;
@@ -333,17 +383,15 @@ namespace ragtag {
         const int no_tag_id = no_tag_id_json;
         const auto no_tag_it = id_to_tag_map.find(no_tag_id);
         if (no_tag_it == id_to_tag_map.end()) {
-          std::cerr << "Couldn't find yes-tag ID " << no_tag_id << " within internal map.\n";
+          std::cerr << "Couldn't find no-tag ID " << no_tag_id
+            << " within internal map for file '" << path.generic_string() << "'.\n";
           continue;
         }
-        properties.tags.emplace(no_tag_it->second, TagSetting::NO);
-      }
-
-      bool add_file_success = tag_map.addFile(path, properties);
-      if (!add_file_success) {
-        // Unclear what would cause this error.
-        std::cerr << "Failed to add file '" << path.generic_string() << "' to TagMap object.\n";
-        continue;
+        if (!tag_map.setTag(path, no_tag_it->second, TagSetting::NO)) {
+          std::cerr << "Couldn't set tag '" << no_tag_it->second << "' to NO for file '"
+            << path.generic_string() << "'.\n";
+          continue;
+        }
       }
     }
 

@@ -102,32 +102,38 @@ void MainFrame::refreshTagToggles() {
 
   bool is_file_active = active_file_.has_value();  // Shorthand
 
-  auto all_tags = tag_map_.getAllTags();
-  for (const auto& tag_element : all_tags) {
+  auto registered_tags = tag_map_.getAllTags();
+
+  if (is_file_active && !tag_map_.hasFile(*active_file_)) {
+    std::cerr << "Active file '" << active_file_->generic_string()
+      << "' isn't known to tag map in refreshTagToggles().\n";
+    return;
+  }
+
+  for (const auto& tag_element : registered_tags) {
+    std::optional<ragtag::TagSetting> tag_setting;
+    if (is_file_active) {
+      tag_setting = tag_map_.getTagSetting(*active_file_, tag_element.first);
+    }
+    else {
+      // TODO: Replace this logic when hide TagProperties.
+      const auto tag_props = tag_map_.getTagProperties(tag_element.first);
+      if (!tag_props.has_value()) {
+        std::cerr << "Can't get tag properties for tag '" << tag_element.first << "'.\n";
+        continue;
+      }
+      tag_setting = tag_props->default_setting;
+    }
+
+    if (!tag_setting.has_value()) {
+      std::cerr << "Failed to establish tag setting for '" << tag_element.first << "' within file '"
+        << active_file_->generic_string() << "'.\n";
+      continue;
+    }
+
     TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_tag_toggles_, tag_element.first);
     sz_tag_toggles_->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
-    if (is_file_active) {
-      // If file is active, configure the checked/unchecked mark to match applied tag.
-      if (tag_map_.hasFile(*active_file_)) {
-        // File is registered with the TagMap. (This generally should be the case.)
-        const auto file_properties = *(tag_map_.getFileProperties(*active_file_));
-        const auto tag_it = file_properties.tags.find(tag_element.first);
-        if (tag_it == file_properties.tags.end()) {
-          // File doesn't describe this tag at all, so apply the tag's default.
-          p_tag_toggle->setCheckBoxState(tag_element.second.default_setting);
-        } else {
-          p_tag_toggle->setCheckBoxState(tag_it->second);
-        }
-      } else {
-        // Active file is not registered with TagMap. This might cause issues, but it's not this
-        // function's responsibility to prevent it or deal with it.
-        // TODO: Log debug warning?
-        p_tag_toggle->setCheckBoxState(ragtag::TagSetting::UNCOMMITTED);
-      }
-    } else {
-      // If no file is active, just use the tag configuration default.
-      p_tag_toggle->setCheckBoxState(tag_element.second.default_setting);
-    }
+    p_tag_toggle->setCheckBoxState(*tag_setting);
   }
 
   // Invoking Layout() on the p_tag_toggles_ parent redraws the scrollbar if needed, whereas
