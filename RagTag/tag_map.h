@@ -52,6 +52,7 @@ namespace ragtag {
     bool setTag(const path_t& path, tag_t tag, TagSetting setting);
     std::optional<TagSetting> getTagSetting(const path_t& path, tag_t tag) const;
     bool setRating(const path_t& path, rating_t rating);
+    std::optional<rating_t> getRating(const path_t& path) const;
     bool clearRating(const path_t& path);
     bool hasFile(const path_t& path) const;
     std::optional<std::vector<path_t>> getFileTags(const path_t& path) const;

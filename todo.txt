@@ -8,6 +8,8 @@ ARCHITECTURE
   it from a utilitarian, data-centric structure to something more frontend-oriented, but if we
   were to maintain separate files, then there would be tight links the two that the utility would
   have to maintain. This too doesn't seem like good design.
+* getRating() can return a default optional when either the file doesn't declare a rating or when
+  the file doesn't exist. Is this ambiguity acceptable?
 
 CODE DESIGN
 * Consider ways of separating JSON read/write functions from data-centric TagMap container.

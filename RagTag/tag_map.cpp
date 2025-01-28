@@ -117,6 +117,17 @@ namespace ragtag {
     return true;
   }
 
+  std::optional<rating_t> TagMap::getRating(const path_t& path) const
+  {
+    const auto file_it = file_map_.find(path);
+    if (file_it == file_map_.end()) {
+      // File is not in our list.
+      return {};
+    }
+
+    return file_it->second.rating;
+  }
+
   bool TagMap::clearRating(const path_t& path)
   {
     const auto file_it = file_map_.find(path);
