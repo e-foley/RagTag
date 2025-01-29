@@ -28,8 +28,23 @@ namespace ragtag {
   }
 
   bool TagMap::deleteTag(const tag_t tag) {
+    const auto tag_it = tag_registry_.find(tag);
+    if (tag_it == tag_registry_.end()) {
+      // This tag already doesn't exist, so we can't remove it.
+      return false;
+    }
+
+    bool was_tag_cleared_from_all_files = true;
+    for (const auto& file_it : file_map_) {
+      if (!clearTag(file_it.first, tag)) {
+        std::cerr << "Couldn't clear tag '" << tag << "' from file '"
+          << file_it.first.generic_string() << "'.\n";
+        was_tag_cleared_from_all_files = false;
+      }
+    }
+
     // erase() returns number of elements removed.
-    return tag_registry_.erase(tag) > 0;
+    return was_tag_cleared_from_all_files && tag_registry_.erase(tag) > 0;
   }
 
   std::optional<TagProperties> TagMap::getTagProperties(const tag_t tag) const {
@@ -98,6 +113,11 @@ namespace ragtag {
 
     // The .second refers to the success of the insertion-or-assignment operation.
     return file_it->second.tags.insert_or_assign(tag, setting).second;
+  }
+
+  bool TagMap::clearTag(const path_t& path, const tag_t tag) {
+    // For now, clearing a tag is the same as setting it to uncommitted.
+    return setTag(path, tag, TagSetting::UNCOMMITTED);
   }
 
   std::optional<TagSetting> TagMap::getTagSetting(const path_t& path, tag_t tag) const
