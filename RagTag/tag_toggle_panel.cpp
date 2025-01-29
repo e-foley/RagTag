@@ -3,7 +3,7 @@
 #include <wx/checkbox.h>
 #include <wx/sizer.h>
 
-TagTogglePanel::TagTogglePanel(wxWindow* parent, std::string label)
+TagTogglePanel::TagTogglePanel(wxWindow* parent, const std::string& label)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_RAISED) {
   wxBoxSizer* sz_tag_toggle = new wxBoxSizer(wxHORIZONTAL);
   this->SetSizer(sz_tag_toggle);
@@ -19,7 +19,7 @@ TagTogglePanel::TagTogglePanel(wxWindow* parent, std::string label)
 
 TagTogglePanel::~TagTogglePanel() {}
 
-void TagTogglePanel::setCheckBoxState(const ragtag::TagSetting& state) {
+void TagTogglePanel::setCheckBoxState(ragtag::TagSetting state) {
   switch (state) {
   case ragtag::TagSetting::NO:
     cb_tag_toggle_->Set3StateValue(wxCHK_UNCHECKED);

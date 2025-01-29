@@ -8,9 +8,9 @@
 
 class TagTogglePanel : public wxPanel {
 public:
-  TagTogglePanel(wxWindow* parent, std::string label);
+  TagTogglePanel(wxWindow* parent, const std::string& label);
   virtual ~TagTogglePanel();
-  void setCheckBoxState(const ragtag::TagSetting& state);
+  void setCheckBoxState(ragtag::TagSetting state);
   ragtag::TagSetting getCheckBoxState() const;
 
 private:
