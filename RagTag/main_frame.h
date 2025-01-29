@@ -1,5 +1,5 @@
-#ifndef INCLUDE_MAIN_FRAME
-#define INCLUDE_MAIN_FRAME
+#ifndef INCLUDE_MAIN_FRAME_H
+#define INCLUDE_MAIN_FRAME_H
 
 #include "tag_map.h"
 #include <filesystem>
@@ -59,4 +59,4 @@ private:
   bool is_dirty_{ false };
 };
 
-#endif  // INCLUDE_MAIN_FRAME
+#endif  // INCLUDE_MAIN_FRAME_H

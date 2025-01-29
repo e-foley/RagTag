@@ -1,5 +1,5 @@
-#ifndef INCLUDE_TAG_ENTRY_DIALOG
-#define INCLUDE_TAG_ENTRY_DIALOG
+#ifndef INCLUDE_TAG_ENTRY_DIALOG_H
+#define INCLUDE_TAG_ENTRY_DIALOG_H
 
 #include "tag_map.h"
 #include <wx/dialog.h>
@@ -32,4 +32,4 @@ private:
   wxRadioBox* rb_default_setting_{ nullptr };
 };
 
-#endif  // INCLUDE_TAG_ENTRY_DIALOG
+#endif  // INCLUDE_TAG_ENTRY_DIALOG_H

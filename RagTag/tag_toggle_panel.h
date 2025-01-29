@@ -1,5 +1,5 @@
-#ifndef INCLUDE_TAG_TOGGLE_PANEL
-#define INCLUDE_TAG_TOGGLE_PANEL
+#ifndef INCLUDE_TAG_TOGGLE_PANEL_H
+#define INCLUDE_TAG_TOGGLE_PANEL_H
 
 #include <wx/checkbox.h>
 #include <wx/panel.h>
@@ -17,4 +17,4 @@ private:
   wxCheckBox* cb_tag_toggle_{ nullptr };
 };
 
-#endif  // INCLUDE_MAIN_FRAME
+#endif  // INCLUDE_TAG_TOGGLE_PANEL_H

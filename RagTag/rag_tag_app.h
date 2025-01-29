@@ -1,5 +1,5 @@
-#ifndef INCLUDE_RAG_TAG_APP
-#define INCLUDE_RAG_TAG_APP
+#ifndef INCLUDE_RAG_TAG_APP_H
+#define INCLUDE_RAG_TAG_APP_H
 
 #include <wx/wx.h>
 
@@ -10,4 +10,4 @@ public:
 
 wxDECLARE_APP(RagTagApp);
 
-#endif  // INCLUDE_RAG_TAG_APP
+#endif  // INCLUDE_RAG_TAG_APP_H_
