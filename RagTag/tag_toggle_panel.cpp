@@ -3,18 +3,28 @@
 #include <wx/checkbox.h>
 #include <wx/sizer.h>
 
-TagTogglePanel::TagTogglePanel(wxWindow* parent, const std::string& label)
-    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_RAISED) {
+wxDEFINE_EVENT(TAG_TOGGLE_BUTTON_EVENT, TagToggleButtonEvent);
+
+TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag)
+  : TagTogglePanel(parent, tag, tag) {}
+
+TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string label)
+    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_RAISED), tag_(tag) {
   wxBoxSizer* sz_tag_toggle = new wxBoxSizer(wxHORIZONTAL);
   this->SetSizer(sz_tag_toggle);
 
   cb_tag_toggle_ = new wxCheckBox(this, wxID_ANY, label,
     wxDefaultPosition, wxDefaultSize, wxCHK_3STATE | wxCHK_ALLOW_3RD_STATE_FOR_USER);
   sz_tag_toggle->Add(cb_tag_toggle_, 1, wxALIGN_CENTER, 5);
-  wxButton* b_tag_edit = new wxButton(this, wxID_ANY, "Edit", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  wxButton* b_tag_edit = new wxButton(this, wxID_ANY, "Edit", wxDefaultPosition,
+    wxDefaultSize, wxBU_EXACTFIT);
   sz_tag_toggle->Add(b_tag_edit, 0, wxALIGN_CENTER, 5);
-  wxButton* b_tag_delete = new wxButton(this, wxID_ANY, "X", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  wxButton* b_tag_delete = new wxButton(this, wxID_ANY, "X", wxDefaultPosition,
+    wxDefaultSize, wxBU_EXACTFIT);
   sz_tag_toggle->Add(b_tag_delete, 0, wxALIGN_CENTER, 5);
+
+  Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickEdit, this, b_tag_edit->GetId());
+  Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickDelete, this, b_tag_delete->GetId());
 }
 
 TagTogglePanel::~TagTogglePanel() {}
@@ -45,4 +55,14 @@ ragtag::TagSetting TagTogglePanel::getCheckBoxState() const {
   case wxCHK_UNDETERMINED:
     return ragtag::TagSetting::UNCOMMITTED;
   }
+}
+
+void TagTogglePanel::OnClickEdit(wxCommandEvent& event) {
+  TagToggleButtonEvent sending(tag_, TagToggleButtonEvent::DesiredAction::EDIT_TAG);
+  wxPostEvent(GetParent(), sending);
+}
+
+void TagTogglePanel::OnClickDelete(wxCommandEvent& event) {
+  TagToggleButtonEvent sending(tag_, TagToggleButtonEvent::DesiredAction::DELETE_TAG);
+  wxPostEvent(GetParent(), sending);
 }

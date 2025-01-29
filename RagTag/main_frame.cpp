@@ -89,6 +89,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
   Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
+  Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
 }
 
 void MainFrame::refreshTagToggles() {
@@ -393,6 +394,24 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
   // Looks like everything was successful. Refresh the panel to show our new tag.
   is_dirty_ = true;
   refreshTagToggles();
+}
+
+void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
+  switch (event.getDesiredAction()) {
+  case TagToggleButtonEvent::DesiredAction::EDIT_TAG: {
+    wxMessageDialog* dlg = new wxMessageDialog(this, std::string("Edit tag ") + event.getTag());
+    dlg->ShowModal();
+    break;
+  }
+  case TagToggleButtonEvent::DesiredAction::DELETE_TAG: {
+    wxMessageDialog* dlg = new wxMessageDialog(this, std::string("Delete tag ") + event.getTag());
+    dlg->ShowModal();
+    break;
+  }
+  default:
+    std::cerr << "Unexpected desired action from tag toggle button.\n";
+    break;
+  }
 }
 
 void MainFrame::OnMediaLoaded(wxMediaEvent& event) {

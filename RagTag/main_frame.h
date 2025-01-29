@@ -2,10 +2,11 @@
 #define INCLUDE_MAIN_FRAME_H
 
 #include "tag_map.h"
+#include "tag_toggle_panel.h"
 #include <filesystem>
 #include <optional>
-#include <wx/wx.h>
 #include <wx/mediactrl.h>
+#include <wx/wx.h>
 
 class MainFrame : public wxFrame {
 public:
@@ -41,6 +42,7 @@ private:
   void OnAbout(wxCommandEvent& event);
   // Button events
   void OnDefineNewTag(wxCommandEvent& event);
+  void OnTagToggleButtonClick(TagToggleButtonEvent& event);
   // Miscellaneous events
   void OnMediaLoaded(wxMediaEvent& event);
   UserIntention promptUnsavedChanges();
