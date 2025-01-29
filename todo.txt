@@ -40,6 +40,8 @@ EXECUTION
   the file, look up the file's tags, search the file's tags for the tag in question, etc. And after
   doing this, replace the logic within refreshTagToggles() to make use of this new function.
 * Confirm that default tag states are handled properly in read/write within Tests.
+* This page says not to use 0 and 1 as manually assigned IDs:
+  https://docs.wxwidgets.org/latest/overview_windowids.html. Make sure we aren't using these.
 
 FEATURES
 * Add ability to drag tags around.
