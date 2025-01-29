@@ -165,34 +165,46 @@ namespace ragtag {
 
     std::vector<path_t> paths_returning;
     for (const auto& tag_it : file_it->second.tags) {
-      paths_returning.push_back(tag_it.first);
+      paths_returning.emplace_back(tag_it.first);
     }
     return paths_returning;
   }
 
-  //std::optional<FileProperties> TagMap::getFileProperties(const path_t& path) const {
-  //  const auto file_it = file_map_.find(path);
-  //  if (file_it == file_map_.end()) {
-  //    return {};
-  //  }
-  //  return file_it->second;
-  //}
+  std::vector<path_t> TagMap::getAllFiles() const {
+    std::vector<path_t> file_vector;
+    file_vector.reserve(file_map_.size());
+    for (const auto map_it : file_map_) {
+      file_vector.emplace_back(map_it.first);
+    }
+    return file_vector;
+  }
 
-  //std::vector<std::pair<path_t, FileProperties>> TagMap::getAllFiles() const {
-  //  std::vector<std::pair<path_t, FileProperties>> file_vector;
-  //  file_vector.reserve(file_map_.size());
-  //  for (const auto map_it : file_map_) {
-  //    file_vector.emplace_back(map_it);
-  //  }
-  //  return file_vector;
-  //}
+  std::vector<path_t> TagMap::selectFiles(const file_qualifier_t& fn) const {
+    std::vector<path_t> qualified_file_vector;
+    for (const auto& file : file_map_) {
+      // Construct relevant FileInfo object...
+      FileInfo info;
+      info.path = file.first;
+      info.rating = file.second.rating;
+      // In effect, this function allows the invoking of getTagSetting() without an explicit path.
+      // This allows the developer to focus on the traits of the tags.
+      info.f_tag_setting = [this, file](tag_t tag) {
+        const auto tag_setting_ret = getTagSetting(file.first, tag);
+        if (!tag_setting_ret.has_value()) {
+          return TagSetting::UNCOMMITTED;
+        }
+        else {
+          return *tag_setting_ret;
+        }
+        };
 
-  //std::vector<std::pair<path_t, FileProperties>> TagMap::selectFiles(const file_qualifier_t& fn) const {
-  //  std::vector<std::pair<path_t, FileProperties>> qualified_file_vector;
-  //  std::copy_if(file_map_.begin(), file_map_.end(), std::back_inserter(qualified_file_vector),
-  //    [&fn](const auto& p) {return std::invoke(fn, p.second);});
-  //  return qualified_file_vector;
-  //}
+      if (std::invoke(fn, info)) {
+        qualified_file_vector.push_back(file.first);
+      }
+    }
+
+    return qualified_file_vector;
+  }
 
   int TagMap::numFiles() const {
     // Safe conversion provided MAX_NUM_FILES is enforced.

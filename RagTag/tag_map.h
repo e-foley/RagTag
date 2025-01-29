@@ -56,12 +56,17 @@ namespace ragtag {
     bool clearRating(const path_t& path);
     bool hasFile(const path_t& path) const;
     std::optional<std::vector<path_t>> getFileTags(const path_t& path) const;
-    // TODO: Implement getTags(), getRating()
-    //std::optional<FileProperties> getFileProperties(const path_t& path) const;
-    //std::vector<std::pair<path_t, FileProperties>> getAllFiles() const;
+    std::vector<path_t> getAllFiles() const;
 
-    //typedef std::function<bool(const FileProperties&)> file_qualifier_t;
-    //std::vector<std::pair<path_t, FileProperties>> selectFiles(const file_qualifier_t& fn) const;
+    struct FileInfo {
+    public:
+      path_t path{};
+      std::optional<rating_t> rating{};
+      std::function<TagSetting(tag_t)> f_tag_setting{};
+    };
+
+    typedef std::function<bool(const FileInfo&)> file_qualifier_t;
+    std::vector<path_t> selectFiles(const file_qualifier_t& fn) const;
     int numFiles() const;
 
     // Reading and writing
