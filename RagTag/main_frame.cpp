@@ -39,11 +39,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_tag_toggles_ = new wxBoxSizer(wxVERTICAL);
   p_tag_toggles_->SetSizer(sz_tag_toggles_);
 
-  // DEBUG
-  for (int i = 0; i < 10; ++i) {
-    tag_map_.registerTag("Tag " + std::to_string(i));
-  }
-
   // Contents of this sizer added dynamically via refreshTagToggles().
   refreshTagToggles();
 
