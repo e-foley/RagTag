@@ -19,7 +19,8 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, const std::optional<tag_entry_t
   wxBoxSizer* sz_tag_entry_row = new wxBoxSizer(wxHORIZONTAL);
   wxStaticText* st_tag_name = new wxStaticText(this, wxID_ANY, "Tag name:");
   sz_tag_entry_row->Add(st_tag_name, 0, wxALL, 5);
-  tc_tag_name_ = new wxTextCtrl(this, wxID_ANY, "tag");
+  std::string default_tag_text = entry_.has_value() ? entry_->first : "new tag";
+  tc_tag_name_ = new wxTextCtrl(this, wxID_ANY, default_tag_text);
   sz_tag_entry_row->Add(tc_tag_name_, 1, wxALL, 5);
   sz_rows->Add(sz_tag_entry_row, 0, wxEXPAND | wxALL, 5);
 
@@ -27,11 +28,22 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, const std::optional<tag_entry_t
   //wxStaticText* st_default_setting_label = new wxStaticText(this, wxID_ANY, "Default setting:");
   //sz_default_setting_row->Add(st_default_setting_label, 0, wxALL, 5);
 
-  // TODO: Tie this array closer to switch labels used in OnOk().
+  // TODO: Tie this array closer to switch labels used in OnOk() and selection_index logic below.
   // NOTE: Make sure this and switch labels in OnOk() match!
   wxString choices[3] = { "No", "Yes", "Uncommitted" };
   rb_default_setting_ = new wxRadioBox(this, wxID_ANY, "Default state",
     wxDefaultPosition, wxDefaultSize, 3, choices, 1, wxRA_SPECIFY_COLS);
+
+  int selection_index = 0;
+  if (entry_.has_value() && entry_->second.default_setting == ragtag::TagSetting::YES) {
+    selection_index = 1;
+  }
+  else if (entry_.has_value() && entry_->second.default_setting == ragtag::TagSetting::UNCOMMITTED) {
+    selection_index = 2;
+  }
+
+  rb_default_setting_->SetSelection(selection_index);
+
   sz_default_setting_row->Add(rb_default_setting_, 1, wxALL, 5);
   sz_rows->Add(sz_default_setting_row, 0, wxEXPAND | wxALL, 5);
 

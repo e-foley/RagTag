@@ -399,7 +399,17 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
 void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
   switch (event.getDesiredAction()) {
   case TagToggleButtonEvent::DesiredAction::EDIT_TAG: {
-    TagEntryDialog* tag_entry_frame = new TagEntryDialog(this);
+    // Cache existing tag properties for convenience.
+    const ragtag::tag_t old_tag = event.getTag();
+    const auto props_ret = tag_map_.getTagProperties(old_tag);
+    if (!props_ret.has_value()) {
+      // Shouldn't happen.
+      SetStatusText("Couldn't get existing tag properties for tag '" + old_tag + "'.");
+      break;
+    }
+    const ragtag::TagProperties old_props = *props_ret;
+
+    TagEntryDialog* tag_entry_frame = new TagEntryDialog(this, {old_tag, old_props});
     auto tag_entry_result = tag_entry_frame->promptTagEntry();
     if (!tag_entry_result.has_value()) {
       // Prompt was canceled. Don't do anything.
@@ -408,9 +418,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
       break;
     }
 
-    // Cacheing names for code legibility.
-    const ragtag::tag_t old_tag = event.getTag();
-    const ragtag::tag_t new_tag = tag_entry_result->first;
+    const ragtag::tag_t& new_tag = tag_entry_result->first;  // Alias for convenience
 
     // TODO: Don't assume that changes have been made.
     is_dirty_ = true;
