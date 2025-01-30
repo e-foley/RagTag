@@ -48,6 +48,7 @@ private:
   UserIntention promptUnsavedChanges();
   std::optional<std::filesystem::path> promptSaveAs();
   std::optional<std::filesystem::path> promptOpen();
+  bool promptConfirmTagDeletion(ragtag::tag_t tag);
   void newProject();
   bool saveProject();
   bool saveProjectAs(const std::filesystem::path& path);

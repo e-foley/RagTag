@@ -404,8 +404,19 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
     break;
   }
   case TagToggleButtonEvent::DesiredAction::DELETE_TAG: {
-    wxMessageDialog* dlg = new wxMessageDialog(this, std::string("Delete tag ") + event.getTag());
-    dlg->ShowModal();
+    if (promptConfirmTagDeletion(event.getTag())) {
+      if (tag_map_.deleteTag(event.getTag())) {
+        SetStatusText("Deleted tag '" + event.getTag() + "'.");
+      }
+      else {
+        // TODO: Report error.
+        SetStatusText("Could not delete tag '" + event.getTag() + "'.");
+      }
+      // Refreshing should only need to happen if deletion is successful, but if deletion somehow
+      // fails, it would be good to update anyway just to make sure we're sharing the most recent
+      // state with the user.
+      refreshTagToggles();
+    }
     break;
   }
   default:
@@ -456,6 +467,16 @@ std::optional<std::filesystem::path> MainFrame::promptOpen() {
   }
 
   return std::filesystem::path(wx_path.ToStdWstring());
+}
+
+bool MainFrame::promptConfirmTagDeletion(ragtag::tag_t tag)
+{
+  wxMessageDialog* dialog = new wxMessageDialog(this, "Are you sure you wish to delete tag '" + tag
+    + "'?\n\nDeleting a tag will remove it from all files in this project.", "Confirm Tag Deletion",
+    wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
+  dialog->SetOKCancelLabels("Delete tag", "Cancel");
+  const int result = dialog->ShowModal();
+  return result == wxID_OK;
 }
 
 void MainFrame::newProject() {
