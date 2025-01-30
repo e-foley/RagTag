@@ -8,12 +8,16 @@
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition, wxSize(800, 600)) {
   wxMenu* menuFile = new wxMenu;
-  menuFile->Append(ID_NEW, "&New Project...\tCtrl-N");
-  menuFile->Append(ID_OPEN, "&Open Project...\tCtrl-O");
-  menuFile->Append(ID_SAVE, "&Save Project...\tCtrl-S");
-  menuFile->Append(ID_SAVE_AS, "Save &As...\tCtrl-Shift-S");
+  menuFile->Append(ID_NEW_PROJECT, "&New Project...\tCtrl-N");
+  menuFile->Append(ID_OPEN_PROJECT, "&Open Project...\tCtrl-Shift-O");
+  menuFile->Append(ID_SAVE_PROJECT, "&Save Project...\tCtrl-S");
+  menuFile->Append(ID_SAVE_PROJECT_AS, "Save Project &As...\tCtrl-Shift-S");
   menuFile->AppendSeparator();
-  menuFile->Append(wxID_EXIT);
+  menuFile->Append(ID_LOAD_FILE, "Load File...\tCtrl-O");
+  menuFile->Append(ID_NEXT_FILE, "Next File in Directory\tSpace");
+  menuFile->Append(ID_PREVIOUS_FILE, "Previous File in Directory\tShift-Space");
+  menuFile->AppendSeparator();
+  menuFile->Append(wxID_EXIT, "Quit\tAlt-F4");
 
   wxMenu* menuHelp = new wxMenu;
   menuHelp->Append(wxID_ABOUT);
@@ -80,10 +84,13 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_main->Add(p_left, 1, wxEXPAND | wxALL, 5);
   sz_main->Add(p_right, 1, wxEXPAND | wxALL, 5);
 
-  Bind(wxEVT_MENU, &MainFrame::OnNew, this, ID_NEW);
-  Bind(wxEVT_MENU, &MainFrame::OnOpen, this, ID_OPEN);
-  Bind(wxEVT_MENU, &MainFrame::OnSave, this, ID_SAVE);
-  Bind(wxEVT_MENU, &MainFrame::OnSaveAs, this, ID_SAVE_AS);
+  Bind(wxEVT_MENU, &MainFrame::OnNewProject, this, ID_NEW_PROJECT);
+  Bind(wxEVT_MENU, &MainFrame::OnOpenProject, this, ID_OPEN_PROJECT);
+  Bind(wxEVT_MENU, &MainFrame::OnSaveProject, this, ID_SAVE_PROJECT);
+  Bind(wxEVT_MENU, &MainFrame::OnSaveProjectAs, this, ID_SAVE_PROJECT_AS);
+  Bind(wxEVT_MENU, &MainFrame::OnLoadFile, this, ID_LOAD_FILE);
+  Bind(wxEVT_MENU, &MainFrame::OnNextFile, this, ID_NEXT_FILE);
+  Bind(wxEVT_MENU, &MainFrame::OnPreviousFile, this, ID_PREVIOUS_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
   Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
@@ -137,7 +144,7 @@ void MainFrame::refreshTagToggles() {
   p_tag_toggles_->GetParent()->Layout();
 }
 
-void MainFrame::OnNew(wxCommandEvent& event) {
+void MainFrame::OnNewProject(wxCommandEvent& event) {
   if (is_dirty_) {
     const UserIntention intention = promptUnsavedChanges();
     switch (intention) {
@@ -176,7 +183,7 @@ void MainFrame::OnNew(wxCommandEvent& event) {
   SetStatusText("Created new project.");
 }
 
-void MainFrame::OnOpen(wxCommandEvent& event) {
+void MainFrame::OnOpenProject(wxCommandEvent& event) {
   if (is_dirty_) {
     const UserIntention intention = promptUnsavedChanges();
     switch (intention) {
@@ -230,7 +237,7 @@ void MainFrame::OnOpen(wxCommandEvent& event) {
   SetStatusText(L"Opened project '" + project_path_->wstring() + L"'.");
 }
 
-void MainFrame::OnSave(wxCommandEvent& event) {
+void MainFrame::OnSaveProject(wxCommandEvent& event) {
   if (!project_path_.has_value()) {
     const std::optional<std::filesystem::path> path = promptSaveAs();
     if (!path.has_value()) {
@@ -252,7 +259,7 @@ void MainFrame::OnSave(wxCommandEvent& event) {
   SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
 }
 
-void MainFrame::OnSaveAs(wxCommandEvent& event) {
+void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
   const std::optional<std::filesystem::path> path = promptSaveAs();
   if (!path.has_value()) {
     // User canceled dialog.
@@ -266,6 +273,21 @@ void MainFrame::OnSaveAs(wxCommandEvent& event) {
   project_path_ = path;
   is_dirty_ = false;
   SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
+}
+
+void MainFrame::OnLoadFile(wxCommandEvent& event)
+{
+  SetStatusText("Load file");
+}
+
+void MainFrame::OnNextFile(wxCommandEvent& event)
+{
+  SetStatusText("Next file");
+}
+
+void MainFrame::OnPreviousFile(wxCommandEvent& event)
+{
+  SetStatusText("Previous file");
 }
 
 void MainFrame::OnExit(wxCommandEvent& event) {

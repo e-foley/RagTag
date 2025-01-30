@@ -12,10 +12,13 @@ class MainFrame : public wxFrame {
 public:
   enum {
     ID_NONE = 0,
-    ID_NEW,
-    ID_OPEN,
-    ID_SAVE,
-    ID_SAVE_AS,
+    ID_NEW_PROJECT,
+    ID_OPEN_PROJECT,
+    ID_SAVE_PROJECT,
+    ID_SAVE_PROJECT_AS,
+    ID_LOAD_FILE,
+    ID_NEXT_FILE,
+    ID_PREVIOUS_FILE,
     ID_DEFINE_NEW_TAG,
     ID_MEDIA_CTRL,
   };
@@ -33,10 +36,13 @@ private:
   void refreshTagToggles();
 
   // Menu events
-  void OnNew(wxCommandEvent& event);
-  void OnOpen(wxCommandEvent& event);
-  void OnSave(wxCommandEvent& event);
-  void OnSaveAs(wxCommandEvent& event);
+  void OnNewProject(wxCommandEvent& event);
+  void OnOpenProject(wxCommandEvent& event);
+  void OnSaveProject(wxCommandEvent& event);
+  void OnSaveProjectAs(wxCommandEvent& event);
+  void OnLoadFile(wxCommandEvent& event);
+  void OnNextFile(wxCommandEvent& event);
+  void OnPreviousFile(wxCommandEvent& event);
   void OnExit(wxCommandEvent& event);
   void OnClose(wxCloseEvent& event);
   void OnAbout(wxCommandEvent& event);
