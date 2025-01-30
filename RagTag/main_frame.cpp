@@ -399,8 +399,35 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
 void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
   switch (event.getDesiredAction()) {
   case TagToggleButtonEvent::DesiredAction::EDIT_TAG: {
-    wxMessageDialog* dlg = new wxMessageDialog(this, std::string("Edit tag ") + event.getTag());
-    dlg->ShowModal();
+    TagEntryDialog* tag_entry_frame = new TagEntryDialog(this);
+    auto tag_entry_result = tag_entry_frame->promptTagEntry();
+    if (!tag_entry_result.has_value()) {
+      // Prompt was canceled. Don't do anything.
+      // TODO: Remove this debug message.
+      SetStatusText("Tag entry prompt canceled.");
+      break;
+    }
+
+    // Cacheing names for code legibility.
+    const ragtag::tag_t old_tag = event.getTag();
+    const ragtag::tag_t new_tag = tag_entry_result->first;
+
+    // TODO: Don't assume that changes have been made.
+    is_dirty_ = true;
+
+    // If the name is different from before, the tag has been renamed.
+    if (new_tag != old_tag) {
+      if (!tag_map_.renameTag(old_tag, new_tag)) {
+        SetStatusText("Could not rename tag '" + old_tag + "' to '" + new_tag + "'.");
+        break;
+      }
+    }
+
+    if (!tag_map_.setTagProperties(new_tag, tag_entry_result->second)) {
+      SetStatusText("Could not set properties for tag '" + new_tag + "'.");
+    }
+
+    SetStatusText("Modified tag '" + old_tag + "'/'" + new_tag + "'.");
     break;
   }
   case TagToggleButtonEvent::DesiredAction::DELETE_TAG: {
@@ -412,10 +439,6 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
         // TODO: Report error.
         SetStatusText("Could not delete tag '" + event.getTag() + "'.");
       }
-      // Refreshing should only need to happen if deletion is successful, but if deletion somehow
-      // fails, it would be good to update anyway just to make sure we're sharing the most recent
-      // state with the user.
-      refreshTagToggles();
     }
     break;
   }
@@ -423,6 +446,10 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
     std::cerr << "Unexpected desired action from tag toggle button.\n";
     break;
   }
+
+  // Whether or not we know a change was made, refresh the tag toggle list to ensure we're
+  // presenting the latest information to the user.
+  refreshTagToggles();
 }
 
 void MainFrame::OnMediaLoaded(wxMediaEvent& event) {
