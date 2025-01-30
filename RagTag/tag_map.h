@@ -41,6 +41,8 @@ namespace ragtag {
     bool registerTag(tag_t tag);
     bool registerTag(tag_t tag, const TagProperties& properties);
     bool deleteTag(tag_t tag);
+    bool copyTag(tag_t tag, tag_t copy_name);
+    bool renameTag(tag_t old_name, tag_t new_name);
     bool isTagRegistered(tag_t tag) const;
     std::optional<TagProperties> getTagProperties(tag_t tag) const;
     std::vector<std::pair<tag_t, TagProperties>> getAllTags() const;

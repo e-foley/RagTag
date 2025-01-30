@@ -47,6 +47,39 @@ namespace ragtag {
     return was_tag_cleared_from_all_files && tag_registry_.erase(tag) > 0;
   }
 
+  bool TagMap::copyTag(tag_t tag, tag_t copy_name)
+  {
+    const auto original_tag_it = tag_registry_.find(tag);
+    if (original_tag_it == tag_registry_.end()) {
+      // Can't find tag we're supposed to copy.
+      return false;
+    }
+
+    // Assert same tag properties.
+    if (!registerTag(copy_name, original_tag_it->second)) {
+      // Can't create copy, possibly due to naming conflict.
+      return false;
+    }
+
+    for (auto file_entry : file_map_) {
+      const auto setting = getTagSetting(file_entry.first, tag);
+      if (setting.has_value() && *setting != TagSetting::UNCOMMITTED) {
+        if (!setTag(file_entry.first, copy_name, *setting)) {
+          std::cerr << "Could not set tag '" << copy_name << "' on file '"
+            << file_entry.first.generic_string() << "' during tag copy operation.\n";
+        }
+      }
+    }
+
+    return true;
+  }
+
+  bool TagMap::renameTag(tag_t old_name, tag_t new_name)
+  {
+    // Strategy is to make a copy and delete the original. Easy-peasy!
+    return copyTag(old_name, new_name) && deleteTag(old_name);
+  }
+
   std::optional<TagProperties> TagMap::getTagProperties(const tag_t tag) const {
     const auto tag_it = tag_registry_.find(tag);
     if (tag_it == tag_registry_.end()) {
