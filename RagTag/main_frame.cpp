@@ -155,7 +155,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
           return;
         }
       } else {
-        const std::optional<std::filesystem::path> path = promptSaveAs();
+        const std::optional<std::filesystem::path> path = promptSaveProjectAs();
         if (!path.has_value()) {
           // User canceled dialog.
           return;
@@ -194,7 +194,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
           return;
         }
       } else {
-        const std::optional<std::filesystem::path> path = promptSaveAs();
+        const std::optional<std::filesystem::path> path = promptSaveProjectAs();
         if (!path.has_value()) {
           // User canceled dialog.
           return;
@@ -217,7 +217,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
   }
 
   // If we've gotten this far, we have permission to open a file.
-  std::optional<std::filesystem::path> path_pending = promptOpen();
+  std::optional<std::filesystem::path> path_pending = promptOpenProject();
   if (!path_pending.has_value()) {
     // User canceled dialog.
     return;
@@ -239,7 +239,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
 
 void MainFrame::OnSaveProject(wxCommandEvent& event) {
   if (!project_path_.has_value()) {
-    const std::optional<std::filesystem::path> path = promptSaveAs();
+    const std::optional<std::filesystem::path> path = promptSaveProjectAs();
     if (!path.has_value()) {
       // User canceled dialog.
       return;
@@ -260,7 +260,7 @@ void MainFrame::OnSaveProject(wxCommandEvent& event) {
 }
 
 void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
-  const std::optional<std::filesystem::path> path = promptSaveAs();
+  const std::optional<std::filesystem::path> path = promptSaveProjectAs();
   if (!path.has_value()) {
     // User canceled dialog.
     return;
@@ -302,7 +302,7 @@ void MainFrame::OnExit(wxCommandEvent& event) {
         }
       }
       else {
-        const std::optional<std::filesystem::path> path = promptSaveAs();
+        const std::optional<std::filesystem::path> path = promptSaveProjectAs();
         if (!path.has_value()) {
           // User canceled dialog.
           return;
@@ -347,7 +347,7 @@ void MainFrame::OnClose(wxCloseEvent& event) {
       Destroy();
     }
     else {
-      const std::optional<std::filesystem::path> path = promptSaveAs();
+      const std::optional<std::filesystem::path> path = promptSaveProjectAs();
       if (!path.has_value()) {
         // User canceled dialog.
         event.Veto();
@@ -504,7 +504,7 @@ MainFrame::UserIntention MainFrame::promptUnsavedChanges() {
   }
 }
 
-std::optional<std::filesystem::path> MainFrame::promptSaveAs() {
+std::optional<std::filesystem::path> MainFrame::promptSaveProjectAs() {
   wxString wx_path = wxFileSelector("Save Project As", wxEmptyString, "project.tagdef", ".tagdef",
     "RagTag project files (*.tagdef)|*.tagdef", wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
   if (wx_path.empty()) {
@@ -515,7 +515,7 @@ std::optional<std::filesystem::path> MainFrame::promptSaveAs() {
   return std::filesystem::path(wx_path.ToStdWstring());
 }
 
-std::optional<std::filesystem::path> MainFrame::promptOpen() {
+std::optional<std::filesystem::path> MainFrame::promptOpenProject() {
   wxString wx_path = wxFileSelector("Open Project", wxEmptyString, wxEmptyString, wxEmptyString,
       "RagTag project files (*.tagdef)|*.tagdef", wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
   if (wx_path.empty()) {
