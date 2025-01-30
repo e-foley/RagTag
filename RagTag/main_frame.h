@@ -45,10 +45,12 @@ private:
   void OnTagToggleButtonClick(TagToggleButtonEvent& event);
   // Miscellaneous events
   void OnMediaLoaded(wxMediaEvent& event);
+  // Custom dialog prompts
   UserIntention promptUnsavedChanges();
   std::optional<std::filesystem::path> promptSaveAs();
   std::optional<std::filesystem::path> promptOpen();
   bool promptConfirmTagDeletion(ragtag::tag_t tag);
+  // Fundamental project commands
   void newProject();
   bool saveProject();
   bool saveProjectAs(const std::filesystem::path& path);
