@@ -88,6 +88,17 @@ namespace ragtag {
     return tag_it->second;
   }
 
+  bool TagMap::setTagProperties(tag_t tag, const TagProperties& properties)
+  {
+    auto tag_it = tag_registry_.find(tag);
+    if (tag_it == tag_registry_.end()) {
+      return false;
+    }
+
+    tag_it->second = properties;
+    return true;
+  }
+
   bool TagMap::isTagRegistered(const tag_t tag) const {
     return tag_registry_.contains(tag);
   }

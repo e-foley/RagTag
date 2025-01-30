@@ -45,6 +45,7 @@ namespace ragtag {
     bool renameTag(tag_t old_name, tag_t new_name);
     bool isTagRegistered(tag_t tag) const;
     std::optional<TagProperties> getTagProperties(tag_t tag) const;
+    bool setTagProperties(tag_t tag, const TagProperties& properties);
     std::vector<std::pair<tag_t, TagProperties>> getAllTags() const;
     int numTags() const;
 
