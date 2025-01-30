@@ -53,8 +53,8 @@ private:
   void OnMediaLoaded(wxMediaEvent& event);
   // Custom dialog prompts
   UserIntention promptUnsavedChanges();
-  std::optional<std::filesystem::path> promptSaveAs();
-  std::optional<std::filesystem::path> promptOpen();
+  std::optional<std::filesystem::path> promptSaveProjectAs();
+  std::optional<std::filesystem::path> promptOpenProject();
   bool promptConfirmTagDeletion(ragtag::tag_t tag);
   // Fundamental project commands
   void newProject();
