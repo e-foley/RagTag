@@ -152,6 +152,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
       if (project_path_.has_value()) {
         if (!saveProject()) {
           // TODO: Report error.
+          SetStatusText(L"Could not save project '" + project_path_->generic_wstring() + L"'.");
           return;
         }
       } else {
@@ -163,6 +164,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
         if (!saveProjectAs(*path)) {
           // Failed to save.
           // TODO: Report error.
+          SetStatusText(L"Could not save project '" + path->generic_wstring() + L"'.");
           return;
         }
       }
@@ -191,6 +193,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
       if (project_path_.has_value()) {
         if (!saveProject()) {
           // TODO: Report error.
+          SetStatusText(L"Could not save project '" + project_path_->generic_wstring() + L"'.");
           return;
         }
       } else {
@@ -202,6 +205,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
         if (!saveProjectAs(*path)) {
           // Failed to save.
           // TODO: Report error.
+          SetStatusText(L"Could not save project '" + path->generic_wstring() + L"'.");
           return;
         }
       }
