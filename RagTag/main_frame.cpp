@@ -277,7 +277,42 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
 
 void MainFrame::OnLoadFile(wxCommandEvent& event)
 {
-  SetStatusText("Load file");
+  std::optional<std::filesystem::path> path_pending = promptLoadFile();
+  if (!path_pending.has_value()) {
+    // User canceled dialog.
+    return;
+  }
+
+  active_file_ = *path_pending;
+
+  if (!displayMediaFile(*active_file_)) {
+    // File is "loaded," it just can't be displayed.
+    // TODO: Display placeholder text or something in the media preview when this happens.
+    SetStatusText(L"Couldn't display file '" + active_file_->generic_wstring() + L"'.");
+  }
+
+  if (!tag_map_.hasFile(*active_file_)) {
+    is_dirty_ = true;
+
+    // Declare file to our tag map.
+    if (!tag_map_.addFile(*active_file_)) {
+      // TODO: Report error.
+      SetStatusText(L"Couldn't add file '" + active_file_->wstring() + L"' to tag map.");
+      return;
+    }
+
+    // Assign default tags to our newly opened file.
+    for (auto tag_it : tag_map_.getAllTags()) {
+      if (!tag_map_.setTag(*active_file_, tag_it.first, tag_it.second.default_setting)) {
+        // TODO: Report error.
+        SetStatusText(L"Couldn't set tag on file '" + active_file_->wstring() + L"'.");
+        return;
+      }
+    }
+  }
+  
+  refreshTagToggles();
+  SetStatusText(L"Loaded file '" + active_file_->wstring() + L"'.");
 }
 
 void MainFrame::OnNextFile(wxCommandEvent& event)
@@ -526,6 +561,18 @@ std::optional<std::filesystem::path> MainFrame::promptOpenProject() {
   return std::filesystem::path(wx_path.ToStdWstring());
 }
 
+std::optional<std::filesystem::path> MainFrame::promptLoadFile() {
+  // TODO: Enumerate all valid media files.
+  wxString wx_path = wxFileSelector("Load File", wxEmptyString, wxEmptyString, wxEmptyString,
+    "All files (*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
+  if (wx_path.empty()) {
+    // User canceled the dialog.
+    return {};
+  }
+
+  return std::filesystem::path(wx_path.ToStdWstring());
+}
+
 bool MainFrame::promptConfirmTagDeletion(ragtag::tag_t tag)
 {
   wxMessageDialog* dialog = new wxMessageDialog(this, "Are you sure you wish to delete tag '" + tag
@@ -554,4 +601,9 @@ bool MainFrame::saveProject() {
 
 bool MainFrame::saveProjectAs(const std::filesystem::path& path) {
   return tag_map_.toFile(path);
+}
+
+bool MainFrame::displayMediaFile(const std::filesystem::path& path)
+{
+  return mc_media_display_->Load(path.generic_wstring());
 }

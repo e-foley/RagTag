@@ -55,11 +55,13 @@ private:
   UserIntention promptUnsavedChanges();
   std::optional<std::filesystem::path> promptSaveProjectAs();
   std::optional<std::filesystem::path> promptOpenProject();
+  std::optional<std::filesystem::path> promptLoadFile();
   bool promptConfirmTagDeletion(ragtag::tag_t tag);
   // Fundamental project commands
   void newProject();
   bool saveProject();
   bool saveProjectAs(const std::filesystem::path& path);
+  bool displayMediaFile(const std::filesystem::path& path);
 
   wxScrolledWindow* p_tag_toggles_{ nullptr };
   wxBoxSizer* sz_tag_toggles_{ nullptr };
