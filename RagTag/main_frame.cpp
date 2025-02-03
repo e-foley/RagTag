@@ -97,7 +97,19 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_media_options->Add(cb_loop, 1, wxALL, 5);
 
   sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
-  sz_right->AddStretchSpacer(1);
+  sz_right->AddStretchSpacer(1);  // Placeholder for file listing...
+
+  wxPanel* p_file_navigation = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
+  p_file_navigation->SetSizer(sz_file_navigation);
+  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE, "Previous file");
+  sz_file_navigation->Add(b_previous_file, 1, wxALL, 5);
+  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load file");
+  sz_file_navigation->Add(b_open_file, 1, wxALL, 5);
+  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next file");
+  sz_file_navigation->Add(b_next_file, 1, wxALL, 5);
+
+  sz_right->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
 
   // TODO: Replace this temporary location with real paths once application is stable.
   const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
