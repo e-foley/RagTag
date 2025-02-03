@@ -1,6 +1,7 @@
 #include "main_frame.h"
 #include "tag_entry_dialog.h"
 #include "tag_toggle_panel.h"
+#include <wx/checkbox.h>
 #include <wx/filedlg.h>
 #include <wx/mediactrl.h>
 #include <wx/scrolwin.h>
@@ -86,6 +87,16 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_media_buttons->Add(b_play_media, 1, wxALL, 5);
 
   sz_right->Add(p_media_buttons, 0, wxEXPAND | wxALL, 5);
+
+  wxPanel* p_media_options = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxBoxSizer* sz_media_options = new wxBoxSizer(wxHORIZONTAL);
+  p_media_options->SetSizer(sz_media_options);
+  wxCheckBox* cb_autoplay = new wxCheckBox(p_media_options, wxID_ANY, "Autoplay");
+  sz_media_options->Add(cb_autoplay, 1, wxALL, 5);
+  wxCheckBox* cb_loop = new wxCheckBox(p_media_options, wxID_ANY, "Loop");
+  sz_media_options->Add(cb_loop, 1, wxALL, 5);
+
+  sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
   sz_right->AddStretchSpacer(1);
 
   // TODO: Replace this temporary location with real paths once application is stable.
