@@ -43,6 +43,7 @@ EXECUTION
 * This page says not to use 0 and 1 as manually assigned IDs:
   https://docs.wxwidgets.org/latest/overview_windowids.html. Make sure we aren't using these.
 * Turn default file view column widths into constants.
+* Turn "Play" and "Pause" labels into constants.
 
 FEATURES
 * Add ability to drag tags around.

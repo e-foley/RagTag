@@ -75,17 +75,16 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   // See: https://github.com/wxWidgets/wxWidgets/issues/18976   
   mc_media_display_ = new wxMediaCtrl(p_right, ID_MEDIA_CTRL, wxEmptyString, wxDefaultPosition,
       wxDefaultSize, wxMC_NO_AUTORESIZE, wxMEDIABACKEND_WMP10);
+
   sz_right->Add(mc_media_display_, 1, wxEXPAND | wxALL, 0);
 
   wxPanel* p_media_buttons = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_media_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_media_buttons->SetSizer(sz_media_buttons);
-  wxButton* b_restart_media = new wxButton(p_media_buttons, ID_RESTART_MEDIA, "Restart");
-  sz_media_buttons->Add(b_restart_media, 1, wxALL, 5);
-  wxButton* b_pause_media = new wxButton(p_media_buttons, ID_PAUSE_MEDIA, "Pause");
-  sz_media_buttons->Add(b_pause_media, 1, wxALL, 5);
-  wxButton* b_play_media = new wxButton(p_media_buttons, ID_PLAY_MEDIA, "Play");
-  sz_media_buttons->Add(b_play_media, 1, wxALL, 5);
+  wxButton* b_stop_media = new wxButton(p_media_buttons, ID_STOP_MEDIA, "Stop");
+  sz_media_buttons->Add(b_stop_media, 1, wxALL, 5);
+  b_play_pause_media_ = new wxButton(p_media_buttons, ID_PLAY_PAUSE_MEDIA, "Play");
+  sz_media_buttons->Add(b_play_pause_media_, 1, wxALL, 5);
 
   sz_right->Add(p_media_buttons, 0, wxEXPAND | wxALL, 5);
 
@@ -107,19 +106,19 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxPanel* p_file_navigation = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
   p_file_navigation->SetSizer(sz_file_navigation);
-  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE, "Previous file");
+  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE, "Previous File");
   sz_file_navigation->Add(b_previous_file, 1, wxALL, 5);
-  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load file");
+  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File");
   sz_file_navigation->Add(b_open_file, 1, wxALL, 5);
-  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next file");
+  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next File");
   sz_file_navigation->Add(b_next_file, 1, wxALL, 5);
 
   sz_right->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
 
   // TODO: Replace this temporary location with real paths once application is stable.
   const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
-  //mc_media_display_->Load(debug_media_dir + "videomp4.mp4");
-  mc_media_display_->Load(debug_media_dir + "imagejpg.jpg");
+  mc_media_display_->Load(debug_media_dir + "videomp4.mp4");
+  //mc_media_display_->Load(debug_media_dir + "imagejpg.jpg");
   //mc_media_display_->Load(debug_media_dir + "imagepng.png");
 
   sz_main->Add(p_left, 1, wxEXPAND | wxALL, 5);
@@ -135,6 +134,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
   Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
+  Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this, ID_STOP_MEDIA);
+  Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
   Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
   Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
@@ -465,6 +466,37 @@ void MainFrame::OnAbout(wxCommandEvent& event) {
 #endif
 
   wxMessageBox(about_string, "About", wxOK | wxICON_INFORMATION);
+}
+
+void MainFrame::OnStopMedia(wxCommandEvent& event) {
+  // Note: Returns an undocumented bool value.
+  mc_media_display_->Stop();
+  b_play_pause_media_->SetLabel("Play");
+}
+
+void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
+{
+  const wxMediaState media_state = mc_media_display_->GetState();
+  switch (media_state) {
+  case wxMEDIASTATE_STOPPED:
+  case wxMEDIASTATE_PAUSED:
+    if (mc_media_display_->Play()) {
+      b_play_pause_media_->SetLabel("Pause");
+    }
+    else {
+      b_play_pause_media_->SetLabel("Play");
+    }
+    break;
+  default:
+  case wxMEDIASTATE_PLAYING:
+    if (mc_media_display_->Pause()) {
+      b_play_pause_media_->SetLabel("Play");
+    }
+    else {
+      b_play_pause_media_->SetLabel("Pause");
+    }
+    break;
+  }
 }
 
 void MainFrame::OnDefineNewTag(wxCommandEvent& event) {

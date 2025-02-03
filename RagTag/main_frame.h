@@ -21,9 +21,8 @@ public:
     ID_PREVIOUS_FILE,
     ID_DEFINE_NEW_TAG,
     ID_MEDIA_CTRL,
-    ID_RESTART_MEDIA,
-    ID_PLAY_MEDIA,
-    ID_PAUSE_MEDIA
+    ID_STOP_MEDIA,
+    ID_PLAY_PAUSE_MEDIA
   };
 
   enum class UserIntention {
@@ -49,6 +48,8 @@ private:
   void OnExit(wxCommandEvent& event);
   void OnClose(wxCloseEvent& event);
   void OnAbout(wxCommandEvent& event);
+  void OnStopMedia(wxCommandEvent& event);
+  void OnPlayPauseMedia(wxCommandEvent& event);
   // Button events
   void OnDefineNewTag(wxCommandEvent& event);
   void OnTagToggleButtonClick(TagToggleButtonEvent& event);
@@ -69,6 +70,7 @@ private:
   wxScrolledWindow* p_tag_toggles_{ nullptr };
   wxBoxSizer* sz_tag_toggles_{ nullptr };
   wxMediaCtrl* mc_media_display_{ nullptr };
+  wxButton* b_play_pause_media_{ nullptr };
   ragtag::TagMap tag_map_{};
   std::optional<std::filesystem::path> project_path_{};
   std::optional<std::filesystem::path> active_file_{};
