@@ -3,6 +3,7 @@
 #include "tag_toggle_panel.h"
 #include <wx/checkbox.h>
 #include <wx/filedlg.h>
+#include <wx/listctrl.h>
 #include <wx/mediactrl.h>
 #include <wx/scrolwin.h>
 #include <wx/stdpaths.h>
@@ -97,7 +98,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_media_options->Add(cb_loop, 1, wxALL, 5);
 
   sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
-  sz_right->AddStretchSpacer(1);  // Placeholder for file listing...
+
+  wxListCtrl* lc_files_in_directory = new wxListCtrl(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+  lc_files_in_directory->InsertColumn(0, "File", wxLIST_FORMAT_LEFT, 250);
+  lc_files_in_directory->InsertColumn(1, "Tagged?", wxLIST_FORMAT_LEFT, 80);
+  sz_right->Add(lc_files_in_directory, 0, wxEXPAND | wxALL, 5);
 
   wxPanel* p_file_navigation = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);

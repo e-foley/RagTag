@@ -42,6 +42,7 @@ EXECUTION
 * Confirm that default tag states are handled properly in read/write within Tests.
 * This page says not to use 0 and 1 as manually assigned IDs:
   https://docs.wxwidgets.org/latest/overview_windowids.html. Make sure we aren't using these.
+* Turn default file view column widths into constants.
 
 FEATURES
 * Add ability to drag tags around.
