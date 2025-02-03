@@ -21,6 +21,9 @@ public:
     ID_PREVIOUS_FILE,
     ID_DEFINE_NEW_TAG,
     ID_MEDIA_CTRL,
+    ID_RESTART_MEDIA,
+    ID_PLAY_MEDIA,
+    ID_PAUSE_MEDIA
   };
 
   enum class UserIntention {

@@ -75,6 +75,19 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
       wxDefaultSize, wxMC_NO_AUTORESIZE, wxMEDIABACKEND_WMP10);
   sz_right->Add(mc_media_display_, 1, wxEXPAND | wxALL, 0);
 
+  wxPanel* p_media_buttons = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxBoxSizer* sz_media_buttons = new wxBoxSizer(wxHORIZONTAL);
+  p_media_buttons->SetSizer(sz_media_buttons);
+  wxButton* b_restart_media = new wxButton(p_media_buttons, ID_RESTART_MEDIA, "Restart");
+  sz_media_buttons->Add(b_restart_media, 1, wxALL, 5);
+  wxButton* b_pause_media = new wxButton(p_media_buttons, ID_PAUSE_MEDIA, "Pause");
+  sz_media_buttons->Add(b_pause_media, 1, wxALL, 5);
+  wxButton* b_play_media = new wxButton(p_media_buttons, ID_PLAY_MEDIA, "Play");
+  sz_media_buttons->Add(b_play_media, 1, wxALL, 5);
+
+  sz_right->Add(p_media_buttons, 0, wxEXPAND | wxALL, 5);
+  sz_right->AddStretchSpacer(1);
+
   // TODO: Replace this temporary location with real paths once application is stable.
   const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
   //mc_media_display_->Load(debug_media_dir + "videomp4.mp4");
