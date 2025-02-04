@@ -18,6 +18,8 @@ CODE DESIGN
 * Allow more granularity in communicating ofstream/ifstream errors in TagMap to/from file ops.
 * Reduce duplicated code within OnNew(), OnOpen().
 * Get serious about versioning the protocol of the JSON file representing the TagMap.
+* Can we Bind() to control events right after we construct them? It would spare our having to
+  maintain an enumeration of IDs.
 
 PROJECT INFRASTRUCTURE
 * Update root CMakeLists to build only required configuration of wxWidgets.
