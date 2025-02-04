@@ -22,7 +22,8 @@ public:
     ID_DEFINE_NEW_TAG,
     ID_MEDIA_CTRL,
     ID_STOP_MEDIA,
-    ID_PLAY_PAUSE_MEDIA
+    ID_PLAY_PAUSE_MEDIA,
+    ID_MUTE_BOX
   };
 
   enum class UserIntention {
@@ -48,11 +49,13 @@ private:
   void OnExit(wxCommandEvent& event);
   void OnClose(wxCloseEvent& event);
   void OnAbout(wxCommandEvent& event);
-  void OnStopMedia(wxCommandEvent& event);
-  void OnPlayPauseMedia(wxCommandEvent& event);
   // Button events
   void OnDefineNewTag(wxCommandEvent& event);
   void OnTagToggleButtonClick(TagToggleButtonEvent& event);
+  void OnStopMedia(wxCommandEvent& event);
+  void OnPlayPauseMedia(wxCommandEvent& event);
+  // Checkbox events
+  void OnMuteBoxToggle(wxCommandEvent& event);
   // Miscellaneous events
   void OnMediaLoaded(wxMediaEvent& event);
   void OnMediaStop(wxMediaEvent& event);
@@ -70,17 +73,23 @@ private:
   bool saveProject();
   bool saveProjectAs(const std::filesystem::path& path);
   bool displayMediaFile(const std::filesystem::path& path);
+  bool playMedia();
+  bool pauseMedia();
+  bool stopMedia();
 
   wxScrolledWindow* p_tag_toggles_{ nullptr };
   wxBoxSizer* sz_tag_toggles_{ nullptr };
   wxMediaCtrl* mc_media_display_{ nullptr };
   wxCheckBox* cb_autoplay_{ nullptr };
   wxCheckBox* cb_loop_{ nullptr };
+  wxCheckBox* cb_mute_{ nullptr };
   wxButton* b_play_pause_media_{ nullptr };
   ragtag::TagMap tag_map_{};
   std::optional<std::filesystem::path> project_path_{};
   std::optional<std::filesystem::path> active_file_{};
   bool is_dirty_{ false };
+  //bool just_finished_looping_media_{ false };
+  bool user_initiated_stop_media_{ false };
 };
 
 #endif  // INCLUDE_MAIN_FRAME_H

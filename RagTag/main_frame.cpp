@@ -92,9 +92,14 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_media_options = new wxBoxSizer(wxHORIZONTAL);
   p_media_options->SetSizer(sz_media_options);
   cb_autoplay_ = new wxCheckBox(p_media_options, wxID_ANY, "Autoplay");
+  cb_autoplay_->SetValue(true);  // True == checked
   sz_media_options->Add(cb_autoplay_, 1, wxALL, 5);
   cb_loop_ = new wxCheckBox(p_media_options, wxID_ANY, "Loop");
+  cb_loop_->SetValue(true);  // True == checked
   sz_media_options->Add(cb_loop_, 1, wxALL, 5);
+  cb_mute_ = new wxCheckBox(p_media_options, ID_MUTE_BOX, "Mute");
+  cb_mute_->SetValue(true);  // True == checked
+  sz_media_options->Add(cb_mute_, 1, wxALL, 5);
 
   sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
 
@@ -136,6 +141,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
   Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this, ID_STOP_MEDIA);
   Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
+  Bind(wxEVT_CHECKBOX, &MainFrame::OnMuteBoxToggle, this, ID_MUTE_BOX);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
   Bind(wxEVT_MEDIA_STOP, &MainFrame::OnMediaStop, this, ID_MEDIA_CTRL);
   Bind(wxEVT_MEDIA_FINISHED, &MainFrame::OnMediaFinished, this, ID_MEDIA_CTRL);
@@ -473,8 +479,9 @@ void MainFrame::OnAbout(wxCommandEvent& event) {
 }
 
 void MainFrame::OnStopMedia(wxCommandEvent& event) {
+  user_initiated_stop_media_ = true;
   // TODO: Returns an undocumented bool that we can use if we want to.
-  mc_media_display_->Stop();
+  stopMedia();
 }
 
 void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
@@ -484,14 +491,19 @@ void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
   case wxMEDIASTATE_STOPPED:
   case wxMEDIASTATE_PAUSED:
     // TODO: Returns an undocumented bool that we can use here if we want to.
-    mc_media_display_->Play();
+    playMedia();
     break;
   default:
   case wxMEDIASTATE_PLAYING:
     // TODO: Returns an undocumented bool that we can use here if we want to.
-    mc_media_display_->Pause();
+    pauseMedia();
     break;
   }
+}
+
+void MainFrame::OnMuteBoxToggle(wxCommandEvent& event)
+{
+  mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
 }
 
 void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
@@ -591,20 +603,31 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
 
 void MainFrame::OnMediaLoaded(wxMediaEvent& event)
 {
+  // NOTE: SetVolume() returns an undocumented bool.
+  mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
   if (cb_autoplay_->IsChecked()) {
-    mc_media_display_->Play();
+    playMedia();
   }
 }
 
 void MainFrame::OnMediaStop(wxMediaEvent& event)
 {
-  b_play_pause_media_->SetLabel("Play");
+  // When a media file finishes playing, it emits Finished and Stopped events nearly simultaneously.
+  // Without this conditional, the button text tends to flash to "Play" then immediately back to
+  // "Pause" as a video loops, which is distracting.
+  //
+  // I'd like to think there's a more elegant way of doing this, but this is the best approach I
+  // found in the half hour I devoted to the problem.
+  if (user_initiated_stop_media_ || !cb_loop_->IsChecked()) {
+    b_play_pause_media_->SetLabel("Play");
+  }
+  user_initiated_stop_media_ = false;
 }
 
 void MainFrame::OnMediaFinished(wxMediaEvent& event)
 {
   if (cb_loop_->IsChecked()) {
-    mc_media_display_->Play();
+    playMedia();
   }
   else {
     b_play_pause_media_->SetLabel("Play");
@@ -705,5 +728,26 @@ bool MainFrame::saveProjectAs(const std::filesystem::path& path) {
 
 bool MainFrame::displayMediaFile(const std::filesystem::path& path)
 {
-  return mc_media_display_->Load(path.generic_wstring());
+  bool load_result = mc_media_display_->Load(path.generic_wstring());
+  // TODO: SetVolume() returns a bool that we can choose to use if we'd like.
+  mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
+  return load_result;
+}
+
+bool MainFrame::playMedia()
+{
+  // NOTE: Returns an undocumented bool.
+  return mc_media_display_->Play();
+}
+
+bool MainFrame::pauseMedia()
+{
+  // NOTE: Returns an undocumented bool.
+  return mc_media_display_->Pause();
+}
+
+bool MainFrame::stopMedia()
+{
+  // NOTE: Returns an undocumented bool.
+  return mc_media_display_->Stop();
 }
