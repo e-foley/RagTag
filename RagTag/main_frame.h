@@ -55,6 +55,7 @@ private:
   void OnTagToggleButtonClick(TagToggleButtonEvent& event);
   // Miscellaneous events
   void OnMediaLoaded(wxMediaEvent& event);
+  void OnMediaFinished(wxMediaEvent& event);
   // Custom dialog prompts
   UserIntention promptUnsavedChanges();
   std::optional<std::filesystem::path> promptSaveProjectAs();
@@ -66,10 +67,15 @@ private:
   bool saveProject();
   bool saveProjectAs(const std::filesystem::path& path);
   bool displayMediaFile(const std::filesystem::path& path);
+  bool playMediaFile();
+  bool pauseMediaFile();
+  bool stopMediaFile();
 
   wxScrolledWindow* p_tag_toggles_{ nullptr };
   wxBoxSizer* sz_tag_toggles_{ nullptr };
   wxMediaCtrl* mc_media_display_{ nullptr };
+  wxCheckBox* cb_autoplay_{ nullptr };
+  wxCheckBox* cb_loop_{ nullptr };
   wxButton* b_play_pause_media_{ nullptr };
   ragtag::TagMap tag_map_{};
   std::optional<std::filesystem::path> project_path_{};

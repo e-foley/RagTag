@@ -91,10 +91,10 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxPanel* p_media_options = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_media_options = new wxBoxSizer(wxHORIZONTAL);
   p_media_options->SetSizer(sz_media_options);
-  wxCheckBox* cb_autoplay = new wxCheckBox(p_media_options, wxID_ANY, "Autoplay");
-  sz_media_options->Add(cb_autoplay, 1, wxALL, 5);
-  wxCheckBox* cb_loop = new wxCheckBox(p_media_options, wxID_ANY, "Loop");
-  sz_media_options->Add(cb_loop, 1, wxALL, 5);
+  cb_autoplay_ = new wxCheckBox(p_media_options, wxID_ANY, "Autoplay");
+  sz_media_options->Add(cb_autoplay_, 1, wxALL, 5);
+  cb_loop_ = new wxCheckBox(p_media_options, wxID_ANY, "Loop");
+  sz_media_options->Add(cb_loop_, 1, wxALL, 5);
 
   sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
 
@@ -117,9 +117,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   // TODO: Replace this temporary location with real paths once application is stable.
   const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
-  mc_media_display_->Load(debug_media_dir + "videomp4.mp4");
-  //mc_media_display_->Load(debug_media_dir + "imagejpg.jpg");
-  //mc_media_display_->Load(debug_media_dir + "imagepng.png");
+  displayMediaFile(std::wstring(debug_media_dir) + L"videomp4.mp4");
+  //displayMediaFile(std::wstring(debug_media_dir) + L"imagejpg.jpg");
+  //displayMediaFile(std::wstring(debug_media_dir) + L"imagepng.png");
 
   sz_main->Add(p_left, 1, wxEXPAND | wxALL, 5);
   sz_main->Add(p_right, 1, wxEXPAND | wxALL, 5);
@@ -137,6 +137,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this, ID_STOP_MEDIA);
   Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
+  Bind(wxEVT_MEDIA_FINISHED, &MainFrame::OnMediaFinished, this, ID_MEDIA_CTRL);
   Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
   Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
 }
@@ -469,9 +470,7 @@ void MainFrame::OnAbout(wxCommandEvent& event) {
 }
 
 void MainFrame::OnStopMedia(wxCommandEvent& event) {
-  // Note: Returns an undocumented bool value.
-  mc_media_display_->Stop();
-  b_play_pause_media_->SetLabel("Play");
+  stopMediaFile();
 }
 
 void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
@@ -480,21 +479,11 @@ void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
   switch (media_state) {
   case wxMEDIASTATE_STOPPED:
   case wxMEDIASTATE_PAUSED:
-    if (mc_media_display_->Play()) {
-      b_play_pause_media_->SetLabel("Pause");
-    }
-    else {
-      b_play_pause_media_->SetLabel("Play");
-    }
+    playMediaFile();
     break;
   default:
   case wxMEDIASTATE_PLAYING:
-    if (mc_media_display_->Pause()) {
-      b_play_pause_media_->SetLabel("Play");
-    }
-    else {
-      b_play_pause_media_->SetLabel("Pause");
-    }
+    pauseMediaFile();
     break;
   }
 }
@@ -595,7 +584,22 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
 }
 
 void MainFrame::OnMediaLoaded(wxMediaEvent& event) {
-  mc_media_display_->Play();
+  if (cb_autoplay_->IsChecked()) {
+    playMediaFile();
+  }
+  else {
+    stopMediaFile();
+  }
+}
+
+void MainFrame::OnMediaFinished(wxMediaEvent& event)
+{
+  if (cb_loop_->IsChecked()) {
+    playMediaFile();
+  }
+  else {
+    stopMediaFile();
+  }
 }
 
 MainFrame::UserIntention MainFrame::promptUnsavedChanges() {
@@ -683,4 +687,34 @@ bool MainFrame::saveProjectAs(const std::filesystem::path& path) {
 bool MainFrame::displayMediaFile(const std::filesystem::path& path)
 {
   return mc_media_display_->Load(path.generic_wstring());
+}
+
+bool MainFrame::playMediaFile()
+{
+  if (!mc_media_display_->Play()) {
+    return false;
+  }
+
+  b_play_pause_media_->SetLabel("Pause");
+  return true;
+}
+
+bool MainFrame::pauseMediaFile()
+{
+  if (!mc_media_display_->Pause()) {
+    return false;
+  }
+
+  b_play_pause_media_->SetLabel("Play");
+  return true;
+}
+
+bool MainFrame::stopMediaFile()
+{
+  if (!mc_media_display_->Stop()) {
+    return false;
+  }
+
+  b_play_pause_media_->SetLabel("Play");
+  return true;
 }
