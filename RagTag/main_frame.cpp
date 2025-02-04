@@ -217,6 +217,9 @@ void MainFrame::refreshFileView()
     return;
   }
 
+  // Cache tag list since we'll be referring to it within the loop.
+  const auto all_tags = tag_map_.getAllTags();
+
   std::filesystem::path parent_directory = active_file_->parent_path();
 
   int i = 0;
@@ -225,6 +228,57 @@ void MainFrame::refreshFileView()
   for (auto file_it = std::filesystem::directory_iterator(parent_directory);
     file_it != std::filesystem::directory_iterator(); file_it++) {
     lc_files_in_directory_->InsertItem(i, file_it->path().filename().generic_wstring());
+
+    // Handle file rating...
+    const auto rating_ret = tag_map_.getRating(file_it->path());
+    if (rating_ret.has_value()) {
+      lc_files_in_directory_->SetItem(i, COLUMN_RATING, wxString::Format("%4.2f", *rating_ret));
+    }
+    else {
+      lc_files_in_directory_->SetItem(i, COLUMN_RATING, L"--");
+    }
+    
+    // Handle tag presence. If all tags within the tag map are asserted yes or no for the file, the
+    // file is considered fully tagged ("All"). If some but not all are uncommitted, the file is
+    // partly tagged ("Some"). If all are uncommitted, the file is entirely untagged ("None").
+    // TODO: Consider moving this function to the TagMap interface.
+    bool any_tag_is_committed = false;
+    bool any_tag_is_uncommitted = false;
+    for (auto tag_it : all_tags) {
+      auto tag_setting = tag_map_.getTagSetting(file_it->path(), tag_it.first);
+      if (!tag_setting.has_value()) {
+        continue;
+      }
+
+      if (*tag_setting == ragtag::TagSetting::NO || *tag_setting == ragtag::TagSetting::YES) {
+        any_tag_is_committed = true;
+      }
+      else if (*tag_setting == ragtag::TagSetting::UNCOMMITTED) {
+        any_tag_is_uncommitted = true;
+      }
+
+      // If we have a mix of committed and uncommitted, we know for sure we're partly tagged.
+      // Nothing can change this, so we can exit the loop early.
+      if (any_tag_is_committed && any_tag_is_uncommitted) {
+        break;
+      }
+    }
+
+    if (any_tag_is_committed && !any_tag_is_uncommitted) {
+      lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"All");
+    }
+    else if (any_tag_is_committed && any_tag_is_uncommitted) {
+      lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"Some");
+    }
+    else if (!any_tag_is_committed && any_tag_is_uncommitted) {
+      lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"None");
+    }
+    else {
+      // No tags defined, or their settings on the file are somehow invalid.
+      // For now, also present the file as "None", though we can change this logic if needed.
+      lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"None");
+    }
+
     ++i;
   }
 }
