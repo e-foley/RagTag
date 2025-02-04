@@ -1,11 +1,8 @@
 #include "main_frame.h"
 #include "tag_entry_dialog.h"
 #include "tag_toggle_panel.h"
-#include <wx/checkbox.h>
 #include <wx/filedlg.h>
-#include <wx/listctrl.h>
-#include <wx/mediactrl.h>
-#include <wx/scrolwin.h>
+#include <wx/statusbr.h>
 #include <wx/stdpaths.h>
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition, wxSize(800, 600)) {

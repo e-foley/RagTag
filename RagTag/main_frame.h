@@ -5,8 +5,13 @@
 #include "tag_toggle_panel.h"
 #include <filesystem>
 #include <optional>
+#include <wx/checkbox.h>
+#include <wx/event.h>
+#include <wx/frame.h>
+#include <wx/listctrl.h>
 #include <wx/mediactrl.h>
-#include <wx/wx.h>
+#include <wx/scrolwin.h>
+#include <wx/sizer.h>
 
 class MainFrame : public wxFrame {
 public:
