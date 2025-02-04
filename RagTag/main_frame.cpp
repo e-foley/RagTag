@@ -137,7 +137,10 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this, ID_STOP_MEDIA);
   Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
+  Bind(wxEVT_MEDIA_STOP, &MainFrame::OnMediaStop, this, ID_MEDIA_CTRL);
   Bind(wxEVT_MEDIA_FINISHED, &MainFrame::OnMediaFinished, this, ID_MEDIA_CTRL);
+  Bind(wxEVT_MEDIA_PLAY, &MainFrame::OnMediaPlay, this, ID_MEDIA_CTRL);
+  Bind(wxEVT_MEDIA_PAUSE, &MainFrame::OnMediaPause, this, ID_MEDIA_CTRL);
   Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
   Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
 }
@@ -470,7 +473,8 @@ void MainFrame::OnAbout(wxCommandEvent& event) {
 }
 
 void MainFrame::OnStopMedia(wxCommandEvent& event) {
-  stopMediaFile();
+  // TODO: Returns an undocumented bool that we can use if we want to.
+  mc_media_display_->Stop();
 }
 
 void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
@@ -479,11 +483,13 @@ void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
   switch (media_state) {
   case wxMEDIASTATE_STOPPED:
   case wxMEDIASTATE_PAUSED:
-    playMediaFile();
+    // TODO: Returns an undocumented bool that we can use here if we want to.
+    mc_media_display_->Play();
     break;
   default:
   case wxMEDIASTATE_PLAYING:
-    pauseMediaFile();
+    // TODO: Returns an undocumented bool that we can use here if we want to.
+    mc_media_display_->Pause();
     break;
   }
 }
@@ -583,23 +589,36 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
   refreshTagToggles();
 }
 
-void MainFrame::OnMediaLoaded(wxMediaEvent& event) {
+void MainFrame::OnMediaLoaded(wxMediaEvent& event)
+{
   if (cb_autoplay_->IsChecked()) {
-    playMediaFile();
+    mc_media_display_->Play();
   }
-  else {
-    stopMediaFile();
-  }
+}
+
+void MainFrame::OnMediaStop(wxMediaEvent& event)
+{
+  b_play_pause_media_->SetLabel("Play");
 }
 
 void MainFrame::OnMediaFinished(wxMediaEvent& event)
 {
   if (cb_loop_->IsChecked()) {
-    playMediaFile();
+    mc_media_display_->Play();
   }
   else {
-    stopMediaFile();
+    b_play_pause_media_->SetLabel("Play");
   }
+}
+
+void MainFrame::OnMediaPlay(wxMediaEvent& event)
+{
+  b_play_pause_media_->SetLabel("Pause");
+}
+
+void MainFrame::OnMediaPause(wxMediaEvent& event)
+{
+  b_play_pause_media_->SetLabel("Play");
 }
 
 MainFrame::UserIntention MainFrame::promptUnsavedChanges() {
@@ -687,34 +706,4 @@ bool MainFrame::saveProjectAs(const std::filesystem::path& path) {
 bool MainFrame::displayMediaFile(const std::filesystem::path& path)
 {
   return mc_media_display_->Load(path.generic_wstring());
-}
-
-bool MainFrame::playMediaFile()
-{
-  if (!mc_media_display_->Play()) {
-    return false;
-  }
-
-  b_play_pause_media_->SetLabel("Pause");
-  return true;
-}
-
-bool MainFrame::pauseMediaFile()
-{
-  if (!mc_media_display_->Pause()) {
-    return false;
-  }
-
-  b_play_pause_media_->SetLabel("Play");
-  return true;
-}
-
-bool MainFrame::stopMediaFile()
-{
-  if (!mc_media_display_->Stop()) {
-    return false;
-  }
-
-  b_play_pause_media_->SetLabel("Play");
-  return true;
 }
