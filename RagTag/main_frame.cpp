@@ -5,7 +5,8 @@
 #include <wx/statusbr.h>
 #include <wx/stdpaths.h>
 
-MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition, wxSize(900, 720)) {
+MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition,
+  wxSize(900, 720)) {
   wxMenu* menuFile = new wxMenu;
   menuFile->Append(ID_NEW_PROJECT, "&New Project...\tCtrl-N");
   menuFile->Append(ID_OPEN_PROJECT, "&Open Project...\tCtrl-Shift-O");
@@ -34,11 +35,13 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_main = new wxBoxSizer(wxHORIZONTAL);
   p_main->SetSizer(sz_main);
 
-  wxPanel* p_left = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxPanel* p_left = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
   wxBoxSizer* sz_left = new wxBoxSizer(wxVERTICAL);
   p_left->SetSizer(sz_left);
 
-  p_tag_toggles_ = new wxScrolledWindow(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  p_tag_toggles_ = new wxScrolledWindow(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
   sz_tag_toggles_ = new wxBoxSizer(wxVERTICAL);
   p_tag_toggles_->SetSizer(sz_tag_toggles_);
 
@@ -50,15 +53,18 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   sz_left->Add(p_tag_toggles_, 1, wxEXPAND | wxALL, 5);
 
-  wxPanel* p_tag_toggles_button_bar = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxPanel* p_tag_toggles_button_bar = new wxPanel(p_left, wxID_ANY, wxDefaultPosition,
+    wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_tag_toggles_button_bar = new wxBoxSizer(wxHORIZONTAL);
   p_tag_toggles_button_bar->SetSizer(sz_tag_toggles_button_bar);
-  wxButton* b_define_new_tag = new wxButton(p_tag_toggles_button_bar, ID_DEFINE_NEW_TAG, "Define New Tag...");
+  wxButton* b_define_new_tag = new wxButton(p_tag_toggles_button_bar, ID_DEFINE_NEW_TAG,
+    "Define New Tag...");
   sz_tag_toggles_button_bar->AddStretchSpacer(1);  // Empty space at left to force right-alignment.
   sz_tag_toggles_button_bar->Add(b_define_new_tag, 0, wxALL, 5);
   sz_left->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 5);
 
-  wxPanel* p_right = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxPanel* p_right = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
   wxBoxSizer* sz_right = new wxBoxSizer(wxVERTICAL);
   p_right->SetSizer(sz_right);
 
@@ -75,7 +81,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   sz_right->Add(mc_media_display_, 1, wxEXPAND | wxALL, 0);
 
-  wxPanel* p_media_buttons = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxPanel* p_media_buttons = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
   wxBoxSizer* sz_media_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_media_buttons->SetSizer(sz_media_buttons);
   wxButton* b_stop_media = new wxButton(p_media_buttons, ID_STOP_MEDIA, "Stop");
@@ -85,7 +92,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   sz_right->Add(p_media_buttons, 0, wxEXPAND | wxALL, 5);
 
-  wxPanel* p_media_options = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxPanel* p_media_options = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
   wxBoxSizer* sz_media_options = new wxBoxSizer(wxHORIZONTAL);
   p_media_options->SetSizer(sz_media_options);
   cb_autoplay_ = new wxCheckBox(p_media_options, wxID_ANY, "Autoplay");
@@ -100,16 +108,19 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
 
-  lc_files_in_directory_ = new wxListCtrl(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
-  lc_files_in_directory_->InsertColumn(0, "File", wxLIST_FORMAT_LEFT, 250);
-  lc_files_in_directory_->InsertColumn(1, "Rating", wxLIST_FORMAT_LEFT, 80);
-  lc_files_in_directory_->InsertColumn(2, "Tags Present", wxLIST_FORMAT_LEFT, 80);
+  lc_files_in_directory_ = new wxListCtrl(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxLC_REPORT);
+  lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
+  lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
+  lc_files_in_directory_->InsertColumn(COLUMN_TAGS_PRESENT, "Tags Present", wxLIST_FORMAT_LEFT, 80);
   sz_right->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
 
-  wxPanel* p_file_navigation = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxPanel* p_file_navigation = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
   wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
   p_file_navigation->SetSizer(sz_file_navigation);
-  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE, "Previous Untagged File");
+  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
+    "Previous Untagged File");
   sz_file_navigation->Add(b_previous_file, 1, wxALL, 5);
   wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
   sz_file_navigation->Add(b_open_file, 1, wxALL, 5);
@@ -199,6 +210,7 @@ void MainFrame::refreshTagToggles() {
 
 void MainFrame::refreshFileView()
 {
+  // Start from a blank slate.
   lc_files_in_directory_->DeleteAllItems();
 
   if (!active_file_.has_value()) {

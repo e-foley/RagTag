@@ -15,6 +15,9 @@
 
 class MainFrame : public wxFrame {
 public:
+  MainFrame();
+
+private:
   enum {
     ID_NONE = 0,
     ID_NEW_PROJECT,
@@ -38,12 +41,15 @@ public:
     CANCEL,
   };
 
-  MainFrame();
+  enum FileViewColumn {
+    COLUMN_FILENAME,
+    COLUMN_TAGS_PRESENT,
+    COLUMN_RATING
+  };
 
-private:
+  // Functions updating view to match model
   void refreshTagToggles();
   void refreshFileView();
-
   // Menu events
   void OnNewProject(wxCommandEvent& event);
   void OnOpenProject(wxCommandEvent& event);
