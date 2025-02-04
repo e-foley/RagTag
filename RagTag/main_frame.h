@@ -88,7 +88,6 @@ private:
   std::optional<std::filesystem::path> project_path_{};
   std::optional<std::filesystem::path> active_file_{};
   bool is_dirty_{ false };
-  //bool just_finished_looping_media_{ false };
   bool user_initiated_stop_media_{ false };
 };
 
