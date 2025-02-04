@@ -5,7 +5,7 @@
 #include <wx/statusbr.h>
 #include <wx/stdpaths.h>
 
-MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition, wxSize(800, 600)) {
+MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition, wxSize(900, 720)) {
   wxMenu* menuFile = new wxMenu;
   menuFile->Append(ID_NEW_PROJECT, "&New Project...\tCtrl-N");
   menuFile->Append(ID_OPEN_PROJECT, "&Open Project...\tCtrl-Shift-O");
@@ -123,8 +123,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagejpg.jpg");
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagepng.png");
 
-  sz_main->Add(p_left, 1, wxEXPAND | wxALL, 5);
-  sz_main->Add(p_right, 1, wxEXPAND | wxALL, 5);
+  sz_main->Add(p_left, 2, wxEXPAND | wxALL, 5);
+  sz_main->Add(p_right, 3, wxEXPAND | wxALL, 5);
 
   Bind(wxEVT_MENU, &MainFrame::OnNewProject, this, ID_NEW_PROJECT);
   Bind(wxEVT_MENU, &MainFrame::OnOpenProject, this, ID_OPEN_PROJECT);
