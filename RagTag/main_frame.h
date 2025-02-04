@@ -42,6 +42,7 @@ public:
 
 private:
   void refreshTagToggles();
+  void refreshFileView();
 
   // Menu events
   void OnNewProject(wxCommandEvent& event);
@@ -59,6 +60,9 @@ private:
   void OnTagToggleButtonClick(TagToggleButtonEvent& event);
   void OnStopMedia(wxCommandEvent& event);
   void OnPlayPauseMedia(wxCommandEvent& event);
+  void OnPreviousUntaggedFile(wxCommandEvent& event);
+  void OnNextUntaggedFile(wxCommandEvent& event);
+  void OnDebug(wxCommandEvent& event);  // TODO: Remove me.
   // Checkbox events
   void OnMuteBoxToggle(wxCommandEvent& event);
   // Miscellaneous events
@@ -89,6 +93,7 @@ private:
   wxCheckBox* cb_loop_{ nullptr };
   wxCheckBox* cb_mute_{ nullptr };
   wxButton* b_play_pause_media_{ nullptr };
+  wxListCtrl* lc_files_in_directory_{ nullptr };
   ragtag::TagMap tag_map_{};
   std::optional<std::filesystem::path> project_path_{};
   std::optional<std::filesystem::path> active_file_{};

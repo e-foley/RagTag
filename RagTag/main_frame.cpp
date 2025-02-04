@@ -193,6 +193,26 @@ void MainFrame::refreshTagToggles() {
   p_tag_toggles_->GetParent()->Layout();
 }
 
+void MainFrame::refreshFileView()
+{
+  lc_files_in_directory_->DeleteAllItems();
+
+  if (!active_file_.has_value()) {
+    return;
+  }
+
+  std::filesystem::path parent_directory = active_file_->parent_path();
+
+  int i = 0;
+  // Note: directory_iterator documentation explains that the end iterator is equal to the
+  // default-constructed iterator.
+  for (auto file_it = std::filesystem::directory_iterator(parent_directory);
+    file_it != std::filesystem::directory_iterator(); file_it++) {
+    lc_files_in_directory_->InsertItem(i, file_it->path().filename().generic_wstring());
+    ++i;
+  }
+}
+
 void MainFrame::OnNewProject(wxCommandEvent& event) {
   if (is_dirty_) {
     const UserIntention intention = promptUnsavedChanges();
@@ -230,7 +250,11 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
 
   // If we've made it this far, we have permission to create a new project.
   newProject();
+  active_file_ = {};
   refreshTagToggles();
+  refreshFileView();
+  user_initiated_stop_media_ = true;
+  stopMedia();
   SetStatusText("Created new project.");
 }
 
@@ -285,7 +309,12 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
   // Loaded successfully!
   tag_map_ = *tag_map_pending;
   project_path_ = path_pending;
+  active_file_ = {};
   refreshTagToggles();
+  refreshFileView();
+  user_initiated_stop_media_ = true;
+  stopMedia();
+  // TODO: Find a way to either reset the wxMediaCtrl or disable playing until a file is loaded.
   is_dirty_ = false;
   SetStatusText(L"Opened project '" + project_path_->wstring() + L"'.");
 }
@@ -364,6 +393,7 @@ void MainFrame::OnLoadFile(wxCommandEvent& event)
     }
   }
   
+  refreshFileView();
   refreshTagToggles();
   SetStatusText(L"Loaded file '" + active_file_->wstring() + L"'.");
 }
