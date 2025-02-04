@@ -100,10 +100,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
 
-  wxListCtrl* lc_files_in_directory = new wxListCtrl(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
-  lc_files_in_directory->InsertColumn(0, "File", wxLIST_FORMAT_LEFT, 250);
-  lc_files_in_directory->InsertColumn(1, "Tagged?", wxLIST_FORMAT_LEFT, 80);
-  sz_right->Add(lc_files_in_directory, 0, wxEXPAND | wxALL, 5);
+  lc_files_in_directory_ = new wxListCtrl(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+  lc_files_in_directory_->InsertColumn(0, "File", wxLIST_FORMAT_LEFT, 250);
+  lc_files_in_directory_->InsertColumn(1, "Rating", wxLIST_FORMAT_LEFT, 80);
+  lc_files_in_directory_->InsertColumn(2, "Tags Present", wxLIST_FORMAT_LEFT, 80);
+  sz_right->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
 
   wxPanel* p_file_navigation = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
