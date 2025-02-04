@@ -108,11 +108,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxPanel* p_file_navigation = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
   p_file_navigation->SetSizer(sz_file_navigation);
-  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE, "Previous File");
+  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE, "Previous Untagged File");
   sz_file_navigation->Add(b_previous_file, 1, wxALL, 5);
-  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File");
+  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
   sz_file_navigation->Add(b_open_file, 1, wxALL, 5);
-  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next File");
+  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next Untagged File");
   sz_file_navigation->Add(b_next_file, 1, wxALL, 5);
 
   sz_right->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
@@ -138,6 +138,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
   Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this, ID_STOP_MEDIA);
   Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
+  Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this, ID_PREVIOUS_FILE);
+  Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this, ID_LOAD_FILE);
+  Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this, ID_NEXT_FILE);
   Bind(wxEVT_CHECKBOX, &MainFrame::OnMuteBoxToggle, this, ID_MUTE_BOX);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
   Bind(wxEVT_MEDIA_STOP, &MainFrame::OnMediaStop, this, ID_MEDIA_CTRL);
@@ -526,6 +529,18 @@ void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
     pauseMedia();
     break;
   }
+}
+
+void MainFrame::OnPreviousUntaggedFile(wxCommandEvent& event)
+{
+}
+
+void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
+{
+}
+
+void MainFrame::OnDebug(wxCommandEvent& event)
+{
 }
 
 void MainFrame::OnMuteBoxToggle(wxCommandEvent& event)
