@@ -649,6 +649,7 @@ void MainFrame::OnMediaLoaded(wxMediaEvent& event)
   // NOTE: SetVolume() returns an undocumented bool.
   mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
   if (cb_autoplay_->IsChecked()) {
+    // Unused bool.
     playMedia();
   }
 }
