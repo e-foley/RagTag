@@ -218,6 +218,8 @@ void MainFrame::refreshTagToggles() {
 void MainFrame::refreshFileView()
 {
   if (!active_file_.has_value()) {
+    lc_files_in_directory_->DeleteAllItems();
+    file_paths_.clear();
     return;
   }
 
