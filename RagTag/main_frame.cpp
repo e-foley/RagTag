@@ -646,6 +646,15 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
     return;
   }
 
+  // Assign the tag's default to the currently opened file, if applicable.
+  if (active_file_.has_value()) {
+    if (!tag_map_.setTag(*active_file_, tag_entry_result->first,
+      tag_entry_result->second.default_setting)) {
+      // TODO: Report error.
+      SetStatusText("Could not set tag '" + tag_entry_result->first + "' on currently open file.");
+    }
+  }
+
   // Looks like everything was successful. Refresh the panel to show our new tag.
   is_dirty_ = true;
   refreshTagToggles();
