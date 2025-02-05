@@ -217,19 +217,21 @@ void MainFrame::refreshTagToggles() {
 
 void MainFrame::refreshFileView()
 {
-  // Start from a blank slate.
-  lc_files_in_directory_->DeleteAllItems();
-  file_paths_.clear();
-  file_paths_.reserve(10000);  // Reserve enough room for large directories.
-
   if (!active_file_.has_value()) {
     return;
   }
 
+  file_paths_.clear();
+  file_paths_.reserve(10000);  // Reserve enough room for large directories.
+
   // Cache tag list since we'll be referring to it within the loop.
   const auto all_tags = tag_map_.getAllTags();
 
-  std::filesystem::path parent_directory = active_file_->parent_path();
+  // Cache quantity of entries presently in the list control so that we know how many entries to
+  // remove in the case we don't need as many to display this directory.
+  const int num_list_view_entries_original = lc_files_in_directory_->GetItemCount();
+
+  const std::filesystem::path parent_directory = active_file_->parent_path();
 
   int i = 0;
   // Note: directory_iterator documentation explains that the end iterator is equal to the
@@ -241,7 +243,15 @@ void MainFrame::refreshFileView()
       continue;
     }
 
-    lc_files_in_directory_->InsertItem(i, file_it->path().filename().generic_wstring());
+    if (i >= lc_files_in_directory_->GetItemCount()) {
+      // We're expanding beyond the current capacity and need to insert new item.
+      lc_files_in_directory_->InsertItem(i, file_it->path().filename().generic_wstring());
+    }
+    else {
+      // We're within the list's capacity and can simply edit existing data.
+      lc_files_in_directory_->SetItem(i, 0, file_it->path().filename().generic_wstring());
+    }
+    
     file_paths_.push_back(file_it->path());
     // Set the "user data" for the list control entry to a pointer directed at the full path.
     // Yes, this is ugly and I wish there were a better way.
@@ -302,6 +312,12 @@ void MainFrame::refreshFileView()
     }
 
     ++i;
+  }
+
+  // Remove any excess list control entries that were needed to display prior directories but not
+  // this one.
+  for (int j = i; j < num_list_view_entries_original; ++j) {
+    lc_files_in_directory_->DeleteItem(lc_files_in_directory_->GetItemCount() - 1);
   }
 }
 
