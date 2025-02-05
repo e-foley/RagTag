@@ -167,6 +167,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MEDIA_PAUSE, &MainFrame::OnMediaPause, this, ID_MEDIA_CTRL);
   Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
   Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
+  Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
 }
 
 void MainFrame::refreshTagToggles() {
@@ -218,6 +219,8 @@ void MainFrame::refreshFileView()
 {
   // Start from a blank slate.
   lc_files_in_directory_->DeleteAllItems();
+  file_paths_.clear();
+  file_paths_.reserve(10000);  // Reserve enough room for large directories.
 
   if (!active_file_.has_value()) {
     return;
@@ -233,7 +236,16 @@ void MainFrame::refreshFileView()
   // default-constructed iterator.
   for (auto file_it = std::filesystem::directory_iterator(parent_directory);
     file_it != std::filesystem::directory_iterator(); file_it++) {
+    // Skip things like symlinks and such.
+    if (!file_it->is_regular_file()) {
+      continue;
+    }
+
     lc_files_in_directory_->InsertItem(i, file_it->path().filename().generic_wstring());
+    file_paths_.push_back(file_it->path());
+    // Set the "user data" for the list control entry to a pointer directed at the full path.
+    // Yes, this is ugly and I wish there were a better way.
+    lc_files_in_directory_->SetItemPtrData(i, reinterpret_cast<wxUIntPtr>(&file_paths_[i]));
 
     // Handle file rating...
     const auto rating_ret = tag_map_.getRating(file_it->path());
@@ -623,6 +635,48 @@ void MainFrame::OnDebug(wxCommandEvent& event)
 void MainFrame::OnMuteBoxToggle(wxCommandEvent& event)
 {
   mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
+}
+
+void MainFrame::OnFocusFile(wxListEvent& event)
+{
+  // Load and display the file.
+  // 
+  // Gross, but the best I could come up with given wxListCtrl's limitations.
+  // Goal is to reinterpret the user data as a pointer leading to the path name that was set for
+  // this item in refreshFileView().
+  const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(event.GetIndex());
+  active_file_ = *reinterpret_cast<ragtag::path_t*>(user_data);
+  
+  // TODO: Code hereafter is identical to OnLoadFile(). Share code for better maintainability.
+  if (!displayMediaFile(*active_file_)) {
+    // File is "loaded," it just can't be displayed.
+    // TODO: Display placeholder text or something in the media preview when this happens.
+    SetStatusText(L"Couldn't display file '" + active_file_->generic_wstring() + L"'.");
+  }
+
+  if (!tag_map_.hasFile(*active_file_)) {
+    is_dirty_ = true;
+
+    // Declare file to our tag map.
+    if (!tag_map_.addFile(*active_file_)) {
+      // TODO: Report error.
+      SetStatusText(L"Couldn't add file '" + active_file_->wstring() + L"' to tag map.");
+      return;
+    }
+
+    // Assign default tags to our newly opened file.
+    for (auto tag_it : tag_map_.getAllTags()) {
+      if (!tag_map_.setTag(*active_file_, tag_it.first, tag_it.second.default_setting)) {
+        // TODO: Report error.
+        SetStatusText(L"Couldn't set tag on file '" + active_file_->wstring() + L"'.");
+        return;
+      }
+    }
+  }
+
+  refreshTagToggles();
+  refreshFileView();
+  SetStatusText(L"Loaded file '" + active_file_->wstring() + L"'.");
 }
 
 void MainFrame::OnDefineNewTag(wxCommandEvent& event) {

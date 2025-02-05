@@ -76,7 +76,9 @@ private:
   void OnDebug(wxCommandEvent& event);  // TODO: Remove me.
   // Checkbox events
   void OnMuteBoxToggle(wxCommandEvent& event);
-  // Miscellaneous events
+  // List control events
+  void OnFocusFile(wxListEvent& event);
+  // Media events
   void OnMediaLoaded(wxMediaEvent& event);
   void OnMediaStop(wxMediaEvent& event);
   void OnMediaFinished(wxMediaEvent& event);
@@ -105,6 +107,10 @@ private:
   wxCheckBox* cb_mute_{ nullptr };
   wxButton* b_play_pause_media_{ nullptr };
   wxListCtrl* lc_files_in_directory_{ nullptr };
+  // Parallel array of full paths to files presented by lc_files_in_directory_, since they cannot be
+  // included directly. It's not pretty design, but it's the best way I could come up with given
+  // wxListCtrl's limitations.
+  std::vector<ragtag::path_t> file_paths_{};
   ragtag::TagMap tag_map_{};
   std::optional<std::filesystem::path> project_path_{};
   std::optional<std::filesystem::path> active_file_{};
