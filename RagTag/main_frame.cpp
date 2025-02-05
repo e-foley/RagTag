@@ -424,7 +424,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
   stopMedia();
   // TODO: Find a way to either reset the wxMediaCtrl or disable playing until a file is loaded.
   is_dirty_ = false;
-  SetStatusText(L"Opened project '" + project_path_->wstring() + L"'.");
+  SetStatusText(L"Opened project '" + project_path_->generic_wstring() + L"'.");
 }
 
 void MainFrame::OnSaveProject(wxCommandEvent& event) {
@@ -446,7 +446,7 @@ void MainFrame::OnSaveProject(wxCommandEvent& event) {
   }
 
   is_dirty_ = false;
-  SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
+  SetStatusText(L"Saved project '" + project_path_->generic_wstring() + L"'.");
 }
 
 void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
@@ -462,7 +462,7 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
   }
   project_path_ = path;
   is_dirty_ = false;
-  SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
+  SetStatusText(L"Saved project '" + project_path_->generic_wstring() + L"'.");
 }
 
 void MainFrame::OnLoadFile(wxCommandEvent& event)
@@ -487,7 +487,7 @@ void MainFrame::OnLoadFile(wxCommandEvent& event)
     // Declare file to our tag map.
     if (!tag_map_.addFile(*active_file_)) {
       // TODO: Report error.
-      SetStatusText(L"Couldn't add file '" + active_file_->wstring() + L"' to tag map.");
+      SetStatusText(L"Couldn't add file '" + active_file_->generic_wstring() + L"' to tag map.");
       return;
     }
 
@@ -495,7 +495,7 @@ void MainFrame::OnLoadFile(wxCommandEvent& event)
     for (auto tag_it : tag_map_.getAllTags()) {
       if (!tag_map_.setTag(*active_file_, tag_it.first, tag_it.second.default_setting)) {
         // TODO: Report error.
-        SetStatusText(L"Couldn't set tag on file '" + active_file_->wstring() + L"'.");
+        SetStatusText(L"Couldn't set tag on file '" + active_file_->generic_wstring() + L"'.");
         return;
       }
     }
@@ -503,7 +503,7 @@ void MainFrame::OnLoadFile(wxCommandEvent& event)
   
   refreshTagToggles();
   refreshFileView();
-  SetStatusText(L"Loaded file '" + active_file_->wstring() + L"'.");
+  SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
 }
 
 void MainFrame::OnNextFile(wxCommandEvent& event)
@@ -676,7 +676,7 @@ void MainFrame::OnFocusFile(wxListEvent& event)
     // Declare file to our tag map.
     if (!tag_map_.addFile(*active_file_)) {
       // TODO: Report error.
-      SetStatusText(L"Couldn't add file '" + active_file_->wstring() + L"' to tag map.");
+      SetStatusText(L"Couldn't add file '" + active_file_->generic_wstring() + L"' to tag map.");
       return;
     }
 
@@ -684,7 +684,7 @@ void MainFrame::OnFocusFile(wxListEvent& event)
     for (auto tag_it : tag_map_.getAllTags()) {
       if (!tag_map_.setTag(*active_file_, tag_it.first, tag_it.second.default_setting)) {
         // TODO: Report error.
-        SetStatusText(L"Couldn't set tag on file '" + active_file_->wstring() + L"'.");
+        SetStatusText(L"Couldn't set tag on file '" + active_file_->generic_wstring() + L"'.");
         return;
       }
     }
@@ -692,7 +692,7 @@ void MainFrame::OnFocusFile(wxListEvent& event)
 
   refreshTagToggles();
   refreshFileView();
-  SetStatusText(L"Loaded file '" + active_file_->wstring() + L"'.");
+  SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
 }
 
 void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
