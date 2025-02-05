@@ -5,6 +5,10 @@
 #include <wx/statusbr.h>
 #include <wx/stdpaths.h>
 
+const wxColour MainFrame::BACKGROUND_COLOR_FULLY_TAGGED = wxColour(200, 255, 200);
+const wxColour MainFrame::BACKGROUND_COLOR_PARTLY_TAGGED = wxColour(255, 255, 200);
+const wxColour MainFrame::BACKGROUND_COLOR_FULLY_UNTAGGED = wxNullColour;
+
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition,
   wxSize(900, 720)) {
   wxMenu* menuFile = new wxMenu;
@@ -240,7 +244,7 @@ void MainFrame::refreshFileView()
     
     // Handle tag presence. If all tags within the tag map are asserted yes or no for the file, the
     // file is considered fully tagged ("All"). If some but not all are uncommitted, the file is
-    // partly tagged ("Some"). If all are uncommitted, the file is entirely untagged ("None").
+    // partly tagged ("Some"). If all are uncommitted, the file is fully untagged ("None").
     // TODO: Consider moving this function to the TagMap interface.
     bool any_tag_is_committed = false;
     bool any_tag_is_uncommitted = false;
@@ -266,17 +270,21 @@ void MainFrame::refreshFileView()
 
     if (any_tag_is_committed && !any_tag_is_uncommitted) {
       lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"All");
+      lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_TAGGED);
     }
     else if (any_tag_is_committed && any_tag_is_uncommitted) {
       lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"Some");
+      lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_PARTLY_TAGGED);
     }
     else if (!any_tag_is_committed && any_tag_is_uncommitted) {
       lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"None");
+      lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_UNTAGGED);
     }
     else {
       // No tags defined, or their settings on the file are somehow invalid.
       // For now, also present the file as "None", though we can change this logic if needed.
       lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"None");
+      lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_UNTAGGED);
     }
 
     ++i;

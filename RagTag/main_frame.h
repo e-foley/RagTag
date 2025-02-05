@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <optional>
 #include <wx/checkbox.h>
+#include <wx/colour.h>
 #include <wx/event.h>
 #include <wx/frame.h>
 #include <wx/listctrl.h>
@@ -46,6 +47,10 @@ private:
     COLUMN_TAGS_PRESENT,
     COLUMN_RATING
   };
+
+  static const wxColour BACKGROUND_COLOR_FULLY_TAGGED;
+  static const wxColour BACKGROUND_COLOR_PARTLY_TAGGED;
+  static const wxColour BACKGROUND_COLOR_FULLY_UNTAGGED;
 
   // Functions updating view to match model
   void refreshTagToggles();
