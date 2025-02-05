@@ -117,6 +117,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
   lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
   lc_files_in_directory_->InsertColumn(COLUMN_TAGS_PRESENT, "Tags Present", wxLIST_FORMAT_LEFT, 80);
+  refreshFileView();
+
   sz_right->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
 
   wxPanel* p_file_navigation = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -471,8 +473,8 @@ void MainFrame::OnLoadFile(wxCommandEvent& event)
     }
   }
   
-  refreshFileView();
   refreshTagToggles();
+  refreshFileView();
   SetStatusText(L"Loaded file '" + active_file_->wstring() + L"'.");
 }
 
@@ -658,6 +660,7 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
   // Looks like everything was successful. Refresh the panel to show our new tag.
   is_dirty_ = true;
   refreshTagToggles();
+  refreshFileView();
 }
 
 void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
@@ -722,6 +725,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
   // Whether or not we know a change was made, refresh the tag toggle list to ensure we're
   // presenting the latest information to the user.
   refreshTagToggles();
+  refreshFileView();
 }
 
 void MainFrame::OnMediaLoaded(wxMediaEvent& event)
