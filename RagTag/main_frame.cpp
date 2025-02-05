@@ -640,10 +640,7 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
     return;
   }
 
-  bool tag_register_result =
-    tag_map_.registerTag(tag_entry_result->first, tag_entry_result->second);
-
-  if (!tag_register_result) {
+  if (!tag_map_.registerTag(tag_entry_result->first, tag_entry_result->second)) {
     // TODO: Report error.
     SetStatusText("Could not register tag '" + tag_entry_result->first + "'.");
     return;
