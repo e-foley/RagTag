@@ -36,7 +36,7 @@ public:
     DELETE_TAG
   };
 
-  // NOTE: wxCommandEvent ctr allows communication of a specific ID. Until we have use for that, we
+  // NOTE: wxCommandEvent ctrl allows communication of a specific ID. Until we have use for that, we
   // will default it to 0.
   TagToggleButtonEvent(ragtag::tag_t tag, DesiredAction action)
     : wxCommandEvent(TAG_TOGGLE_BUTTON_EVENT, 0), tag_(tag), desired_action_(action) {}
