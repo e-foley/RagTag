@@ -25,6 +25,7 @@ TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string 
 
   Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickEdit, this, b_tag_edit->GetId());
   Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickDelete, this, b_tag_delete->GetId());
+  Bind(wxEVT_CHECKBOX, &TagTogglePanel::OnCheckboxChange, this, cb_tag_toggle_->GetId());
 }
 
 TagTogglePanel::~TagTogglePanel() {}
@@ -64,5 +65,23 @@ void TagTogglePanel::OnClickEdit(wxCommandEvent& event) {
 
 void TagTogglePanel::OnClickDelete(wxCommandEvent& event) {
   TagToggleButtonEvent sending(tag_, TagToggleButtonEvent::DesiredAction::DELETE_TAG);
+  wxPostEvent(GetParent(), sending);
+}
+
+void TagTogglePanel::OnCheckboxChange(wxCommandEvent& event) {
+  TagToggleButtonEvent sending(tag_, TagToggleButtonEvent::DesiredAction::UPDATE_TAG_STATE);
+  switch (cb_tag_toggle_->Get3StateValue()) {
+  case wxCHK_UNCHECKED:
+    sending.setDesiredState(ragtag::TagSetting::NO);
+    break;
+  case wxCHK_CHECKED:
+    sending.setDesiredState(ragtag::TagSetting::YES);
+    break;
+  default:
+  case wxCHK_UNDETERMINED:
+    sending.setDesiredState(ragtag::TagSetting::UNCOMMITTED);
+    break;
+  }
+
   wxPostEvent(GetParent(), sending);
 }

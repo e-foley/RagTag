@@ -155,8 +155,10 @@ namespace ragtag {
       return true;
     }
 
-    // The .second refers to the success of the insertion-or-assignment operation.
-    return file_it->second.tags.insert_or_assign(tag, setting).second;
+    // Returns bool denoting whether insertion took place (true) or assignment took place (false),
+    // but we don't really mind one way or the other, so we can ignore the result.
+    file_it->second.tags.insert_or_assign(tag, setting).second;
+    return true;
   }
 
   bool TagMap::clearTag(const path_t& path, const tag_t tag) {

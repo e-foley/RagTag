@@ -707,12 +707,28 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
   }
   case TagToggleButtonEvent::DesiredAction::DELETE_TAG: {
     if (promptConfirmTagDeletion(event.getTag())) {
+      // TODO: Don't assume that changes have been made.
+      is_dirty_ = true;
+
       if (tag_map_.deleteTag(event.getTag())) {
         SetStatusText("Deleted tag '" + event.getTag() + "'.");
       }
       else {
         // TODO: Report error.
         SetStatusText("Could not delete tag '" + event.getTag() + "'.");
+      }
+    }
+    break;
+  }
+  case TagToggleButtonEvent::DesiredAction::UPDATE_TAG_STATE: {
+    if (active_file_.has_value()) {
+      // TODO: Don't assume that changes have been made.
+      is_dirty_ = true;
+
+      if (!tag_map_.setTag(*active_file_, event.getTag(), event.getDesiredState())) {
+        // TODO: Report error.
+        SetStatusText("Could not assert tag '" + event.getTag() + "' on file '"
+          + active_file_->generic_string() + "'.");
       }
     }
     break;
