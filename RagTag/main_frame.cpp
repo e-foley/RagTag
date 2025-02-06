@@ -451,37 +451,7 @@ void MainFrame::OnLoadFile(wxCommandEvent& event)
     return;
   }
 
-  active_file_ = *path_pending;
-
-  if (!displayMediaFile(*active_file_)) {
-    // File is "loaded," it just can't be displayed.
-    // TODO: Display placeholder text or something in the media preview when this happens.
-    SetStatusText(L"Couldn't display file '" + active_file_->generic_wstring() + L"'.");
-  }
-
-  if (!tag_map_.hasFile(*active_file_)) {
-    is_dirty_ = true;
-
-    // Declare file to our tag map.
-    if (!tag_map_.addFile(*active_file_)) {
-      // TODO: Report error.
-      SetStatusText(L"Couldn't add file '" + active_file_->generic_wstring() + L"' to tag map.");
-      return;
-    }
-
-    // Assign default tags to our newly opened file.
-    for (auto tag_it : tag_map_.getAllTags()) {
-      if (!tag_map_.setTag(*active_file_, tag_it.first, tag_it.second.default_setting)) {
-        // TODO: Report error.
-        SetStatusText(L"Couldn't set tag on file '" + active_file_->generic_wstring() + L"'.");
-        return;
-      }
-    }
-  }
-  
-  refreshTagToggles();
-  refreshFileView();
-  SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
+  loadFileAndSetAsActive(*path_pending);
 }
 
 void MainFrame::OnNextFile(wxCommandEvent& event)
@@ -492,29 +462,32 @@ void MainFrame::OnNextFile(wxCommandEvent& event)
     return;
   }
 
-  auto next_file = getFileAfter(*active_file_);
+  const auto next_file = qualifiedFileNavigator(
+    *active_file_, [](const ragtag::path_t&) {return true; }, true);
   if (!next_file.has_value()) {
     SetStatusText("Couldn't find next file.");
     return;
   }
 
-  active_file_ = next_file;
-  refreshFileView();
+  loadFileAndSetAsActive(*next_file);
 }
 
 void MainFrame::OnPreviousFile(wxCommandEvent& event)
 {
   if (!active_file_.has_value()) {
+    // Can't find previous file when there's no current file.
     SetStatusText("No active file.");
     return;
   }
-  auto temp = getFileBefore(*active_file_);
-  if (!temp.has_value()) {
-    SetStatusText("getFileBefore() failed.");
+
+  const auto previous_file = qualifiedFileNavigator(
+    *active_file_, [](const ragtag::path_t&) {return true; }, false);
+  if (!previous_file.has_value()) {
+    SetStatusText("Couldn't find previous file.");
     return;
   }
 
-  SetStatusText(L"Previous file is " + temp->generic_wstring());
+  loadFileAndSetAsActive(*previous_file);
 }
 
 void MainFrame::OnExit(wxCommandEvent& event) {
@@ -639,17 +612,44 @@ void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
 
 void MainFrame::OnPreviousUntaggedFile(wxCommandEvent& event)
 {
+  if (!active_file_.has_value()) {
+    // Can't find previous untagged file when there's no current file.
+    SetStatusText("No active file.");
+    return;
+  }
+
+  const auto previous_untagged = qualifiedFileNavigator(*active_file_,
+    [this](const ragtag::path_t& path) {
+      const auto tag_coverage = getFileTagCoverage(path);
+      return tag_coverage == TagCoverage::NONE || tag_coverage == TagCoverage::SOME;
+    }, false);
+  if (!previous_untagged.has_value()) {
+    SetStatusText("Couldn't find previous untagged file.");
+    return;
+  }
+
+  loadFileAndSetAsActive(*previous_untagged);
 }
 
 void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
 {
   if (!active_file_.has_value()) {
-    // Can't find next file when there's no current file.
+    // Can't find next untagged file when there's no current file.
+    SetStatusText("No active file.");
     return;
   }
 
+  const auto next_untagged_file = qualifiedFileNavigator(*active_file_,
+    [this](const ragtag::path_t& path) {
+      const auto tag_coverage = getFileTagCoverage(path);
+      return tag_coverage == TagCoverage::NONE || tag_coverage == TagCoverage::SOME;
+    }, true);
+  if (!next_untagged_file.has_value()) {
+    SetStatusText("Couldn't find next untagged file.");
+    return;
+  }
 
-
+  loadFileAndSetAsActive(*next_untagged_file);
 }
 
 void MainFrame::OnDebug(wxCommandEvent& event)
@@ -669,38 +669,9 @@ void MainFrame::OnFocusFile(wxListEvent& event)
   // Goal is to reinterpret the user data as a pointer leading to the path name that was set for
   // this item in refreshFileView().
   const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(event.GetIndex());
-  active_file_ = *reinterpret_cast<ragtag::path_t*>(user_data);
-  
-  // TODO: Code hereafter is identical to OnLoadFile(). Share code for better maintainability.
-  if (!displayMediaFile(*active_file_)) {
-    // File is "loaded," it just can't be displayed.
-    // TODO: Display placeholder text or something in the media preview when this happens.
-    SetStatusText(L"Couldn't display file '" + active_file_->generic_wstring() + L"'.");
+  if (!loadFileAndSetAsActive(*reinterpret_cast<ragtag::path_t*>(user_data))) {
+    // TODO: Log error.
   }
-
-  if (!tag_map_.hasFile(*active_file_)) {
-    is_dirty_ = true;
-
-    // Declare file to our tag map.
-    if (!tag_map_.addFile(*active_file_)) {
-      // TODO: Report error.
-      SetStatusText(L"Couldn't add file '" + active_file_->generic_wstring() + L"' to tag map.");
-      return;
-    }
-
-    // Assign default tags to our newly opened file.
-    for (auto tag_it : tag_map_.getAllTags()) {
-      if (!tag_map_.setTag(*active_file_, tag_it.first, tag_it.second.default_setting)) {
-        // TODO: Report error.
-        SetStatusText(L"Couldn't set tag on file '" + active_file_->generic_wstring() + L"'.");
-        return;
-      }
-    }
-  }
-
-  refreshTagToggles();
-  refreshFileView();
-  SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
 }
 
 void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
@@ -950,7 +921,38 @@ bool MainFrame::saveProjectAs(const ragtag::path_t& path) {
 
 bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
 {
-  return false;
+  active_file_ = path;
+
+  if (!displayMediaFile(*active_file_)) {
+    // File is "loaded," it just can't be displayed.
+    // TODO: Display placeholder text or something in the media preview when this happens.
+    SetStatusText(L"Couldn't display file '" + active_file_->generic_wstring() + L"'.");
+  }
+
+  if (!tag_map_.hasFile(*active_file_)) {
+    is_dirty_ = true;
+
+    // Declare file to our tag map.
+    if (!tag_map_.addFile(*active_file_)) {
+      // TODO: Report error.
+      SetStatusText(L"Couldn't add file '" + active_file_->generic_wstring() + L"' to tag map.");
+      return false;
+    }
+
+    // Assign default tags to our newly opened file.
+    for (auto tag_it : tag_map_.getAllTags()) {
+      if (!tag_map_.setTag(*active_file_, tag_it.first, tag_it.second.default_setting)) {
+        // TODO: Report error.
+        SetStatusText(L"Couldn't set tag on file '" + active_file_->generic_wstring() + L"'.");
+        return false;
+      }
+    }
+  }
+
+  refreshTagToggles();
+  refreshFileView();
+  SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
+  return true;
 }
 
 bool MainFrame::displayMediaFile(const ragtag::path_t& path)
@@ -977,16 +979,6 @@ bool MainFrame::stopMedia()
 {
   // NOTE: Returns an undocumented bool.
   return mc_media_display_->Stop();
-}
-
-std::optional<ragtag::path_t> MainFrame::getFileAfter(const ragtag::path_t& reference)
-{
-  return qualifiedFileNavigator(reference, [](const ragtag::path_t&) {return true; }, true);
-}
-
-std::optional<ragtag::path_t> MainFrame::getFileBefore(const ragtag::path_t& reference) const
-{
-  return qualifiedFileNavigator(reference, [](const ragtag::path_t&) {return true; }, false);
 }
 
 std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigator(
