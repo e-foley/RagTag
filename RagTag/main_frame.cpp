@@ -1075,3 +1075,16 @@ MainFrame::TagCoverage MainFrame::getFileTagCoverage(const ragtag::path_t& file)
   // TODO: Record error.
   return TagCoverage::NONE;
 }
+
+std::optional<long> MainFrame::getPathListCtrlIndex(const ragtag::path_t& path) const
+{
+  for (long i = 0; i < lc_files_in_directory_->GetItemCount(); ++i) {
+    // User data is a pointer to the path corresponding to the list control entry.
+    const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(i);
+    if (path == *reinterpret_cast<ragtag::path_t*>(user_data)) {
+      return i;
+    }
+  }
+
+  return {};
+}

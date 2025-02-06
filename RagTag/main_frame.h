@@ -113,6 +113,7 @@ private:
   static std::optional<ragtag::path_t> qualifiedFileNavigator(
     const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);
   TagCoverage getFileTagCoverage(const ragtag::path_t& file) const;
+  std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
 
 
   wxScrolledWindow* p_tag_toggles_{ nullptr };
