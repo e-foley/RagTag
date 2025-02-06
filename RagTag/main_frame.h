@@ -98,6 +98,11 @@ private:
   bool playMedia();
   bool pauseMedia();
   bool stopMedia();
+  static std::optional<ragtag::path_t> getFileAfter(const ragtag::path_t& reference);
+  std::optional<ragtag::path_t> getFileBefore(const ragtag::path_t& reference) const;
+  // Helper functions
+  static std::optional<ragtag::path_t> qualifiedFileNavigatorHelper(const ragtag::path_t& reference,
+                                                                    bool find_next);
 
   wxScrolledWindow* p_tag_toggles_{ nullptr };
   wxBoxSizer* sz_tag_toggles_{ nullptr };

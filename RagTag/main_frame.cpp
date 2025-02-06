@@ -510,12 +510,32 @@ void MainFrame::OnLoadFile(wxCommandEvent& event)
 
 void MainFrame::OnNextFile(wxCommandEvent& event)
 {
-  SetStatusText("Next file");
+  if (!active_file_.has_value()) {
+    SetStatusText("No active file.");
+    return;
+  }
+  auto temp = getFileAfter(*active_file_);
+  if (!temp.has_value()) {
+    SetStatusText("getFileAfter() failed.");
+    return;
+  }
+
+  SetStatusText(L"Next file is " + temp->generic_wstring());
 }
 
 void MainFrame::OnPreviousFile(wxCommandEvent& event)
 {
-  SetStatusText("Previous file");
+  if (!active_file_.has_value()) {
+    SetStatusText("No active file.");
+    return;
+  }
+  auto temp = getFileBefore(*active_file_);
+  if (!temp.has_value()) {
+    SetStatusText("getFileBefore() failed.");
+    return;
+  }
+
+  SetStatusText(L"Previous file is " + temp->generic_wstring());
 }
 
 void MainFrame::OnExit(wxCommandEvent& event) {
@@ -644,6 +664,13 @@ void MainFrame::OnPreviousUntaggedFile(wxCommandEvent& event)
 
 void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
 {
+  if (!active_file_.has_value()) {
+    // Can't find next file when there's no current file.
+    return;
+  }
+
+
+
 }
 
 void MainFrame::OnDebug(wxCommandEvent& event)
@@ -966,4 +993,50 @@ bool MainFrame::stopMedia()
 {
   // NOTE: Returns an undocumented bool.
   return mc_media_display_->Stop();
+}
+
+std::optional<ragtag::path_t> MainFrame::getFileAfter(const ragtag::path_t& reference)
+{
+  return qualifiedFileNavigatorHelper(reference, true);
+}
+
+std::optional<ragtag::path_t> MainFrame::getFileBefore(const ragtag::path_t& reference) const
+{
+  return qualifiedFileNavigatorHelper(reference, false);
+}
+
+std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigatorHelper(const ragtag::path_t& reference, bool find_next)
+{
+  if (!reference.has_parent_path()) {
+    return {};
+  }
+
+  // Strategy is to construct a vector of paths to regular, qualified files within this directory,
+  // find the entry that matches our reference file, then return the neighboring entry.
+  //
+  // This approach is a little cheesy, but IMO it's easier to follow than maintaining multiple
+  // directory iterators that all need to be conditioned to seek only regular files.
+  std::vector<ragtag::path_t> regular_files;
+  for (std::filesystem::directory_iterator dir_it(reference.parent_path());
+    dir_it != std::filesystem::directory_iterator(); ++dir_it) {
+    if (dir_it->is_regular_file()) {
+      regular_files.push_back(dir_it->path());
+    }
+  }
+
+  if (regular_files.empty()) {
+    // No files in the reference directory are regular, so we have nothing to return.
+    return {};
+  }
+
+  for (int i = 0; i < regular_files.size(); ++i) {
+    if (regular_files[i] == reference) {
+      const size_t seek_index = find_next ? (i + 1) % regular_files.size()
+        : (i + regular_files.size() - 1) % regular_files.size();
+      return regular_files[seek_index];
+    }
+  }
+
+  // We didn't encounter our reference file. Perhaps the reference file itself is not regular.
+  return {};
 }
