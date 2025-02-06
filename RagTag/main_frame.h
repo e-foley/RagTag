@@ -95,15 +95,16 @@ private:
   void OnMediaPause(wxMediaEvent& event);
   // Custom dialog prompts
   UserIntention promptUnsavedChanges();
-  std::optional<std::filesystem::path> promptSaveProjectAs();
-  std::optional<std::filesystem::path> promptOpenProject();
-  std::optional<std::filesystem::path> promptLoadFile();
+  std::optional<ragtag::path_t> promptSaveProjectAs();
+  std::optional<ragtag::path_t> promptOpenProject();
+  std::optional<ragtag::path_t> promptLoadFile();
   bool promptConfirmTagDeletion(ragtag::tag_t tag);
   // Fundamental project commands
   void newProject();
   bool saveProject();
-  bool saveProjectAs(const std::filesystem::path& path);
-  bool displayMediaFile(const std::filesystem::path& path);
+  bool saveProjectAs(const ragtag::path_t& path);
+  bool loadFileAndSetAsActive(const ragtag::path_t& path);
+  bool displayMediaFile(const ragtag::path_t& path);
   bool playMedia();
   bool pauseMedia();
   bool stopMedia();
@@ -129,8 +130,8 @@ private:
   // wxListCtrl's limitations.
   std::vector<ragtag::path_t> file_paths_{};
   ragtag::TagMap tag_map_{};
-  std::optional<std::filesystem::path> project_path_{};
-  std::optional<std::filesystem::path> active_file_{};
+  std::optional<ragtag::path_t> project_path_{};
+  std::optional<ragtag::path_t> active_file_{};
   bool is_dirty_{ false };
   bool user_initiated_stop_media_{ false };
 };

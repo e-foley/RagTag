@@ -233,7 +233,7 @@ void MainFrame::refreshFileView()
   // remove in the case we don't need as many to display this directory.
   const int num_list_view_entries_original = lc_files_in_directory_->GetItemCount();
 
-  const std::filesystem::path parent_directory = active_file_->parent_path();
+  const ragtag::path_t parent_directory = active_file_->parent_path();
 
   int i = 0;
   // Note: directory_iterator documentation explains that the end iterator is equal to the
@@ -311,7 +311,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
           return;
         }
       } else {
-        const std::optional<std::filesystem::path> path = promptSaveProjectAs();
+        const std::optional<ragtag::path_t> path = promptSaveProjectAs();
         if (!path.has_value()) {
           // User canceled dialog.
           return;
@@ -356,7 +356,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
           return;
         }
       } else {
-        const std::optional<std::filesystem::path> path = promptSaveProjectAs();
+        const std::optional<ragtag::path_t> path = promptSaveProjectAs();
         if (!path.has_value()) {
           // User canceled dialog.
           return;
@@ -380,7 +380,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
   }
 
   // If we've gotten this far, we have permission to open a file.
-  std::optional<std::filesystem::path> path_pending = promptOpenProject();
+  std::optional<ragtag::path_t> path_pending = promptOpenProject();
   if (!path_pending.has_value()) {
     // User canceled dialog.
     return;
@@ -407,7 +407,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
 
 void MainFrame::OnSaveProject(wxCommandEvent& event) {
   if (!project_path_.has_value()) {
-    const std::optional<std::filesystem::path> path = promptSaveProjectAs();
+    const std::optional<ragtag::path_t> path = promptSaveProjectAs();
     if (!path.has_value()) {
       // User canceled dialog.
       return;
@@ -428,7 +428,7 @@ void MainFrame::OnSaveProject(wxCommandEvent& event) {
 }
 
 void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
-  const std::optional<std::filesystem::path> path = promptSaveProjectAs();
+  const std::optional<ragtag::path_t> path = promptSaveProjectAs();
   if (!path.has_value()) {
     // User canceled dialog.
     return;
@@ -445,7 +445,7 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
 
 void MainFrame::OnLoadFile(wxCommandEvent& event)
 {
-  std::optional<std::filesystem::path> path_pending = promptLoadFile();
+  std::optional<ragtag::path_t> path_pending = promptLoadFile();
   if (!path_pending.has_value()) {
     // User canceled dialog.
     return;
@@ -487,16 +487,19 @@ void MainFrame::OnLoadFile(wxCommandEvent& event)
 void MainFrame::OnNextFile(wxCommandEvent& event)
 {
   if (!active_file_.has_value()) {
+    // Can't find next file when there's no current file.
     SetStatusText("No active file.");
     return;
   }
-  auto temp = getFileAfter(*active_file_);
-  if (!temp.has_value()) {
-    SetStatusText("getFileAfter() failed.");
+
+  auto next_file = getFileAfter(*active_file_);
+  if (!next_file.has_value()) {
+    SetStatusText("Couldn't find next file.");
     return;
   }
 
-  SetStatusText(L"Next file is " + temp->generic_wstring());
+  active_file_ = next_file;
+  refreshFileView();
 }
 
 void MainFrame::OnPreviousFile(wxCommandEvent& event)
@@ -526,7 +529,7 @@ void MainFrame::OnExit(wxCommandEvent& event) {
         }
       }
       else {
-        const std::optional<std::filesystem::path> path = promptSaveProjectAs();
+        const std::optional<ragtag::path_t> path = promptSaveProjectAs();
         if (!path.has_value()) {
           // User canceled dialog.
           return;
@@ -571,7 +574,7 @@ void MainFrame::OnClose(wxCloseEvent& event) {
       Destroy();
     }
     else {
-      const std::optional<std::filesystem::path> path = promptSaveProjectAs();
+      const std::optional<ragtag::path_t> path = promptSaveProjectAs();
       if (!path.has_value()) {
         // User canceled dialog.
         event.Veto();
@@ -881,7 +884,7 @@ MainFrame::UserIntention MainFrame::promptUnsavedChanges() {
   }
 }
 
-std::optional<std::filesystem::path> MainFrame::promptSaveProjectAs() {
+std::optional<ragtag::path_t> MainFrame::promptSaveProjectAs() {
   wxString wx_path = wxFileSelector("Save Project As", wxEmptyString, "project.tagdef", ".tagdef",
     "RagTag project files (*.tagdef)|*.tagdef", wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
   if (wx_path.empty()) {
@@ -889,10 +892,10 @@ std::optional<std::filesystem::path> MainFrame::promptSaveProjectAs() {
     return {};
   }
 
-  return std::filesystem::path(wx_path.ToStdWstring());
+  return ragtag::path_t(wx_path.ToStdWstring());
 }
 
-std::optional<std::filesystem::path> MainFrame::promptOpenProject() {
+std::optional<ragtag::path_t> MainFrame::promptOpenProject() {
   wxString wx_path = wxFileSelector("Open Project", wxEmptyString, wxEmptyString, wxEmptyString,
       "RagTag project files (*.tagdef)|*.tagdef", wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
   if (wx_path.empty()) {
@@ -900,10 +903,10 @@ std::optional<std::filesystem::path> MainFrame::promptOpenProject() {
     return {};
   }
 
-  return std::filesystem::path(wx_path.ToStdWstring());
+  return ragtag::path_t(wx_path.ToStdWstring());
 }
 
-std::optional<std::filesystem::path> MainFrame::promptLoadFile() {
+std::optional<ragtag::path_t> MainFrame::promptLoadFile() {
   // TODO: Enumerate all valid media files.
   wxString wx_path = wxFileSelector("Load File", wxEmptyString, wxEmptyString, wxEmptyString,
     "All files (*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
@@ -912,7 +915,7 @@ std::optional<std::filesystem::path> MainFrame::promptLoadFile() {
     return {};
   }
 
-  return std::filesystem::path(wx_path.ToStdWstring());
+  return ragtag::path_t(wx_path.ToStdWstring());
 }
 
 bool MainFrame::promptConfirmTagDeletion(ragtag::tag_t tag)
@@ -941,11 +944,16 @@ bool MainFrame::saveProject() {
   return tag_map_.toFile(*project_path_);
 }
 
-bool MainFrame::saveProjectAs(const std::filesystem::path& path) {
+bool MainFrame::saveProjectAs(const ragtag::path_t& path) {
   return tag_map_.toFile(path);
 }
 
-bool MainFrame::displayMediaFile(const std::filesystem::path& path)
+bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
+{
+  return false;
+}
+
+bool MainFrame::displayMediaFile(const ragtag::path_t& path)
 {
   bool load_result = mc_media_display_->Load(path.generic_wstring());
   // TODO: SetVolume() returns a bool that we can choose to use if we'd like.
@@ -988,7 +996,7 @@ std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigator(
     return {};
   }
 
-  auto isQualified = [&qualifier](const std::filesystem::path& file_it) {
+  auto isQualified = [&qualifier](const ragtag::path_t& file_it) {
     return std::filesystem::is_regular_file(file_it) && qualifier(file_it);
     };
 
