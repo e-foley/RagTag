@@ -116,7 +116,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     wxLC_REPORT);
   lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
   lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
-  lc_files_in_directory_->InsertColumn(COLUMN_TAGS_PRESENT, "Tags Present", wxLIST_FORMAT_LEFT, 80);
+  lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 80);
   refreshFileView();
 
   sz_right->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
@@ -295,21 +295,21 @@ void MainFrame::refreshFileView()
     }
 
     if (any_tag_is_committed && !any_tag_is_uncommitted) {
-      lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"All");
+      lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"All");
       lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_TAGGED);
     }
     else if (any_tag_is_committed && any_tag_is_uncommitted) {
-      lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"Some");
+      lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"Some");
       lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_PARTLY_TAGGED);
     }
     else if (!any_tag_is_committed && any_tag_is_uncommitted) {
-      lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"None");
+      lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"None");
       lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_UNTAGGED);
     }
     else {
       // No tags defined, or their settings on the file are somehow invalid.
       // For now, also present the file as "None", though we can change this logic if needed.
-      lc_files_in_directory_->SetItem(i, COLUMN_TAGS_PRESENT, L"None");
+      lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"None");
       lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_UNTAGGED);
     }
 

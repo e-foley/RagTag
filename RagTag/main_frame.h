@@ -44,7 +44,7 @@ private:
 
   enum FileViewColumn {
     COLUMN_FILENAME,
-    COLUMN_TAGS_PRESENT,
+    COLUMN_TAG_COVERAGE,
     COLUMN_RATING
   };
 
