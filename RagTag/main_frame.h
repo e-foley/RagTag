@@ -50,6 +50,13 @@ private:
     COLUMN_RATING
   };
 
+  enum class TagCoverage {
+    NONE,
+    SOME,
+    ALL,
+    NO_TAGS_DEFINED
+  };
+
   static const wxColour BACKGROUND_COLOR_FULLY_TAGGED;
   static const wxColour BACKGROUND_COLOR_PARTLY_TAGGED;
   static const wxColour BACKGROUND_COLOR_FULLY_UNTAGGED;
@@ -105,6 +112,8 @@ private:
   // Helper functions
   static std::optional<ragtag::path_t> qualifiedFileNavigator(
     const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);
+  TagCoverage getFileTagCoverage(const ragtag::path_t& file) const;
+
 
   wxScrolledWindow* p_tag_toggles_{ nullptr };
   wxBoxSizer* sz_tag_toggles_{ nullptr };

@@ -268,49 +268,25 @@ void MainFrame::refreshFileView()
       lc_files_in_directory_->SetItem(i, COLUMN_RATING, L"--");
     }
     
-    // Handle tag presence. If all tags within the tag map are asserted yes or no for the file, the
-    // file is considered fully tagged ("All"). If some but not all are uncommitted, the file is
-    // partly tagged ("Some"). If all are uncommitted, the file is fully untagged ("None").
-    // TODO: Consider moving this function to the TagMap interface.
-    bool any_tag_is_committed = false;
-    bool any_tag_is_uncommitted = false;
-    for (auto tag_it : all_tags) {
-      auto tag_setting = tag_map_.getTagSetting(file_it->path(), tag_it.first);
-      if (!tag_setting.has_value()) {
-        continue;
-      }
-
-      if (*tag_setting == ragtag::TagSetting::NO || *tag_setting == ragtag::TagSetting::YES) {
-        any_tag_is_committed = true;
-      }
-      else if (*tag_setting == ragtag::TagSetting::UNCOMMITTED) {
-        any_tag_is_uncommitted = true;
-      }
-
-      // If we have a mix of committed and uncommitted, we know for sure we're partly tagged.
-      // Nothing can change this, so we can exit the loop early.
-      if (any_tag_is_committed && any_tag_is_uncommitted) {
+    const TagCoverage tag_coverage = getFileTagCoverage(file_it->path());
+    switch (tag_coverage) {
+      case TagCoverage::NONE:
+        lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"None");
+        lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_UNTAGGED);
         break;
-      }
-    }
-
-    if (any_tag_is_committed && !any_tag_is_uncommitted) {
-      lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"All");
-      lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_TAGGED);
-    }
-    else if (any_tag_is_committed && any_tag_is_uncommitted) {
-      lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"Some");
-      lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_PARTLY_TAGGED);
-    }
-    else if (!any_tag_is_committed && any_tag_is_uncommitted) {
-      lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"None");
-      lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_UNTAGGED);
-    }
-    else {
-      // No tags defined, or their settings on the file are somehow invalid.
-      // For now, also present the file as "None", though we can change this logic if needed.
-      lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"None");
-      lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_UNTAGGED);
+      case TagCoverage::SOME:
+        lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"Some");
+        lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_PARTLY_TAGGED);
+        break;
+      case TagCoverage::ALL:
+        lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"All");
+        lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_TAGGED);
+        break;
+      default:
+      case TagCoverage::NO_TAGS_DEFINED:
+        lc_files_in_directory_->SetItem(i, COLUMN_TAG_COVERAGE, L"--");
+        lc_files_in_directory_->SetItemBackgroundColour(i, BACKGROUND_COLOR_FULLY_UNTAGGED);
+        break;
     }
 
     ++i;
@@ -1054,4 +1030,48 @@ std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigator(
   //
   // TODO: Report error.
   return {};
+}
+
+MainFrame::TagCoverage MainFrame::getFileTagCoverage(const ragtag::path_t& file) const
+{
+  if (tag_map_.numTags() == 0) {
+    return TagCoverage::NO_TAGS_DEFINED;
+  }
+
+  // Handle tag presence. If all tags within the tag map are asserted yes or no for the file, the
+  // file is considered fully tagged. If some but not all are uncommitted, the file is partly
+  // tagged. If all are uncommitted, the file is fully untagged ("None").
+  // TODO: Consider moving this function to the TagMap interface.
+  bool any_tag_is_committed = false;
+  bool any_tag_is_uncommitted = false;
+  for (auto tag_it : tag_map_.getAllTags()) {
+    auto tag_setting = tag_map_.getTagSetting(file, tag_it.first);
+    if (!tag_setting.has_value()) {
+      continue;
+    }
+
+    if (*tag_setting == ragtag::TagSetting::NO || *tag_setting == ragtag::TagSetting::YES) {
+      any_tag_is_committed = true;
+    }
+    else if (*tag_setting == ragtag::TagSetting::UNCOMMITTED) {
+      any_tag_is_uncommitted = true;
+    }
+
+    // If we have a mix of committed and uncommitted, we know for sure we're partly tagged.
+    // Nothing can change this, so we can return immediately.
+    if (any_tag_is_committed && any_tag_is_uncommitted) {
+      return TagCoverage::SOME;
+    }
+  }
+
+  if (any_tag_is_committed && !any_tag_is_uncommitted) {
+    return TagCoverage::ALL;
+  }
+  else if (!any_tag_is_committed && any_tag_is_uncommitted) {
+    return TagCoverage::NONE;
+  }
+
+  // Shouldn't be possible to get here.
+  // TODO: Record error.
+  return TagCoverage::NONE;
 }
