@@ -19,6 +19,8 @@ public:
   MainFrame();
 
 private:
+  typedef std::function<bool(const ragtag::path_t&)> file_qualifier_t;
+
   enum {
     ID_NONE = 0,
     ID_NEW_PROJECT,
@@ -101,8 +103,8 @@ private:
   static std::optional<ragtag::path_t> getFileAfter(const ragtag::path_t& reference);
   std::optional<ragtag::path_t> getFileBefore(const ragtag::path_t& reference) const;
   // Helper functions
-  static std::optional<ragtag::path_t> qualifiedFileNavigatorHelper(const ragtag::path_t& reference,
-                                                                    bool find_next);
+  static std::optional<ragtag::path_t> qualifiedFileNavigator(
+    const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);
 
   wxScrolledWindow* p_tag_toggles_{ nullptr };
   wxBoxSizer* sz_tag_toggles_{ nullptr };

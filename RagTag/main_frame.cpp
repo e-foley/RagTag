@@ -997,22 +997,23 @@ bool MainFrame::stopMedia()
 
 std::optional<ragtag::path_t> MainFrame::getFileAfter(const ragtag::path_t& reference)
 {
-  return qualifiedFileNavigatorHelper(reference, true);
+  return qualifiedFileNavigator(reference, [](const ragtag::path_t&) {return true; }, true);
 }
 
 std::optional<ragtag::path_t> MainFrame::getFileBefore(const ragtag::path_t& reference) const
 {
-  return qualifiedFileNavigatorHelper(reference, false);
+  return qualifiedFileNavigator(reference, [](const ragtag::path_t&) {return true; }, false);
 }
 
-std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigatorHelper(const ragtag::path_t& reference, bool find_next)
+std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigator(
+  const ragtag::path_t& reference, const MainFrame::file_qualifier_t& qualifier, bool find_next)
 {
   if (!reference.has_parent_path()) {
     return {};
   }
 
-  auto isQualified = [](const std::filesystem::path& file_it) {
-    return std::filesystem::is_regular_file(file_it);
+  auto isQualified = [&qualifier](const std::filesystem::path& file_it) {
+    return std::filesystem::is_regular_file(file_it) && qualifier(file_it);
     };
 
   // Strategy is to construct a vector of paths to regular, qualified files within this directory,
