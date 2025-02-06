@@ -1011,32 +1011,46 @@ std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigatorHelper(const ragt
     return {};
   }
 
+  auto isQualified = [](const std::filesystem::path& file_it) {
+    return std::filesystem::is_regular_file(file_it);
+    };
+
   // Strategy is to construct a vector of paths to regular, qualified files within this directory,
   // find the entry that matches our reference file, then return the neighboring entry.
   //
   // This approach is a little cheesy, but IMO it's easier to follow than maintaining multiple
-  // directory iterators that all need to be conditioned to seek only regular files.
-  std::vector<ragtag::path_t> regular_files;
+  // directory iterators that all need to be conditioned to seek only qualified files.
+  std::vector<ragtag::path_t> qualified_or_self;
   for (std::filesystem::directory_iterator dir_it(reference.parent_path());
     dir_it != std::filesystem::directory_iterator(); ++dir_it) {
-    if (dir_it->is_regular_file()) {
-      regular_files.push_back(dir_it->path());
+    // If it's qualified, add it to our vector. Also include our reference file regardless of its
+    // qualifications such that we can obtain a reference index afterward.
+    if (isQualified(dir_it->path()) || dir_it->path() == reference) {
+      qualified_or_self.push_back(dir_it->path());
     }
   }
 
-  if (regular_files.empty()) {
-    // No files in the reference directory are regular, so we have nothing to return.
+  if (qualified_or_self.empty()) {
+    // Somehow, we have no files. (We didn't even encounter our reference file.)
     return {};
   }
 
-  for (int i = 0; i < regular_files.size(); ++i) {
-    if (regular_files[i] == reference) {
-      const size_t seek_index = find_next ? (i + 1) % regular_files.size()
-        : (i + regular_files.size() - 1) % regular_files.size();
-      return regular_files[seek_index];
+  if (qualified_or_self.size() == 1) {
+    // We only have our reference file, meaning no other files in the directory are qualified.
+    return isQualified(reference) ? reference : std::optional<ragtag::path_t>();
+  }
+
+  for (int i = 0; i < qualified_or_self.size(); ++i) {
+    if (qualified_or_self[i] == reference) {
+      const size_t seek_index = find_next ? (i + 1) % qualified_or_self.size()
+        : (i + qualified_or_self.size() - 1) % qualified_or_self.size();
+      return qualified_or_self[seek_index];
     }
   }
 
-  // We didn't encounter our reference file. Perhaps the reference file itself is not regular.
+  // We didn't encounter our reference file. This shouldn't happen, since we added our reference
+  // file to the `qualified_or_self` vector earlier.
+  //
+  // TODO: Report error.
   return {};
 }
