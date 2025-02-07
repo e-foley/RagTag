@@ -246,7 +246,7 @@ void MainFrame::refreshFileView()
     }
 
     if (i >= lc_files_in_directory_->GetItemCount()) {
-      // We're expanding beyond the current capacity and need to insert new item.
+      // We're expanding beyond the current capacity and need to insert a new item.
       lc_files_in_directory_->InsertItem(i, file_it->path().filename().generic_wstring());
     }
     else {
