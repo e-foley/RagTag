@@ -113,7 +113,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
 
   lc_files_in_directory_ = new wxListCtrl(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxLC_REPORT);
+    wxLC_REPORT | wxLC_SINGLE_SEL);
   lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
   lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
   lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
