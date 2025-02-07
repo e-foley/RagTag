@@ -61,9 +61,14 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_tag_toggles_button_bar = new wxBoxSizer(wxHORIZONTAL);
   p_tag_toggles_button_bar->SetSizer(sz_tag_toggles_button_bar);
+  wxButton* b_clear_tags_from_file = new wxButton(p_tag_toggles_button_bar, ID_CLEAR_TAGS_FROM_FILE,
+    "Clear Tags from File");
+  sz_tag_toggles_button_bar->Add(b_clear_tags_from_file, 0, wxALL, 5);
+  wxButton* b_set_tags_to_defaults = new wxButton(p_tag_toggles_button_bar, ID_SET_TAGS_TO_DEFAULTS,
+    "Set Tags to Defaults");
+  sz_tag_toggles_button_bar->Add(b_set_tags_to_defaults, 0, wxALL, 5);
   wxButton* b_define_new_tag = new wxButton(p_tag_toggles_button_bar, ID_DEFINE_NEW_TAG,
     "Define New Tag...");
-  sz_tag_toggles_button_bar->AddStretchSpacer(1);  // Empty space at left to force right-alignment.
   sz_tag_toggles_button_bar->Add(b_define_new_tag, 0, wxALL, 5);
   sz_left->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 5);
 
@@ -153,6 +158,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnPreviousFile, this, ID_PREVIOUS_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
+  Bind(wxEVT_BUTTON, &MainFrame::OnClearTagsFromFile, this, ID_CLEAR_TAGS_FROM_FILE);
+  Bind(wxEVT_BUTTON, &MainFrame::OnSetTagsToDefaults, this, ID_SET_TAGS_TO_DEFAULTS);
   Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
   Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this, ID_STOP_MEDIA);
   Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
@@ -597,6 +604,34 @@ void MainFrame::OnAbout(wxCommandEvent& event) {
 #endif
 
   wxMessageBox(about_string, "About", wxOK | wxICON_INFORMATION);
+}
+
+void MainFrame::OnClearTagsFromFile(wxCommandEvent& event)
+{
+  if (!active_file_.has_value()) {
+    return;
+  }
+
+  for (auto tag : tag_map_.getAllTags()) {
+    tag_map_.clearTag(*active_file_, tag.first);
+  }
+
+  refreshTagToggles();
+  refreshFileView();
+}
+
+void MainFrame::OnSetTagsToDefaults(wxCommandEvent& event)
+{
+  if (!active_file_.has_value()) {
+    return;
+  }
+
+  for (auto tag : tag_map_.getAllTags()) {
+    tag_map_.setTag(*active_file_, tag.first, tag.second.default_setting);
+  }
+
+  refreshTagToggles();
+  refreshFileView();
 }
 
 void MainFrame::OnStopMedia(wxCommandEvent& event) {

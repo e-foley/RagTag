@@ -30,6 +30,8 @@ private:
     ID_LOAD_FILE,
     ID_NEXT_FILE,
     ID_PREVIOUS_FILE,
+    ID_CLEAR_TAGS_FROM_FILE,
+    ID_SET_TAGS_TO_DEFAULTS,
     ID_DEFINE_NEW_TAG,
     ID_MEDIA_CTRL,
     ID_STOP_MEDIA,
@@ -76,6 +78,8 @@ private:
   void OnClose(wxCloseEvent& event);
   void OnAbout(wxCommandEvent& event);
   // Button events
+  void OnClearTagsFromFile(wxCommandEvent& event);
+  void OnSetTagsToDefaults(wxCommandEvent& event);
   void OnDefineNewTag(wxCommandEvent& event);
   void OnTagToggleButtonClick(TagToggleButtonEvent& event);
   void OnStopMedia(wxCommandEvent& event);
