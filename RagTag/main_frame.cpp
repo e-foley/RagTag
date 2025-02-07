@@ -297,6 +297,18 @@ void MainFrame::refreshFileView()
   for (int j = i; j < num_list_view_entries_original; ++j) {
     lc_files_in_directory_->DeleteItem(lc_files_in_directory_->GetItemCount() - 1);
   }
+
+  // Handle highlighting: Only the active file should be highlighted; all others should be
+  // unhighlighted.
+  auto active_file_index = getPathListCtrlIndex(*active_file_);
+  for (long i = 0; i < lc_files_in_directory_->GetItemCount(); ++i) {
+    if (active_file_index.has_value() && i == *active_file_index) {
+      lc_files_in_directory_->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+    }
+    else {
+      lc_files_in_directory_->SetItemState(i, 0, wxLIST_STATE_SELECTED);
+    }
+  }
 }
 
 void MainFrame::OnNewProject(wxCommandEvent& event) {
