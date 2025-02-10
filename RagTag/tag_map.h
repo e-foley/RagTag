@@ -14,6 +14,7 @@ namespace ragtag {
   typedef std::string tag_t;
   typedef std::filesystem::path path_t;
   typedef float rating_t;
+  typedef wchar_t rtchar_t;
 
   enum class TagSetting {
     NO = 0,
@@ -23,9 +24,11 @@ namespace ragtag {
 
   struct TagProperties {
     TagSetting default_setting{TagSetting::NO};
+    std::optional<rtchar_t> hotkey{};
 
     bool operator==(const TagProperties& rhs) const noexcept {
-      return default_setting == rhs.default_setting;
+      return default_setting == rhs.default_setting &&
+        hotkey == rhs.hotkey;
     }
   };
 
