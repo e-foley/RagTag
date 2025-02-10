@@ -21,8 +21,10 @@ public:
 private:
   typedef std::function<bool(const ragtag::path_t&)> file_qualifier_t;
 
+  // Implementation note: IDs of 0 and 1 are not allowed per wxWidgets documentation:
+  // https://docs.wxwidgets.org/latest/overview_windowids.html
   enum {
-    ID_NONE = 0,
+    ID_NONE = 2,
     ID_NEW_PROJECT,
     ID_OPEN_PROJECT,
     ID_SAVE_PROJECT,
