@@ -95,8 +95,23 @@ void TagTogglePanel::OnCheckboxChange(wxCommandEvent& event) {
 void TagTogglePanel::OnKeyDown(wxKeyEvent& event)
 {
   if (hotkey_.has_value() && event.GetUnicodeKey() == *hotkey_) {
-    // TODO: Process event.
-    event = event;
+    TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::UPDATE_TAG_STATE);
+    switch (event.GetModifiers()) {
+    case wxMOD_NONE:
+      sending.setDesiredState(ragtag::TagSetting::YES);
+      wxPostEvent(GetParent(), sending);
+      break;
+    case wxMOD_ALT:
+      sending.setDesiredState(ragtag::TagSetting::UNCOMMITTED);
+      wxPostEvent(GetParent(), sending);
+      break;
+    case wxMOD_SHIFT:
+      sending.setDesiredState(ragtag::TagSetting::NO);
+      wxPostEvent(GetParent(), sending);
+      break;
+    default:
+      break;
+    }
   }
   event.Skip();
 }
