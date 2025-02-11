@@ -10,9 +10,9 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent)
 
 TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
   const ragtag::TagProperties& tag_properties) : wxDialog(parent, wxID_ANY, "Create/Modify Tag",
-    wxDefaultPosition, wxSize(320, 320)), parent_(parent), response_(Response{}) {
-  response_->tag = tag;
-  response_->tag_properties = tag_properties;
+    wxDefaultPosition, wxSize(320, 320)), parent_(parent) {
+  response_.tag = tag;
+  response_.tag_properties = tag_properties;
 
   wxBoxSizer* sz_rows = new wxBoxSizer(wxVERTICAL);
   this->SetSizer(sz_rows);
@@ -21,14 +21,14 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
   sz_text_entry_grid->AddGrowableCol(1, 1);
   wxStaticText* st_tag_name = new wxStaticText(this, wxID_ANY, "Tag name:");
   sz_text_entry_grid->Add(st_tag_name, 0, wxALL, 5);
-  std::string default_tag_text = response_->tag;
+  std::string default_tag_text = response_.tag;
   tc_tag_name_ = new wxTextCtrl(this, wxID_ANY, default_tag_text);
   sz_text_entry_grid->Add(tc_tag_name_, 1, wxALL | wxEXPAND, 5);
   wxStaticText* st_hotkey = new wxStaticText(this, wxID_ANY, "Hotkey:");
   sz_text_entry_grid->Add(st_hotkey, 0, wxALL, 5);
   std::string default_hotkey_text;
-  if (response_->tag_properties.hotkey.has_value()) {
-    default_hotkey_text = *response_->tag_properties.hotkey;
+  if (response_.tag_properties.hotkey.has_value()) {
+    default_hotkey_text = *response_.tag_properties.hotkey;
   }
   else {
     default_hotkey_text = "";
@@ -48,10 +48,10 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
     wxDefaultPosition, wxDefaultSize, 3, choices, 1, wxRA_SPECIFY_COLS);
 
   int selection_index = 0;
-  if (response_->tag_properties.default_setting == ragtag::TagSetting::YES) {
+  if (response_.tag_properties.default_setting == ragtag::TagSetting::YES) {
     selection_index = 1;
   }
-  else if (response_->tag_properties.default_setting == ragtag::TagSetting::UNCOMMITTED) {
+  else if (response_.tag_properties.default_setting == ragtag::TagSetting::UNCOMMITTED) {
     selection_index = 2;
   }
 
@@ -78,11 +78,14 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
 }
 
 std::optional<TagEntryDialog::Response> TagEntryDialog::promptTagEntry() {
-  if (this->ShowModal() == wxID_CANCEL) {
+  response_confirmed_ = false;
+  ShowModal();
+  if (response_confirmed_) {
+    return response_;
+  }
+  else {
     return {};
   }
-
-  return response_;
 }
 
 void TagEntryDialog::OnOk(wxCommandEvent& event) {
@@ -128,13 +131,13 @@ void TagEntryDialog::OnOk(wxCommandEvent& event) {
     tag_properties.hotkey = {};
   }
 
-  response_ = response_pending;
-
   // TODO: Validate the entry first?
+  response_ = response_pending;
+  response_confirmed_ = true;
   Close();
 }
 
 void TagEntryDialog::OnCancel(wxCommandEvent& event) {
-  response_ = {};
+  response_confirmed_ = false;
   Close();
 }

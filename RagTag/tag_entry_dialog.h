@@ -17,8 +17,9 @@ public:
     bool apply_to_all_project_files{ false };
   };
 
+  // wxWidgets requires custom IDs to be at least 2.
   enum {
-    ID_CANCEL = 0,
+    ID_CANCEL = 2,
     ID_OK
   };
 
@@ -31,7 +32,8 @@ private:
   void OnOk(wxCommandEvent& event);
   void OnCancel(wxCommandEvent& event);
 
-  std::optional<Response> response_;
+  Response response_{};
+  bool response_confirmed_{ false };
   wxWindow* parent_{ nullptr };
   wxTextCtrl* tc_tag_name_{ nullptr };
   wxTextCtrl* tc_hotkey_{ nullptr };
