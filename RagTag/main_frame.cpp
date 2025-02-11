@@ -212,7 +212,8 @@ void MainFrame::refreshTagToggles() {
       continue;
     }
 
-    TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_tag_toggles_, tag_element.first);
+    TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_tag_toggles_, tag_element.first,
+      tag_element.first, tag_element.second.hotkey);
     sz_tag_toggles_->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
     p_tag_toggle->setCheckBoxState(*tag_setting);
   }

@@ -8,8 +8,8 @@
 
 class TagTogglePanel : public wxPanel {
 public:
-  TagTogglePanel(wxWindow* parent, ragtag::tag_t tag);
-  TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string label);
+  TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string label,
+    std::optional<ragtag::rtchar_t> hotkey);
   virtual ~TagTogglePanel();
   // This function does not emit a checkbox event.
   void setCheckBoxState(ragtag::TagSetting state);
@@ -21,6 +21,7 @@ private:
   void OnCheckboxChange(wxCommandEvent& event);
 
   ragtag::tag_t tag_{};
+  std::optional<ragtag::rtchar_t> hotkey_{};
   wxCheckBox* cb_tag_toggle_{ nullptr };
 };
 

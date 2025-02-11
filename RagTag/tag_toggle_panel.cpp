@@ -2,16 +2,21 @@
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/sizer.h>
+#include <wx/stattext.h>
 
 wxDEFINE_EVENT(TAG_TOGGLE_BUTTON_EVENT, TagToggleButtonEvent);
 
-TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag)
-  : TagTogglePanel(parent, tag, tag) {}
-
-TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string label)
-    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_RAISED), tag_(tag) {
+TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string label,
+  std::optional<ragtag::rtchar_t> hotkey) 
+  : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_RAISED), tag_(tag),
+  hotkey_(hotkey) {
   wxBoxSizer* sz_tag_toggle = new wxBoxSizer(wxHORIZONTAL);
   this->SetSizer(sz_tag_toggle);
+
+  wxStaticText* st_hotkey = new wxStaticText(this, wxID_ANY,
+    hotkey_.has_value() ? wxString(*hotkey_) : wxString(wxEmptyString), wxDefaultPosition,
+    wxSize(12, -1), wxALIGN_CENTRE_HORIZONTAL | wxST_NO_AUTORESIZE);
+  sz_tag_toggle->Add(st_hotkey, 0, wxALIGN_CENTER | wxALL, 5);
 
   cb_tag_toggle_ = new wxCheckBox(this, wxID_ANY, label,
     wxDefaultPosition, wxDefaultSize, wxCHK_3STATE | wxCHK_ALLOW_3RD_STATE_FOR_USER);
