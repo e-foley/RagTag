@@ -31,7 +31,7 @@ private:
   void OnOk(wxCommandEvent& event);
   void OnCancel(wxCommandEvent& event);
 
-  Response response_;
+  std::optional<Response> response_;
   wxWindow* parent_{ nullptr };
   wxTextCtrl* tc_tag_name_{ nullptr };
   wxTextCtrl* tc_hotkey_{ nullptr };
