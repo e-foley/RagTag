@@ -28,7 +28,6 @@ public:
   std::optional<Response> promptTagEntry();
 
 private:
-  //TagEntryDialog(wxWindow* parent, bool has_tag_info, const std::optional<tag_entry_t>& entry_init_opt);
   void OnOk(wxCommandEvent& event);
   void OnCancel(wxCommandEvent& event);
 
