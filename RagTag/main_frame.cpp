@@ -760,9 +760,9 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
   refreshFileView();
 }
 
-void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
+void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
   switch (event.getDesiredAction()) {
-  case TagToggleButtonEvent::DesiredAction::EDIT_TAG: {
+  case TagToggleEvent::DesiredAction::EDIT_TAG: {
     // Cache existing tag properties for convenience.
     const ragtag::tag_t old_tag = event.getTag();
     const auto props_ret = tag_map_.getTagProperties(old_tag);
@@ -802,7 +802,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
     SetStatusText("Modified tag '" + old_tag + "'/'" + new_tag + "'.");
     break;
   }
-  case TagToggleButtonEvent::DesiredAction::DELETE_TAG: {
+  case TagToggleEvent::DesiredAction::DELETE_TAG: {
     if (promptConfirmTagDeletion(event.getTag())) {
       // TODO: Don't assume that changes have been made.
       is_dirty_ = true;
@@ -817,7 +817,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleButtonEvent& event) {
     }
     break;
   }
-  case TagToggleButtonEvent::DesiredAction::UPDATE_TAG_STATE: {
+  case TagToggleEvent::DesiredAction::UPDATE_TAG_STATE: {
     if (active_file_.has_value()) {
       // TODO: Don't assume that changes have been made.
       is_dirty_ = true;

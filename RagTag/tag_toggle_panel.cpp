@@ -4,7 +4,7 @@
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 
-wxDEFINE_EVENT(TAG_TOGGLE_BUTTON_EVENT, TagToggleButtonEvent);
+wxDEFINE_EVENT(TAG_TOGGLE_BUTTON_EVENT, TagToggleEvent);
 
 TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string label,
   std::optional<ragtag::rtchar_t> hotkey) 
@@ -65,17 +65,17 @@ ragtag::TagSetting TagTogglePanel::getCheckBoxState() const {
 }
 
 void TagTogglePanel::OnClickEdit(wxCommandEvent& event) {
-  TagToggleButtonEvent sending(tag_, TagToggleButtonEvent::DesiredAction::EDIT_TAG);
+  TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::EDIT_TAG);
   wxPostEvent(GetParent(), sending);
 }
 
 void TagTogglePanel::OnClickDelete(wxCommandEvent& event) {
-  TagToggleButtonEvent sending(tag_, TagToggleButtonEvent::DesiredAction::DELETE_TAG);
+  TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::DELETE_TAG);
   wxPostEvent(GetParent(), sending);
 }
 
 void TagTogglePanel::OnCheckboxChange(wxCommandEvent& event) {
-  TagToggleButtonEvent sending(tag_, TagToggleButtonEvent::DesiredAction::UPDATE_TAG_STATE);
+  TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::UPDATE_TAG_STATE);
   switch (cb_tag_toggle_->Get3StateValue()) {
   case wxCHK_UNCHECKED:
     sending.setDesiredState(ragtag::TagSetting::NO);

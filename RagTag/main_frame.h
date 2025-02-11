@@ -83,7 +83,7 @@ private:
   void OnClearTagsFromFile(wxCommandEvent& event);
   void OnSetTagsToDefaults(wxCommandEvent& event);
   void OnDefineNewTag(wxCommandEvent& event);
-  void OnTagToggleButtonClick(TagToggleButtonEvent& event);
+  void OnTagToggleButtonClick(TagToggleEvent& event);
   void OnStopMedia(wxCommandEvent& event);
   void OnPlayPauseMedia(wxCommandEvent& event);
   void OnPreviousUntaggedFile(wxCommandEvent& event);

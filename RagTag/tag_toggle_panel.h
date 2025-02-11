@@ -27,12 +27,12 @@ private:
 };
 
 
-class TagToggleButtonEvent;
-wxDECLARE_EVENT(TAG_TOGGLE_BUTTON_EVENT, TagToggleButtonEvent);
+class TagToggleEvent;
+wxDECLARE_EVENT(TAG_TOGGLE_BUTTON_EVENT, TagToggleEvent);
 
 // Extension of wxCommandEvent that communicates info specific to the tag being modified.
 // Approach adapted from https://wiki.wxwidgets.org/Custom_Events#Subclassing_wxCommandEvent.
-class TagToggleButtonEvent : public wxCommandEvent {
+class TagToggleEvent : public wxCommandEvent {
 public:
   enum class DesiredAction {
     NONE,
@@ -43,19 +43,19 @@ public:
 
   // NOTE: wxCommandEvent ctrl allows communication of a specific ID. Until we have use for that, we
   // will default it to 0.
-  TagToggleButtonEvent(ragtag::tag_t tag, DesiredAction action,
+  TagToggleEvent(ragtag::tag_t tag, DesiredAction action,
     ragtag::TagSetting desired_state = ragtag::TagSetting::UNCOMMITTED)
     : wxCommandEvent(TAG_TOGGLE_BUTTON_EVENT, 0), tag_(tag), desired_state_(desired_state),
     desired_action_(action) {}
 
-  TagToggleButtonEvent(const TagToggleButtonEvent& event) : wxCommandEvent(event) {
+  TagToggleEvent(const TagToggleEvent& event) : wxCommandEvent(event) {
     tag_ = event.tag_;
     desired_state_ = event.desired_state_;
     desired_action_ = event.desired_action_;
   }
 
   wxEvent* Clone() const {
-    return new TagToggleButtonEvent(*this);
+    return new TagToggleEvent(*this);
   }
 
   ragtag::tag_t getTag() const {
@@ -88,7 +88,7 @@ private:
   DesiredAction desired_action_{DesiredAction::NONE};
 };
 
-typedef void (wxEvtHandler::* TagToggleButtonEventFunction)(TagToggleButtonEvent&);
+typedef void (wxEvtHandler::* TagToggleButtonEventFunction)(TagToggleEvent&);
 #define TagToggleButtonEventHandler(func) wxEVENT_HANDLER_CAST(TagToggleButtonEventFunction, func)
 
 #endif  // INCLUDE_TAG_TOGGLE_PANEL_H
