@@ -8,7 +8,7 @@ wxDEFINE_EVENT(TAG_TOGGLE_BUTTON_EVENT, TagToggleButtonEvent);
 
 TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string label,
   std::optional<ragtag::rtchar_t> hotkey) 
-  : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_RAISED), tag_(tag),
+  : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_RAISED | wxWANTS_CHARS), tag_(tag),
   hotkey_(hotkey) {
   wxBoxSizer* sz_tag_toggle = new wxBoxSizer(wxHORIZONTAL);
   this->SetSizer(sz_tag_toggle);
@@ -31,6 +31,7 @@ TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string 
   Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickEdit, this, b_tag_edit->GetId());
   Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickDelete, this, b_tag_delete->GetId());
   Bind(wxEVT_CHECKBOX, &TagTogglePanel::OnCheckboxChange, this, cb_tag_toggle_->GetId());
+  parent->Bind(wxEVT_CHAR_HOOK, &TagTogglePanel::OnKeyDown, this);
 }
 
 TagTogglePanel::~TagTogglePanel() {}
@@ -89,4 +90,13 @@ void TagTogglePanel::OnCheckboxChange(wxCommandEvent& event) {
   }
 
   wxPostEvent(GetParent(), sending);
+}
+
+void TagTogglePanel::OnKeyDown(wxKeyEvent& event)
+{
+  if (hotkey_.has_value() && event.GetUnicodeKey() == *hotkey_) {
+    // TODO: Process event.
+    event = event;
+  }
+  event.Skip();
 }

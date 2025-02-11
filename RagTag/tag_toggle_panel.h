@@ -19,6 +19,7 @@ private:
   void OnClickEdit(wxCommandEvent& event);
   void OnClickDelete(wxCommandEvent& event);
   void OnCheckboxChange(wxCommandEvent& event);
+  void OnKeyDown(wxKeyEvent& event);
 
   ragtag::tag_t tag_{};
   std::optional<ragtag::rtchar_t> hotkey_{};
