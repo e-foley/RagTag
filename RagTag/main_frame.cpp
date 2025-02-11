@@ -117,6 +117,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
 
+  st_current_directory_ = new wxStaticText(p_right, wxID_ANY, wxEmptyString);
+  sz_right->Add(st_current_directory_, 0, wxEXPAND | wxALL, 5);
+
   lc_files_in_directory_ = new wxListCtrl(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
     wxLC_REPORT | wxLC_SINGLE_SEL);
   lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
@@ -229,6 +232,7 @@ void MainFrame::refreshFileView()
   if (!active_file_.has_value()) {
     lc_files_in_directory_->DeleteAllItems();
     file_paths_.clear();
+    st_current_directory_->SetLabelText("Current directory: (None)");
     return;
   }
 
@@ -243,6 +247,7 @@ void MainFrame::refreshFileView()
   const int num_list_view_entries_original = lc_files_in_directory_->GetItemCount();
 
   const ragtag::path_t parent_directory = active_file_->parent_path();
+  st_current_directory_->SetLabelText(L"Current directory: " + parent_directory.generic_wstring());
 
   int i = 0;
   // Note: directory_iterator documentation explains that the end iterator is equal to the

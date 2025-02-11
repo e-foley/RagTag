@@ -13,6 +13,7 @@
 #include <wx/mediactrl.h>
 #include <wx/scrolwin.h>
 #include <wx/sizer.h>
+#include <wx/stattext.h>
 
 class MainFrame : public wxFrame {
 public:
@@ -132,6 +133,7 @@ private:
   wxCheckBox* cb_loop_{ nullptr };
   wxCheckBox* cb_mute_{ nullptr };
   wxButton* b_play_pause_media_{ nullptr };
+  wxStaticText* st_current_directory_{ nullptr };
   wxListCtrl* lc_files_in_directory_{ nullptr };
   // Parallel array of full paths to files presented by lc_files_in_directory_, since they cannot be
   // included directly. It's not pretty design, but it's the best way I could come up with given
