@@ -11,22 +11,35 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, const tag_entry_t& entry_init)
   : TagEntryDialog(parent, std::optional<tag_entry_t>{entry_init}) {}
 
 TagEntryDialog::TagEntryDialog(wxWindow* parent, const std::optional<tag_entry_t>& entry_init_opt)
-  : wxDialog(parent, wxID_ANY, "Create/Modify Tag", wxDefaultPosition, wxSize(300, 250)),
+  : wxDialog(parent, wxID_ANY, "Create/Modify Tag", wxDefaultPosition, wxSize(300, 280)),
   parent_(parent), entry_(entry_init_opt) {
   wxBoxSizer* sz_rows = new wxBoxSizer(wxVERTICAL);
   this->SetSizer(sz_rows);
 
-  wxBoxSizer* sz_tag_entry_row = new wxBoxSizer(wxHORIZONTAL);
+  //wxBoxSizer* sz_tag_entry_row = new wxBoxSizer(wxHORIZONTAL);
+  wxFlexGridSizer* sz_text_entry_grid = new wxFlexGridSizer(2, 5, 5);  // cols, vgap, hgap
+  sz_text_entry_grid->AddGrowableCol(1, 1);
   wxStaticText* st_tag_name = new wxStaticText(this, wxID_ANY, "Tag name:");
-  sz_tag_entry_row->Add(st_tag_name, 0, wxALL, 5);
+  sz_text_entry_grid->Add(st_tag_name, 0, wxALL, 5);
   std::string default_tag_text = entry_.has_value() ? entry_->first : "new tag";
   tc_tag_name_ = new wxTextCtrl(this, wxID_ANY, default_tag_text);
-  sz_tag_entry_row->Add(tc_tag_name_, 1, wxALL, 5);
-  sz_rows->Add(sz_tag_entry_row, 0, wxEXPAND | wxALL, 5);
+  sz_text_entry_grid->Add(tc_tag_name_, 1, wxALL | wxEXPAND, 5);
+  wxStaticText* st_hotkey = new wxStaticText(this, wxID_ANY, "Hotkey:");
+  sz_text_entry_grid->Add(st_hotkey, 0, wxALL, 5);
+  std::string default_hotkey_text;
+  if (entry_.has_value() && entry_->second.hotkey.has_value()) {
+    default_hotkey_text = *(entry_->second.hotkey);
+  }
+  else {
+    default_hotkey_text = "";
+  }
+  tc_hotkey_ = new wxTextCtrl(this, wxID_ANY, default_hotkey_text, wxDefaultPosition, wxDefaultSize);
+  tc_hotkey_->SetMaxLength(1);
+  sz_text_entry_grid->Add(tc_hotkey_, 1, wxALL | wxEXPAND, 5);
+
+  sz_rows->Add(sz_text_entry_grid, 0, wxEXPAND | wxALL, 5);
 
   wxBoxSizer* sz_default_setting_row = new wxBoxSizer(wxHORIZONTAL);
-  //wxStaticText* st_default_setting_label = new wxStaticText(this, wxID_ANY, "Default setting:");
-  //sz_default_setting_row->Add(st_default_setting_label, 0, wxALL, 5);
 
   // TODO: Tie this array closer to switch labels used in OnOk() and selection_index logic below.
   // NOTE: Make sure this and switch labels in OnOk() match!
@@ -85,6 +98,26 @@ void TagEntryDialog::OnOk(wxCommandEvent& event) {
   case 2:
     tag_properties.default_setting = ragtag::TagSetting::UNCOMMITTED;
     break;
+  }
+
+  const wxString hotkey_text = tc_hotkey_->GetLineText(0);
+  if (hotkey_text.Length() > 0) {
+    wxChar hotkey_char = hotkey_text.GetChar(0);
+    if (hotkey_char >= L'a' && hotkey_char <= L'z') {
+      hotkey_char -= 32;  // Lowercase appears 32 positions after uppercase.
+    }
+    if (hotkey_char >= L'A' && hotkey_char <= L'Z') {
+      tag_properties.hotkey = hotkey_char;
+    }
+    else {
+      // Invalid hotkey entered.
+      // TODO: Report this somehow?
+      tag_properties.hotkey = {};
+    }
+  }
+  else {
+    // Empty hotkey text.
+    tag_properties.hotkey = {};
   }
 
   entry_ = tag_entry_pending;

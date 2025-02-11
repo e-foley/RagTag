@@ -29,6 +29,7 @@ private:
   std::optional<std::pair<ragtag::tag_t, ragtag::TagProperties>> entry_{};
   wxWindow* parent_{ nullptr };
   wxTextCtrl* tc_tag_name_{ nullptr };
+  wxTextCtrl* tc_hotkey_{ nullptr };
   wxRadioBox* rb_default_setting_{ nullptr };
 };
 
