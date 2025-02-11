@@ -10,7 +10,7 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent)
 
 TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
   const ragtag::TagProperties& tag_properties) : wxDialog(parent, wxID_ANY, "Create/Modify Tag",
-    wxDefaultPosition, wxSize(300, 320)), parent_(parent), response_() {
+    wxDefaultPosition, wxSize(320, 320)), parent_(parent), response_() {
   response_.tag = tag;
   response_.tag_properties = tag_properties;
 
@@ -60,7 +60,7 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
   sz_default_setting_row->Add(rb_default_setting_, 1, wxALL, 5);
   sz_rows->Add(sz_default_setting_row, 0, wxEXPAND | wxALL, 5);
 
-  cb_apply_to_all_files_ = new wxCheckBox(this, wxID_ANY, "Apply default to all files in project",
+  cb_apply_to_all_files_ = new wxCheckBox(this, wxID_ANY, "Replace uncommitted tag status in existing files",
     wxDefaultPosition, wxDefaultSize);
   sz_rows->Add(cb_apply_to_all_files_, 0, wxALL, 10);
 
