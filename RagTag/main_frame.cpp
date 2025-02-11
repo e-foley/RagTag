@@ -733,25 +733,34 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
     return;
   }
 
-  if (tag_map_.isTagRegistered(tag_entry_result->first)) {
+  if (tag_map_.isTagRegistered(tag_entry_result->tag)) {
     // The "newly created" tag has a name that's already registered.
     // TODO: Report error.
-    SetStatusText("Tag '" + tag_entry_result->first + "' is already registered.");
+    SetStatusText("Tag '" + tag_entry_result->tag + "' is already registered.");
     return;
   }
 
-  if (!tag_map_.registerTag(tag_entry_result->first, tag_entry_result->second)) {
+  if (!tag_map_.registerTag(tag_entry_result->tag, tag_entry_result->tag_properties)) {
     // TODO: Report error.
-    SetStatusText("Could not register tag '" + tag_entry_result->first + "'.");
+    SetStatusText("Could not register tag '" + tag_entry_result->tag + "'.");
     return;
+  }
+
+  if (tag_entry_result->apply_to_all_project_files) {
+    auto all_files = tag_map_.getAllFiles();
+    for (auto file : all_files) {
+      // TODO: Log if any of these fails.
+      tag_map_.setTag(file, tag_entry_result->tag,
+        tag_entry_result->tag_properties.default_setting);
+    }
   }
 
   // Assign the tag's default to the currently opened file, if applicable.
   if (active_file_.has_value()) {
-    if (!tag_map_.setTag(*active_file_, tag_entry_result->first,
-      tag_entry_result->second.default_setting)) {
+    if (!tag_map_.setTag(*active_file_, tag_entry_result->tag,
+      tag_entry_result->tag_properties.default_setting)) {
       // TODO: Report error.
-      SetStatusText("Could not set tag '" + tag_entry_result->first + "' on currently open file.");
+      SetStatusText("Could not set tag '" + tag_entry_result->tag + "' on currently open file.");
     }
   }
 
@@ -774,7 +783,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
     }
     const ragtag::TagProperties old_props = *props_ret;
 
-    TagEntryDialog* tag_entry_frame = new TagEntryDialog(this, {old_tag, old_props});
+    TagEntryDialog* tag_entry_frame = new TagEntryDialog(this, old_tag, old_props);
     auto tag_entry_result = tag_entry_frame->promptTagEntry();
     if (!tag_entry_result.has_value()) {
       // Prompt was canceled. Don't do anything.
@@ -783,7 +792,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
       break;
     }
 
-    const ragtag::tag_t& new_tag = tag_entry_result->first;  // Alias for convenience
+    const ragtag::tag_t& new_tag = tag_entry_result->tag;  // Alias for convenience
 
     // TODO: Don't assume that changes have been made.
     is_dirty_ = true;
@@ -796,8 +805,18 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
       }
     }
 
-    if (!tag_map_.setTagProperties(new_tag, tag_entry_result->second)) {
+    if (!tag_map_.setTagProperties(new_tag, tag_entry_result->tag_properties)) {
       SetStatusText("Could not set properties for tag '" + new_tag + "'.");
+    }
+
+    // Apply default to all files in project if requested.
+    if (tag_entry_result->apply_to_all_project_files) {
+      auto all_files = tag_map_.getAllFiles();
+      for (auto file : all_files) {
+        // TODO: Log if any of these fails.
+        tag_map_.setTag(file, tag_entry_result->tag,
+          tag_entry_result->tag_properties.default_setting);
+      }
     }
 
     SetStatusText("Modified tag '" + old_tag + "'/'" + new_tag + "'.");

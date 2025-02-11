@@ -5,30 +5,30 @@
 #include <wx/wx.h>
 
 TagEntryDialog::TagEntryDialog(wxWindow* parent)
-  : TagEntryDialog(parent, std::optional<tag_entry_t>{}) {};
+  : TagEntryDialog(parent, "new tag", ragtag::TagProperties{}) {
+};
 
-TagEntryDialog::TagEntryDialog(wxWindow* parent, const tag_entry_t& entry_init)
-  : TagEntryDialog(parent, std::optional<tag_entry_t>{entry_init}) {}
+TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
+  const ragtag::TagProperties& tag_properties) : wxDialog(parent, wxID_ANY, "Create/Modify Tag",
+    wxDefaultPosition, wxSize(300, 320)), parent_(parent), response_() {
+  response_.tag = tag;
+  response_.tag_properties = tag_properties;
 
-TagEntryDialog::TagEntryDialog(wxWindow* parent, const std::optional<tag_entry_t>& entry_init_opt)
-  : wxDialog(parent, wxID_ANY, "Create/Modify Tag", wxDefaultPosition, wxSize(300, 280)),
-  parent_(parent), entry_(entry_init_opt) {
   wxBoxSizer* sz_rows = new wxBoxSizer(wxVERTICAL);
   this->SetSizer(sz_rows);
 
-  //wxBoxSizer* sz_tag_entry_row = new wxBoxSizer(wxHORIZONTAL);
   wxFlexGridSizer* sz_text_entry_grid = new wxFlexGridSizer(2, 5, 5);  // cols, vgap, hgap
   sz_text_entry_grid->AddGrowableCol(1, 1);
   wxStaticText* st_tag_name = new wxStaticText(this, wxID_ANY, "Tag name:");
   sz_text_entry_grid->Add(st_tag_name, 0, wxALL, 5);
-  std::string default_tag_text = entry_.has_value() ? entry_->first : "new tag";
+  std::string default_tag_text = response_.tag;
   tc_tag_name_ = new wxTextCtrl(this, wxID_ANY, default_tag_text);
   sz_text_entry_grid->Add(tc_tag_name_, 1, wxALL | wxEXPAND, 5);
   wxStaticText* st_hotkey = new wxStaticText(this, wxID_ANY, "Hotkey:");
   sz_text_entry_grid->Add(st_hotkey, 0, wxALL, 5);
   std::string default_hotkey_text;
-  if (entry_.has_value() && entry_->second.hotkey.has_value()) {
-    default_hotkey_text = *(entry_->second.hotkey);
+  if (response_.tag_properties.hotkey.has_value()) {
+    default_hotkey_text = *response_.tag_properties.hotkey;
   }
   else {
     default_hotkey_text = "";
@@ -48,10 +48,10 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, const std::optional<tag_entry_t
     wxDefaultPosition, wxDefaultSize, 3, choices, 1, wxRA_SPECIFY_COLS);
 
   int selection_index = 0;
-  if (entry_.has_value() && entry_->second.default_setting == ragtag::TagSetting::YES) {
+  if (response_.tag_properties.default_setting == ragtag::TagSetting::YES) {
     selection_index = 1;
   }
-  else if (entry_.has_value() && entry_->second.default_setting == ragtag::TagSetting::UNCOMMITTED) {
+  else if (response_.tag_properties.default_setting == ragtag::TagSetting::UNCOMMITTED) {
     selection_index = 2;
   }
 
@@ -60,6 +60,10 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, const std::optional<tag_entry_t
   sz_default_setting_row->Add(rb_default_setting_, 1, wxALL, 5);
   sz_rows->Add(sz_default_setting_row, 0, wxEXPAND | wxALL, 5);
 
+  cb_apply_to_all_files_ = new wxCheckBox(this, wxID_ANY, "Apply default to all files in project",
+    wxDefaultPosition, wxDefaultSize);
+  sz_rows->Add(cb_apply_to_all_files_, 0, wxALL, 10);
+
   wxBoxSizer* sz_button_row = new wxBoxSizer(wxHORIZONTAL);
   sz_button_row->AddStretchSpacer(1);
   wxButton* b_cancel = new wxButton(this, ID_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize);
@@ -67,23 +71,22 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, const std::optional<tag_entry_t
   wxButton* b_ok = new wxButton(this, ID_OK, "OK", wxDefaultPosition, wxDefaultSize);
   b_ok->SetDefault();
   sz_button_row->Add(b_ok, 0);
-  sz_rows->Add(sz_button_row, 0, wxEXPAND | wxALL, 5);
+  sz_rows->Add(sz_button_row, 0, wxEXPAND | wxALL, 10);
 
   Bind(wxEVT_BUTTON, &TagEntryDialog::OnOk, this, ID_OK);
   Bind(wxEVT_BUTTON, &TagEntryDialog::OnCancel, this, ID_CANCEL);
 }
 
-std::optional<TagEntryDialog::tag_entry_t> TagEntryDialog::promptTagEntry() {
+std::optional<TagEntryDialog::Response> TagEntryDialog::promptTagEntry() {
   this->ShowModal();
-
-  return entry_;
+  return response_;
 }
 
 void TagEntryDialog::OnOk(wxCommandEvent& event) {
-  tag_entry_t tag_entry_pending{};
-  tag_entry_pending.first = tc_tag_name_->GetLineText(0);
+  Response response_pending{};
+  response_pending.tag = tc_tag_name_->GetLineText(0);
 
-  ragtag::TagProperties& tag_properties = tag_entry_pending.second;
+  ragtag::TagProperties& tag_properties = response_pending.tag_properties;
 
   // TODO: Tie these switch labels closer to the ordering of `choices` in the constructor.
   // NOTE: Maintain same order/meaning as `choices` in constructor!
@@ -99,6 +102,8 @@ void TagEntryDialog::OnOk(wxCommandEvent& event) {
     tag_properties.default_setting = ragtag::TagSetting::UNCOMMITTED;
     break;
   }
+
+  response_pending.apply_to_all_project_files = cb_apply_to_all_files_->IsChecked();
 
   const wxString hotkey_text = tc_hotkey_->GetLineText(0);
   if (hotkey_text.Length() > 0) {
@@ -120,13 +125,13 @@ void TagEntryDialog::OnOk(wxCommandEvent& event) {
     tag_properties.hotkey = {};
   }
 
-  entry_ = tag_entry_pending;
+  response_ = response_pending;
 
   // TODO: Validate the entry first?
   Close();
 }
 
 void TagEntryDialog::OnCancel(wxCommandEvent& event) {
-  entry_ = {};
+  response_ = {};
   Close();
 }
