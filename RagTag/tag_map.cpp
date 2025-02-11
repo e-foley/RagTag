@@ -295,6 +295,9 @@ namespace ragtag {
       if (default_setting_num.has_value()) {
         adding["default"] = *default_setting_num;
       }
+      if (tag_it.second.hotkey.has_value()) {
+        adding["hotkey"] = *tag_it.second.hotkey;
+      }
       id_tag_array_json.push_back(adding);
       ++id;
     }
@@ -379,6 +382,9 @@ namespace ragtag {
         continue;
       }
 
+      const auto hotkey_json = tag_it.find("hotkey");
+      // Hotkey is optional; no problem if there's no setting.
+
       // If we've made it here, the tag entry has "id", "tag", and "default".
       if (id_to_tag_map.contains(*id_json)) {
         // Duplicate ID...
@@ -394,6 +400,12 @@ namespace ragtag {
         continue;
       }
       properties_pending.default_setting = *default_setting;
+
+      if (hotkey_json == tag_it.end()) {
+        properties_pending.hotkey = {};
+      } else {
+        properties_pending.hotkey = *hotkey_json;
+      }
 
       bool insertion_successful =
         id_to_tag_map.try_emplace(*id_json, *tag_json).second;
