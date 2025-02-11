@@ -99,12 +99,15 @@ private:
   void OnMediaFinished(wxMediaEvent& event);
   void OnMediaPlay(wxMediaEvent& event);
   void OnMediaPause(wxMediaEvent& event);
+  // Key presses
+  void OnKeyDown(wxKeyEvent& event);
   // Custom dialog prompts
   UserIntention promptUnsavedChanges();
   std::optional<ragtag::path_t> promptSaveProjectAs();
   std::optional<ragtag::path_t> promptOpenProject();
   std::optional<ragtag::path_t> promptLoadFile();
   bool promptConfirmTagDeletion(ragtag::tag_t tag);
+  bool promptConfirmFileDeletion(const ragtag::path_t& path);
   // Fundamental project commands
   void newProject();
   bool saveProject();
@@ -114,6 +117,7 @@ private:
   bool playMedia();
   bool pauseMedia();
   bool stopMedia();
+  bool deleteFile(const ragtag::path_t& path);
   // Helper functions
   static std::optional<ragtag::path_t> qualifiedFileNavigator(
     const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);

@@ -175,6 +175,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
   Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
   Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
+  Bind(wxEVT_CHAR_HOOK, &MainFrame::OnKeyDown, this);
 }
 
 void MainFrame::refreshTagToggles() {
@@ -885,6 +886,34 @@ void MainFrame::OnMediaPause(wxMediaEvent& event)
   b_play_pause_media_->SetLabel("Play");
 }
 
+void MainFrame::OnKeyDown(wxKeyEvent& event)
+{
+  if (event.GetKeyCode() == WXK_DELETE) {
+    // Attempt to delete the file with prompting.
+    if (active_file_.has_value() && promptConfirmFileDeletion(*active_file_)) {
+      ragtag::path_t path_cache = *active_file_;  // Copy for use in error dialog.
+      // Cache next file name so that we can switch to it if deletion is successful.
+      const auto next_file = qualifiedFileNavigator(
+        *active_file_, [](const ragtag::path_t&) {return true; }, true);
+      if (!deleteFile(*active_file_)) {
+        // TODO: Report error.
+        SetStatusText(L"Could not delete file '" + path_cache.generic_wstring() + L"'.");
+      }
+
+      if (next_file.has_value()) {
+        loadFileAndSetAsActive(*next_file);
+      }
+      else {
+        // User might have deleted last file in its directory.
+        active_file_ = {};
+        refreshFileView();
+      }
+    }
+  }
+
+  event.Skip();
+}
+
 MainFrame::UserIntention MainFrame::promptUnsavedChanges() {
   wxMessageDialog md_unsaved_changes(this, "You have unsaved changes.", "Unsaved Changes",
       wxYES_NO | wxCANCEL | wxICON_WARNING);
@@ -943,6 +972,16 @@ bool MainFrame::promptConfirmTagDeletion(ragtag::tag_t tag)
     + "'?\n\nDeleting a tag will remove it from all files in this project.", "Confirm Tag Deletion",
     wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
   dialog->SetOKCancelLabels("Delete tag", "Cancel");
+  const int result = dialog->ShowModal();
+  return result == wxID_OK;
+}
+
+bool MainFrame::promptConfirmFileDeletion(const ragtag::path_t& path)
+{
+  wxMessageDialog* dialog = new wxMessageDialog(this, L"Are you sure you wish to delete file '"
+    + path.generic_wstring() + L"'?\n\nThis action will remove the file from your machine.",
+    "Confirm File Deletion", wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
+  dialog->SetOKCancelLabels("Delete file", "Cancel");
   const int result = dialog->ShowModal();
   return result == wxID_OK;
 }
@@ -1027,6 +1066,28 @@ bool MainFrame::stopMedia()
 {
   // NOTE: Returns an undocumented bool.
   return mc_media_display_->Stop();
+}
+
+// Approach from SO user Zeltrax: https://stackoverflow.com/a/70258061
+bool MainFrame::deleteFile(const ragtag::path_t& path)
+{
+  // `pFrom` argument needs to be double null-terminated.
+  std::wstring widestr = path.wstring() + L'\0';
+
+  SHFILEOPSTRUCT fileOp;
+  fileOp.hwnd = NULL;
+  fileOp.wFunc = FO_DELETE;
+  fileOp.pFrom = widestr.c_str();
+  fileOp.pTo = NULL;
+  fileOp.fFlags = FOF_ALLOWUNDO | FOF_NOERRORUI | FOF_NOCONFIRMATION | FOF_SILENT;
+  int result = SHFileOperation(&fileOp);
+
+  if (result != 0) {
+    return false;
+  }
+  else {
+    return true;
+  }
 }
 
 std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigator(
