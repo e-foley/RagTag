@@ -20,6 +20,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   menuFile->Append(ID_LOAD_FILE, "Load File...\tCtrl-O");
   menuFile->Append(ID_NEXT_FILE, "Next File in Directory\tSpace");
   menuFile->Append(ID_PREVIOUS_FILE, "Previous File in Directory\tShift-Space");
+  menuFile->Append(ID_REFRESH_FILE_VIEW, "Refresh File View\tF5");
   menuFile->AppendSeparator();
   menuFile->Append(wxID_EXIT, "Quit\tAlt-F4");
 
@@ -141,12 +142,15 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     wxBORDER_SUNKEN);
   wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
   p_file_navigation->SetSizer(sz_file_navigation);
-  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
-    "Previous Untagged File");
-  sz_file_navigation->Add(b_previous_file, 1, wxALL, 5);
   wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
   sz_file_navigation->Add(b_open_file, 1, wxALL, 5);
-  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next Untagged File");
+  wxButton* b_refresh_file_view = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
+  sz_file_navigation->Add(b_refresh_file_view, 1, wxALL, 5);
+  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
+    "Previous Untagged");
+  sz_file_navigation->Add(b_previous_file, 1, wxALL, 5);
+
+  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next Untagged");
   sz_file_navigation->Add(b_next_file, 1, wxALL, 5);
 
   sz_right->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
@@ -165,6 +169,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnSaveProject, this, ID_SAVE_PROJECT);
   Bind(wxEVT_MENU, &MainFrame::OnSaveProjectAs, this, ID_SAVE_PROJECT_AS);
   Bind(wxEVT_MENU, &MainFrame::OnLoadFile, this, ID_LOAD_FILE);
+  Bind(wxEVT_MENU, &MainFrame::OnRefreshFileView, this, ID_REFRESH_FILE_VIEW);
   Bind(wxEVT_MENU, &MainFrame::OnNextFile, this, ID_NEXT_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnPreviousFile, this, ID_PREVIOUS_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
@@ -176,6 +181,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
   Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this, ID_PREVIOUS_FILE);
   Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this, ID_LOAD_FILE);
+  Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this, ID_REFRESH_FILE_VIEW);
   Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this, ID_NEXT_FILE);
   Bind(wxEVT_CHECKBOX, &MainFrame::OnMuteBoxToggle, this, ID_MUTE_BOX);
   Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
@@ -501,6 +507,11 @@ void MainFrame::OnLoadFile(wxCommandEvent& event)
   }
 
   loadFileAndSetAsActive(*path_pending);
+}
+
+void MainFrame::OnRefreshFileView(wxCommandEvent& event)
+{
+  refreshFileView();
 }
 
 void MainFrame::OnNextFile(wxCommandEvent& event)

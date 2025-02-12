@@ -31,6 +31,7 @@ private:
     ID_SAVE_PROJECT,
     ID_SAVE_PROJECT_AS,
     ID_LOAD_FILE,
+    ID_REFRESH_FILE_VIEW,
     ID_NEXT_FILE,
     ID_PREVIOUS_FILE,
     ID_CLEAR_TAGS_FROM_FILE,
@@ -75,6 +76,7 @@ private:
   void OnSaveProject(wxCommandEvent& event);
   void OnSaveProjectAs(wxCommandEvent& event);
   void OnLoadFile(wxCommandEvent& event);
+  void OnRefreshFileView(wxCommandEvent& event);
   void OnNextFile(wxCommandEvent& event);
   void OnPreviousFile(wxCommandEvent& event);
   void OnExit(wxCommandEvent& event);
