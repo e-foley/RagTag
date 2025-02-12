@@ -21,6 +21,7 @@ CODE DESIGN
 * Can we Bind() to control events right after we construct them? It would spare our having to
   maintain an enumeration of IDs.
 * Make usage of strings and wide strings consistent.
+* Find a way around the "ellipse hack." (See doEllipseHack() in main_frame.cpp.)
 
 PROJECT INFRASTRUCTURE
 * Update root CMakeLists to build only required configuration of wxWidgets.

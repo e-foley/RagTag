@@ -117,8 +117,16 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
 
-  st_current_directory_ = new wxStaticText(p_right, wxID_ANY, wxEmptyString);
-  sz_right->Add(st_current_directory_, 0, wxEXPAND | wxALL, 5);
+  wxPanel* p_current_directory_line = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxBoxSizer* sz_current_directory_line = new wxBoxSizer(wxHORIZONTAL);
+  p_current_directory_line->SetSizer(sz_current_directory_line);
+  wxStaticText* st_current_directory_label = new wxStaticText(p_current_directory_line, wxID_ANY,
+    "Current directory: ");
+  sz_current_directory_line->Add(st_current_directory_label, 0, wxALL, 5);
+  st_current_directory_ = new wxStaticText(p_current_directory_line, wxID_ANY, wxEmptyString,
+    wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_START);
+  sz_current_directory_line->Add(st_current_directory_, 1, wxALL, 5);
+  sz_right->Add(p_current_directory_line, 0, wxEXPAND | wxALL, 0);
 
   lc_files_in_directory_ = new wxListCtrl(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
     wxLC_REPORT | wxLC_SINGLE_SEL);
@@ -232,7 +240,7 @@ void MainFrame::refreshFileView()
   if (!active_file_.has_value()) {
     lc_files_in_directory_->DeleteAllItems();
     file_paths_.clear();
-    st_current_directory_->SetLabelText("Current directory: (None)");
+    st_current_directory_->SetLabelText("(None)");
     return;
   }
 
@@ -247,7 +255,8 @@ void MainFrame::refreshFileView()
   const int num_list_view_entries_original = lc_files_in_directory_->GetItemCount();
 
   const ragtag::path_t parent_directory = active_file_->parent_path();
-  st_current_directory_->SetLabelText(L"Current directory: " + parent_directory.generic_wstring());
+  st_current_directory_->SetLabelText(parent_directory.generic_wstring());
+  doEllipseHack();
 
   int i = 0;
   // Note: directory_iterator documentation explains that the end iterator is equal to the
@@ -1220,4 +1229,22 @@ std::optional<long> MainFrame::getPathListCtrlIndex(const ragtag::path_t& path) 
   }
 
   return {};
+}
+
+void MainFrame::doEllipseHack()
+{
+  // For whatever reason, ellipses are only inserted in the current directory display after the
+  // window is resized, not when the text is changed. Reasserting the current window size doesn't
+  // work; it actually has to change dimensions.
+  //
+  // I did a good amount of research on this issue but couldn't find much. One thread documenting a
+  // somewhat similar issue highlighted a troubled interaction between wxStaticText and the
+  // calculation of optimal size that wxBoxSizer uses, so it's possible the same trouble affects us.
+  //
+  // TODO: Find and implement a better approach.
+  int w = 0;
+  int h = 0;
+  GetSize(&w, &h);
+  SetSize(w, h+1);
+  SetSize(w, h);
 }
