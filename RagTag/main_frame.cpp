@@ -117,11 +117,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
 
-  wxPanel* p_current_directory_line = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+  wxPanel* p_current_directory_line = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize);
   wxBoxSizer* sz_current_directory_line = new wxBoxSizer(wxHORIZONTAL);
   p_current_directory_line->SetSizer(sz_current_directory_line);
   wxStaticText* st_current_directory_label = new wxStaticText(p_current_directory_line, wxID_ANY,
-    "Current directory: ");
+    "Directory: ");
   sz_current_directory_line->Add(st_current_directory_label, 0, wxALL, 5);
   st_current_directory_ = new wxStaticText(p_current_directory_line, wxID_ANY, wxEmptyString,
     wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_START);
