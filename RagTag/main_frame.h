@@ -145,6 +145,7 @@ private:
   std::optional<ragtag::path_t> active_file_{};
   bool is_dirty_{ false };
   bool user_initiated_stop_media_{ false };
+  bool file_view_modification_in_progress_{ false };
 };
 
 #endif  // INCLUDE_MAIN_FRAME_H

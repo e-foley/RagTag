@@ -317,8 +317,19 @@ void MainFrame::refreshFileView()
 
   // Remove any excess list control entries that were needed to display prior directories but not
   // this one.
+  //
+  // Set the file view modification flag so that we don't attempt to load files as the DeleteItem()
+  // function might automatically change the selected item in the list.
+  file_view_modification_in_progress_ = true;
   for (int j = i; j < num_list_view_entries_original; ++j) {
-    lc_files_in_directory_->DeleteItem(lc_files_in_directory_->GetItemCount() - 1);
+    // Yes, wxWidgets uses int type for GetItemCount() but long type for indices.
+    const long index_to_delete = lc_files_in_directory_->GetItemCount() - 1;
+    // This deselects and de-focuses the item before deletion. This fixes a bug that suppressed list
+    // item selection events when clicking the last item in a list after loading a file from a
+    // directory with fewer files than the prior directory had.
+    lc_files_in_directory_->SetItemState(index_to_delete, 0,
+      wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
+    lc_files_in_directory_->DeleteItem(index_to_delete);
   }
 
   // Handle highlighting: Only the active file should be highlighted; all others should be
@@ -326,12 +337,15 @@ void MainFrame::refreshFileView()
   auto active_file_index = getPathListCtrlIndex(*active_file_);
   for (long i = 0; i < lc_files_in_directory_->GetItemCount(); ++i) {
     if (active_file_index.has_value() && i == *active_file_index) {
-      lc_files_in_directory_->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+      lc_files_in_directory_->SetItemState(i, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED,
+        wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
     }
     else {
-      lc_files_in_directory_->SetItemState(i, 0, wxLIST_STATE_SELECTED);
+      lc_files_in_directory_->SetItemState(i, 0, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
     }
   }
+
+  file_view_modification_in_progress_ = false;
 }
 
 void MainFrame::OnNewProject(wxCommandEvent& event) {
@@ -726,6 +740,17 @@ void MainFrame::OnMuteBoxToggle(wxCommandEvent& event)
 
 void MainFrame::OnFocusFile(wxListEvent& event)
 {
+  if (file_view_modification_in_progress_) {
+    // When items are removed from the list view, such as when redrawing the control after loading a
+    // file from a directory with fewer items than the current item's directory, the currently
+    // "focused" items can change without user intent. The associated event--this function--fires
+    // and causes the files to be loaded transiently, potentially triggering an unintended file to
+    // be marked as the presently active file and/or causing a crash.
+    //
+    // Instead, we just eschew loading when we're told that the control is being modified.
+    return;
+  }
+
   // Load and display the file.
   // 
   // Gross, but the best I could come up with given wxListCtrl's limitations.
