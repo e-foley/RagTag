@@ -3,14 +3,17 @@
 
 #include "tag_map.h"
 #include <wx/frame.h>
+#include <wx/listctrl.h>
 #include <wx/window.h>
 
 class SummaryFrame : public wxFrame {
 public:
-  SummaryFrame(wxWindow* parent, const ragtag::TagMap& tag_map);
+  SummaryFrame(wxWindow* parent);
+  void setTagMap(const ragtag::TagMap& tag_map);
 
 private:
   ragtag::TagMap tag_map_{};
+  wxListCtrl* lc_summary_{};
 };
 
 #endif  // INCLUDE_SUMMARY_FRAME_H
