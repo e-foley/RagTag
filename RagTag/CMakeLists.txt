@@ -4,6 +4,8 @@ set(SRC_FILES
     main_frame.cpp
     rag_tag_app.h
     rag_tag_app.cpp
+    summary_frame.h
+    summary_frame.cpp
     tag_entry_dialog.h
     tag_entry_dialog.cpp
     tag_map.h

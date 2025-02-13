@@ -1,4 +1,5 @@
 #include "main_frame.h"
+#include "summary_frame.h"
 #include "tag_entry_dialog.h"
 #include "tag_toggle_panel.h"
 #include <wx/filedlg.h>
@@ -16,6 +17,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   menuFile->Append(ID_OPEN_PROJECT, "&Open Project...\tCtrl-Shift-O");
   menuFile->Append(ID_SAVE_PROJECT, "&Save Project...\tCtrl-S");
   menuFile->Append(ID_SAVE_PROJECT_AS, "Save Project &As...\tCtrl-Shift-S");
+  menuFile->AppendSeparator();
+  menuFile->Append(ID_SHOW_SUMMARY, "View Project Summary...\tCtrl-P");
   menuFile->AppendSeparator();
   menuFile->Append(ID_LOAD_FILE, "Load File...\tCtrl-O");
   menuFile->Append(ID_NEXT_FILE, "Next File in Directory\tSpace");
@@ -168,6 +171,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnOpenProject, this, ID_OPEN_PROJECT);
   Bind(wxEVT_MENU, &MainFrame::OnSaveProject, this, ID_SAVE_PROJECT);
   Bind(wxEVT_MENU, &MainFrame::OnSaveProjectAs, this, ID_SAVE_PROJECT_AS);
+  Bind(wxEVT_MENU, &MainFrame::OnShowSummary, this, ID_SHOW_SUMMARY);
   Bind(wxEVT_MENU, &MainFrame::OnLoadFile, this, ID_LOAD_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnRefreshFileView, this, ID_REFRESH_FILE_VIEW);
   Bind(wxEVT_MENU, &MainFrame::OnNextFile, this, ID_NEXT_FILE);
@@ -496,6 +500,12 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
   project_path_ = path;
   is_dirty_ = false;
   SetStatusText(L"Saved project '" + project_path_->generic_wstring() + L"'.");
+}
+
+void MainFrame::OnShowSummary(wxCommandEvent& event)
+{
+  SummaryFrame* f_summary = new SummaryFrame(this, tag_map_);
+  f_summary->Show();
 }
 
 void MainFrame::OnLoadFile(wxCommandEvent& event)

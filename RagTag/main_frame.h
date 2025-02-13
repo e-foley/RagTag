@@ -34,6 +34,7 @@ private:
     ID_REFRESH_FILE_VIEW,
     ID_NEXT_FILE,
     ID_PREVIOUS_FILE,
+    ID_SHOW_SUMMARY,
     ID_CLEAR_TAGS_FROM_FILE,
     ID_SET_TAGS_TO_DEFAULTS,
     ID_DEFINE_NEW_TAG,
@@ -75,6 +76,7 @@ private:
   void OnOpenProject(wxCommandEvent& event);
   void OnSaveProject(wxCommandEvent& event);
   void OnSaveProjectAs(wxCommandEvent& event);
+  void OnShowSummary(wxCommandEvent& event);
   void OnLoadFile(wxCommandEvent& event);
   void OnRefreshFileView(wxCommandEvent& event);
   void OnNextFile(wxCommandEvent& event);
