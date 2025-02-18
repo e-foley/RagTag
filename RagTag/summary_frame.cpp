@@ -26,6 +26,20 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   b_copy_selections->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
   sz_summary_buttons->Add(b_copy_selections, 0, wxALL, 5);
   sz_main->Add(p_summary_buttons, 0, wxEXPAND | wxALL, 0);
+
+  // Approach heavily follows wxWidgets listctrl sample project.
+  normal_images_.push_back(wxIcon("icon1", wxBITMAP_TYPE_ICO_RESOURCE));
+  normal_images_.push_back(wxIcon("icon2", wxBITMAP_TYPE_ICO_RESOURCE));
+  normal_images_.push_back(wxIcon("icon3", wxBITMAP_TYPE_ICO_RESOURCE));
+  normal_images_.push_back(wxIcon("icon4", wxBITMAP_TYPE_ICO_RESOURCE));
+  normal_images_.push_back(wxIcon("icon5", wxBITMAP_TYPE_ICO_RESOURCE));
+  normal_images_.push_back(wxIcon("icon6", wxBITMAP_TYPE_ICO_RESOURCE));
+  normal_images_.push_back(wxIcon("icon7", wxBITMAP_TYPE_ICO_RESOURCE));
+  normal_images_.push_back(wxIcon("icon8", wxBITMAP_TYPE_ICO_RESOURCE));
+  normal_images_.push_back(wxIcon("icon9", wxBITMAP_TYPE_ICO_RESOURCE));
+  small_images_.push_back(wxIcon("iconsmall", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
+  lc_summary_->SetNormalImages(normal_images_);
+  lc_summary_->SetSmallImages(small_images_);
 }
 
 void SummaryFrame::setTagMap(const ragtag::TagMap& tag_map) {
