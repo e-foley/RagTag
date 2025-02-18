@@ -67,12 +67,15 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   p_tag_toggles_button_bar->SetSizer(sz_tag_toggles_button_bar);
   wxButton* b_clear_tags_from_file = new wxButton(p_tag_toggles_button_bar, ID_CLEAR_TAGS_FROM_FILE,
     "Clear Tags from File");
+  b_clear_tags_from_file->Bind(wxEVT_BUTTON, &MainFrame::OnClearTagsFromFile, this);
   sz_tag_toggles_button_bar->Add(b_clear_tags_from_file, 0, wxALL, 5);
   wxButton* b_set_tags_to_defaults = new wxButton(p_tag_toggles_button_bar, ID_SET_TAGS_TO_DEFAULTS,
     "Set Tags to Defaults");
+  b_set_tags_to_defaults->Bind(wxEVT_BUTTON, &MainFrame::OnSetTagsToDefaults, this);
   sz_tag_toggles_button_bar->Add(b_set_tags_to_defaults, 0, wxALL, 5);
   wxButton* b_define_new_tag = new wxButton(p_tag_toggles_button_bar, ID_DEFINE_NEW_TAG,
     "Define New Tag...");
+  b_define_new_tag->Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this);
   sz_tag_toggles_button_bar->Add(b_define_new_tag, 0, wxALL, 5);
   sz_left->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 5);
 
@@ -91,6 +94,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   // See: https://github.com/wxWidgets/wxWidgets/issues/18976   
   mc_media_display_ = new wxMediaCtrl(p_right, ID_MEDIA_CTRL, wxEmptyString, wxDefaultPosition,
       wxDefaultSize, wxMC_NO_AUTORESIZE, wxMEDIABACKEND_WMP10);
+  mc_media_display_->Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this);
+  mc_media_display_->Bind(wxEVT_MEDIA_STOP, &MainFrame::OnMediaStop, this);
+  mc_media_display_->Bind(wxEVT_MEDIA_FINISHED, &MainFrame::OnMediaFinished, this);
+  mc_media_display_->Bind(wxEVT_MEDIA_PLAY, &MainFrame::OnMediaPlay, this);
+  mc_media_display_->Bind(wxEVT_MEDIA_PAUSE, &MainFrame::OnMediaPause, this);
 
   sz_right->Add(mc_media_display_, 1, wxEXPAND | wxALL, 0);
 
@@ -99,8 +107,10 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_media_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_media_buttons->SetSizer(sz_media_buttons);
   wxButton* b_stop_media = new wxButton(p_media_buttons, ID_STOP_MEDIA, "Stop");
+  b_stop_media->Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this);
   sz_media_buttons->Add(b_stop_media, 1, wxALL, 5);
   b_play_pause_media_ = new wxButton(p_media_buttons, ID_PLAY_PAUSE_MEDIA, "Play");
+  b_play_pause_media_->Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
   sz_media_buttons->Add(b_play_pause_media_, 1, wxALL, 5);
 
   sz_right->Add(p_media_buttons, 0, wxEXPAND | wxALL, 5);
@@ -116,6 +126,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   cb_loop_->SetValue(true);  // True == checked
   sz_media_options->Add(cb_loop_, 1, wxALL, 5);
   cb_mute_ = new wxCheckBox(p_media_options, ID_MUTE_BOX, "Mute");
+  cb_mute_->Bind(wxEVT_CHECKBOX, &MainFrame::OnMuteBoxToggle, this);
   cb_mute_->SetValue(true);  // True == checked
   sz_media_options->Add(cb_mute_, 1, wxALL, 5);
 
@@ -137,6 +148,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
   lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
   lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
+  lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
   refreshFileView();
 
   sz_right->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
@@ -146,14 +158,18 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
   p_file_navigation->SetSizer(sz_file_navigation);
   wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
+  b_open_file->Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this);
   sz_file_navigation->Add(b_open_file, 1, wxALL, 5);
   wxButton* b_refresh_file_view = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
+  b_refresh_file_view->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
   sz_file_navigation->Add(b_refresh_file_view, 1, wxALL, 5);
   wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
     "Previous Untagged");
+  b_previous_file->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
   sz_file_navigation->Add(b_previous_file, 1, wxALL, 5);
 
   wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next Untagged");
+  b_next_file->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
   sz_file_navigation->Add(b_next_file, 1, wxALL, 5);
 
   sz_right->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
@@ -178,25 +194,13 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnPreviousFile, this, ID_PREVIOUS_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
-  Bind(wxEVT_BUTTON, &MainFrame::OnClearTagsFromFile, this, ID_CLEAR_TAGS_FROM_FILE);
-  Bind(wxEVT_BUTTON, &MainFrame::OnSetTagsToDefaults, this, ID_SET_TAGS_TO_DEFAULTS);
-  Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
-  Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this, ID_STOP_MEDIA);
-  Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
-  Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this, ID_PREVIOUS_FILE);
-  Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this, ID_LOAD_FILE);
-  Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this, ID_REFRESH_FILE_VIEW);
-  Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this, ID_NEXT_FILE);
-  Bind(wxEVT_CHECKBOX, &MainFrame::OnMuteBoxToggle, this, ID_MUTE_BOX);
-  Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this, ID_MEDIA_CTRL);
-  Bind(wxEVT_MEDIA_STOP, &MainFrame::OnMediaStop, this, ID_MEDIA_CTRL);
-  Bind(wxEVT_MEDIA_FINISHED, &MainFrame::OnMediaFinished, this, ID_MEDIA_CTRL);
-  Bind(wxEVT_MEDIA_PLAY, &MainFrame::OnMediaPlay, this, ID_MEDIA_CTRL);
-  Bind(wxEVT_MEDIA_PAUSE, &MainFrame::OnMediaPause, this, ID_MEDIA_CTRL);
   Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
-  Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
-  Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
   Bind(wxEVT_CHAR_HOOK, &MainFrame::OnKeyDown, this);
+  // TODO: I only seem to be able to handle this custom event when it's bound to the frame and not
+  // directly to the TagTogglePanel object. (All other button events are bound directly to their
+  // object.) Figure out the difference and implement a fix such that the custom event matches how
+  // ordinary events on other objects are handled.
+  Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
 }
 
 void MainFrame::refreshTagToggles() {

@@ -20,17 +20,17 @@ TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string 
 
   cb_tag_toggle_ = new wxCheckBox(this, wxID_ANY, label,
     wxDefaultPosition, wxDefaultSize, wxCHK_3STATE | wxCHK_ALLOW_3RD_STATE_FOR_USER);
+  cb_tag_toggle_->Bind(wxEVT_CHECKBOX, &TagTogglePanel::OnCheckboxChange, this);
   sz_tag_toggle->Add(cb_tag_toggle_, 1, wxALIGN_CENTER, 5);
   wxButton* b_tag_edit = new wxButton(this, wxID_ANY, "Edit", wxDefaultPosition,
     wxDefaultSize, wxBU_EXACTFIT);
+  b_tag_edit->Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickEdit, this);
   sz_tag_toggle->Add(b_tag_edit, 0, wxALIGN_CENTER, 5);
   wxButton* b_tag_delete = new wxButton(this, wxID_ANY, "X", wxDefaultPosition,
     wxDefaultSize, wxBU_EXACTFIT);
+  b_tag_delete->Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickDelete, this);
   sz_tag_toggle->Add(b_tag_delete, 0, wxALIGN_CENTER, 5);
 
-  Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickEdit, this, b_tag_edit->GetId());
-  Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickDelete, this, b_tag_delete->GetId());
-  Bind(wxEVT_CHECKBOX, &TagTogglePanel::OnCheckboxChange, this, cb_tag_toggle_->GetId());
   parent->Bind(wxEVT_CHAR_HOOK, &TagTogglePanel::OnKeyDown, this);
 }
 

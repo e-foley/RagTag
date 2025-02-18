@@ -17,12 +17,6 @@ public:
     bool apply_to_all_project_files{ false };
   };
 
-  // wxWidgets requires custom IDs to be at least 2.
-  enum {
-    ID_CANCEL = 2,
-    ID_OK
-  };
-
   TagEntryDialog(wxWindow* parent);
   TagEntryDialog(wxWindow* parent, ragtag::tag_t tag, const ragtag::TagProperties& tag_properties);
   std::optional<Response> promptTagEntry();
