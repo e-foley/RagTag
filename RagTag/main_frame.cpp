@@ -175,10 +175,12 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_right->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
 
   // TODO: Replace this temporary location with real paths once application is stable.
-  const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
-  displayMediaFile(std::wstring(debug_media_dir) + L"videomp4.mp4");
+  //const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
+  const wxString debug_project_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
+  //displayMediaFile(std::wstring(debug_media_dir) + L"videomp4.mp4");
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagejpg.jpg");
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagepng.png");
+  loadProject(std::wstring(debug_project_dir) + L"beachcoolrainbow.tagdef");
 
   sz_main->Add(p_left, 2, wxEXPAND | wxALL, 5);
   sz_main->Add(p_right, 3, wxEXPAND | wxALL, 5);
@@ -448,24 +450,12 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
     // User canceled dialog.
     return;
   }
-  std::optional<ragtag::TagMap> tag_map_pending = ragtag::TagMap::fromFile(*path_pending);
-  if (!tag_map_pending.has_value()) {
-    // Loading operation failed.
-    // TODO: Report error
+
+  if (!loadProject(*path_pending)) {
+    // TODO: Report error.
+    SetStatusText(L"Could not load project '" + path_pending->generic_wstring() + L"'.");
     return;
   }
-
-  // Loaded successfully!
-  tag_map_ = *tag_map_pending;
-  project_path_ = path_pending;
-  active_file_ = {};
-  refreshTagToggles();
-  refreshFileView();
-  user_initiated_stop_media_ = true;
-  stopMedia();
-  // TODO: Find a way to either reset the wxMediaCtrl or disable playing until a file is loaded.
-  is_dirty_ = false;
-  SetStatusText(L"Opened project '" + project_path_->generic_wstring() + L"'.");
 }
 
 void MainFrame::OnSaveProject(wxCommandEvent& event) {
@@ -1124,6 +1114,27 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
   refreshTagToggles();
   refreshFileView();
   SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
+  return true;
+}
+
+bool MainFrame::loadProject(const ragtag::path_t& path)
+{
+  std::optional<ragtag::TagMap> tag_map_pending = ragtag::TagMap::fromFile(path);
+  if (!tag_map_pending.has_value()) {
+    return false;
+  }
+
+  // Loaded successfully!
+  tag_map_ = *tag_map_pending;
+  project_path_ = path;
+  active_file_ = {};
+  refreshTagToggles();
+  refreshFileView();
+  user_initiated_stop_media_ = true;
+  stopMedia();
+  // TODO: Find a way to either reset the wxMediaCtrl or disable playing until a file is loaded.
+  is_dirty_ = false;
+  SetStatusText(L"Opened project '" + project_path_->generic_wstring() + L"'.");
   return true;
 }
 
