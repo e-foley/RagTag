@@ -510,6 +510,7 @@ void MainFrame::OnShowSummary(wxCommandEvent& event)
 {
   SummaryFrame* f_summary = new SummaryFrame(this);
   f_summary->setTagMap(tag_map_);
+  f_summary->refresh();
   f_summary->Show();
 }
 

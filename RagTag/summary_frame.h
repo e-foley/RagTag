@@ -10,6 +10,7 @@ class SummaryFrame : public wxFrame {
 public:
   SummaryFrame(wxWindow* parent);
   void setTagMap(const ragtag::TagMap& tag_map);
+  void refresh();
 
 private:
   ragtag::TagMap tag_map_{};
