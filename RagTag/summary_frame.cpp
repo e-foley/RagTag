@@ -10,6 +10,10 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxBoxSizer* sz_main = new wxBoxSizer(wxVERTICAL);
   p_main->SetSizer(sz_main);
 
+  lc_summary_ = new wxListCtrl(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxLC_REPORT | wxLC_SINGLE_SEL);
+  sz_main->Add(lc_summary_, 1, wxEXPAND | wxALL, 5);
+
   wxPanel* p_summary_buttons = new wxPanel(p_main, wxID_ANY);
   wxBoxSizer* sz_summary_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_summary_buttons->SetSizer(sz_summary_buttons);
@@ -22,10 +26,6 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   b_copy_selections->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
   sz_summary_buttons->Add(b_copy_selections, 0, wxALL, 5);
   sz_main->Add(p_summary_buttons, 0, wxEXPAND | wxALL, 0);
-
-  lc_summary_ = new wxListCtrl(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxLC_REPORT | wxLC_SINGLE_SEL);
-  sz_main->Add(lc_summary_, 1, wxEXPAND | wxALL, 5);
 }
 
 void SummaryFrame::setTagMap(const ragtag::TagMap& tag_map) {
