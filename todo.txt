@@ -48,7 +48,6 @@ EXECUTION
   https://docs.wxwidgets.org/latest/overview_windowids.html. Make sure we aren't using these.
 * Turn default file view column widths into constants.
 * Turn "Play" and "Pause" labels into constants.
-* Display star icons rather than textual representation of ratings within project summary.
 
 FEATURES
 * Add ability to drag tags around.

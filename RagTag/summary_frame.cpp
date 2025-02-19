@@ -3,6 +3,20 @@
 #include <wx/panel.h>
 #include <wx/sizer.h>
 
+// The font used by wxWidgets does not display half-star characters as of writing.
+// #define HALF_STAR_GLYPH_SUPPORTED
+
+const wxString SummaryFrame::GLYPH_CHECKED = L"\U00002611";  // U+2611 is a checkmark in a box.
+const wxString SummaryFrame::GLYPH_UNCOMMITTED = L"\U00002012";  // U+2012 is a figure dash.
+const wxString SummaryFrame::GLYPH_UNCHECKED = L"\U00002610";  // U+2610 is an empty checkbox.
+const wxString SummaryFrame::GLYPH_RATING_FULL_STAR = L"\U00002605";  // U+2605 is a full star.
+#ifdef HALF_STAR_GLYPH_SUPPORTED
+const wxString SummaryFrame::GLYPH_RATING_HALF_STAR = L"\U00002BE8";  // U+2BE8 is a half star.
+#else
+const wxString SummaryFrame::GLYPH_RATING_HALF_STAR = L"\U000000BD";  // U+00BD is a half fraction.
+#endif
+const int SummaryFrame::MAX_STARS = 5;
+
 SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Project Summary",
   wxDefaultPosition, wxSize(1280, 768))
 {
@@ -26,20 +40,6 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   b_copy_selections->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
   sz_summary_buttons->Add(b_copy_selections, 0, wxALL, 5);
   sz_main->Add(p_summary_buttons, 0, wxEXPAND | wxALL, 0);
-
-  // Approach heavily follows wxWidgets listctrl sample project.
-  small_images_.push_back(wxIcon("iconsmall", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  small_images_.push_back(wxIcon("icon1", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  small_images_.push_back(wxIcon("icon2", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  small_images_.push_back(wxIcon("icon_check", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  small_images_.push_back(wxIcon("icon4", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  small_images_.push_back(wxIcon("icon5", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  small_images_.push_back(wxIcon("icon6", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  small_images_.push_back(wxIcon("icon7", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  small_images_.push_back(wxIcon("icon8", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  small_images_.push_back(wxIcon("icon9", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  //lc_summary_->SetNormalImages(normal_images_);
-  lc_summary_->SetSmallImages(small_images_);
 }
 
 void SummaryFrame::setTagMap(const ragtag::TagMap& tag_map) {
@@ -50,32 +50,33 @@ void SummaryFrame::refresh()
 {
   lc_summary_->ClearAll();
   lc_summary_->AppendColumn("Path", wxLIST_FORMAT_LEFT, 500);
-  lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE_USEHEADER);
+  lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_LEFT, 65);
   const auto all_tags = tag_map_.getAllTags();
   for (const auto& tag : all_tags) {
     lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE_USEHEADER);
   }
   const auto all_files = tag_map_.getAllFiles();
   for (int i = 0; i < all_files.size(); ++i) {
-    lc_summary_->InsertItem(i, all_files[i].generic_wstring());
+    lc_summary_->InsertItem(i, all_files[i].generic_wstring(), -1);
     // Show rating...
     auto rating = tag_map_.getRating(all_files[i]);
-    // TODO: Show star icons rather than textual representation of number.
-    lc_summary_->SetItem(i, 1, rating.has_value() ? std::to_string(*rating) : "--");
+    lc_summary_->SetItem(i, 1, rating.has_value() ? getStarTextForRating(*rating) : wxString("--"));
     // Show state of tags...
-    for (int j = 0; j < all_tags.size(); ++j) {
-      int icon_index = 0;
+    for (int j = 0; j < all_tags.size(); ++j) {  
+      wxString tag_state_glyph = wxEmptyString;
       auto tag_setting = tag_map_.getTagSetting(all_files[i], all_tags[j].first);
-      // TODO: Don't use magic numbers here.
-      if (!tag_setting.has_value()) {
-        icon_index = 1;  // Uncommitted
+      if (!tag_setting.has_value() || *tag_setting == ragtag::TagSetting::UNCOMMITTED) {
+        tag_state_glyph = GLYPH_UNCOMMITTED;
       }
       else if (*tag_setting == ragtag::TagSetting::YES) {
-        icon_index = 3;
+        tag_state_glyph = GLYPH_CHECKED;
       }
-      
+      else if (*tag_setting == ragtag::TagSetting::NO) {
+        tag_state_glyph = GLYPH_UNCHECKED;
+      }
+
       // Set j+2 column because of Path and Rating columns taking indices 0 and 1.
-      lc_summary_->SetItem(i, j + 2, wxEmptyString, icon_index);
+      lc_summary_->SetItem(i, j + 2, tag_state_glyph, -1);
     }
   }
 }
@@ -86,4 +87,19 @@ void SummaryFrame::OnResetSelections(wxCommandEvent& event)
 
 void SummaryFrame::OnCopySelections(wxCommandEvent& event)
 {
+}
+
+wxString SummaryFrame::getStarTextForRating(float rating)
+{
+  wxString returning = wxEmptyString;
+  for (int i = 1; i <= MAX_STARS; ++i) {
+    if (rating >= static_cast<float>(i)) {
+      returning.Append(GLYPH_RATING_FULL_STAR);
+    }
+    else if (rating >= static_cast<float>(i) - 0.5f) {
+      returning.Append(GLYPH_RATING_HALF_STAR);
+    }
+  }
+
+  return returning;
 }
