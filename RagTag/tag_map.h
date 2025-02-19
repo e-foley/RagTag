@@ -62,7 +62,7 @@ namespace ragtag {
     bool clearRating(const path_t& path);
     std::optional<rating_t> getRating(const path_t& path) const;
     bool hasFile(const path_t& path) const;
-    std::optional<std::vector<path_t>> getFileTags(const path_t& path) const;
+    std::optional<std::vector<tag_t>> getFileTags(const path_t& path) const;
     std::vector<path_t> getAllFiles() const;
 
     struct FileInfo {

@@ -16,16 +16,20 @@ const wxString SummaryFrame::GLYPH_RATING_HALF_STAR = L"\U00002BE8";  // U+2BE8 
 const wxString SummaryFrame::GLYPH_RATING_HALF_STAR = L"\U000000BD";  // U+00BD is a half fraction.
 #endif
 const int SummaryFrame::MAX_STARS = 5;
+const int SummaryFrame::FIRST_TAG_COLUMN_INDEX = 2;
 
 SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Project Summary",
   wxDefaultPosition, wxSize(1280, 768))
 {
+  CreateStatusBar();
+
   wxPanel* p_main = new wxPanel(this, wxID_ANY);
   wxBoxSizer* sz_main = new wxBoxSizer(wxVERTICAL);
   p_main->SetSizer(sz_main);
 
   lc_summary_ = new wxListCtrl(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
     wxLC_REPORT | wxLC_SINGLE_SEL);
+  lc_summary_->Bind(wxEVT_LIST_COL_CLICK, &SummaryFrame::OnClickHeading, this);
   sz_main->Add(lc_summary_, 1, wxEXPAND | wxALL, 5);
 
   wxPanel* p_summary_buttons = new wxPanel(p_main, wxID_ANY);
@@ -55,16 +59,21 @@ void SummaryFrame::refresh()
   for (const auto& tag : all_tags) {
     lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE_USEHEADER);
   }
-  const auto all_files = tag_map_.getAllFiles();
-  for (int i = 0; i < all_files.size(); ++i) {
-    lc_summary_->InsertItem(i, all_files[i].generic_wstring(), -1);
+  file_paths_ = tag_map_.getAllFiles();
+  for (int i = 0; i < file_paths_.size(); ++i) {
+    lc_summary_->InsertItem(i, file_paths_[i].generic_wstring(), -1);
+     
+    // Associate user data with the wxListCtrl item by giving it a pointer--in this case, to the
+    // path we've cached within file_paths_. (It's not ideal, but we play along.)
+    lc_summary_->SetItemPtrData(i, reinterpret_cast<wxUIntPtr>(&file_paths_[i]));
+
     // Show rating...
-    auto rating = tag_map_.getRating(all_files[i]);
+    auto rating = tag_map_.getRating(file_paths_[i]);
     lc_summary_->SetItem(i, 1, rating.has_value() ? getStarTextForRating(*rating) : wxString("--"));
     // Show state of tags...
     for (int j = 0; j < all_tags.size(); ++j) {  
       wxString tag_state_glyph = wxEmptyString;
-      auto tag_setting = tag_map_.getTagSetting(all_files[i], all_tags[j].first);
+      auto tag_setting = tag_map_.getTagSetting(file_paths_[i], all_tags[j].first);
       if (!tag_setting.has_value() || *tag_setting == ragtag::TagSetting::UNCOMMITTED) {
         tag_state_glyph = GLYPH_UNCOMMITTED;
       }
@@ -75,8 +84,8 @@ void SummaryFrame::refresh()
         tag_state_glyph = GLYPH_UNCHECKED;
       }
 
-      // Set j+2 column because of Path and Rating columns taking indices 0 and 1.
-      lc_summary_->SetItem(i, j + 2, tag_state_glyph, -1);
+      // Offset edited column because of Path and Rating columns taking indices 0 and 1.
+      lc_summary_->SetItem(i, j + FIRST_TAG_COLUMN_INDEX, tag_state_glyph, -1);
     }
   }
 }
@@ -87,6 +96,39 @@ void SummaryFrame::OnResetSelections(wxCommandEvent& event)
 
 void SummaryFrame::OnCopySelections(wxCommandEvent& event)
 {
+}
+
+void SummaryFrame::OnClickHeading(wxListEvent& event)
+{
+  const int column = event.GetColumn();
+  if (column == -1) {
+    // User clicked the header bar away from a column. Ignore.
+    return;
+  }
+
+  // GetSortIndicator() returns the column in which the current sort indicator is shown, or -1.
+  // When a new column is clicked, we prefer to sort descending first, which is the opposite of the
+  // default behavior.
+  bool ascending = false;
+  if (lc_summary_->GetSortIndicator() == column) {
+    ascending = lc_summary_->GetUpdatedAscendingSortIndicator(column);
+  }
+
+  if (column >= FIRST_TAG_COLUMN_INDEX) {
+    // This is a pain, but because wxListCtrl's sort operation requires a free-floating function
+    // (not a member function that has access to object internals), we have to manually supply it a
+    // snapshot of the information we would like to sort. We do this by sending it a pointer to an
+    // instance of a helper struct we populate with information the sorting function requires.
+    SortHelper sort_helper;
+    sort_helper.p_tag_map = &tag_map_;
+    // TODO: Consider caching all tags when refreshing so we don't need to re-procure the list here.
+    const auto all_tags = tag_map_.getAllTags();
+    sort_helper.tag = all_tags[column - FIRST_TAG_COLUMN_INDEX].first;
+    sort_helper.sort_ascending = ascending;
+    lc_summary_->SortItems(&SummaryFrame::tagSort, reinterpret_cast<wxIntPtr>(&sort_helper));
+  }
+
+  lc_summary_->ShowSortIndicator(column, ascending);
 }
 
 wxString SummaryFrame::getStarTextForRating(float rating)
@@ -102,4 +144,37 @@ wxString SummaryFrame::getStarTextForRating(float rating)
   }
 
   return returning;
+}
+
+int wxCALLBACK SummaryFrame::tagSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data)
+{
+  // It's understood that the items to sort are paths and that `sort_data` is a pointer to our
+  // sorting helper struct.
+  const ragtag::path_t path1 = *reinterpret_cast<ragtag::path_t*>(item1);
+  const ragtag::path_t path2 = *reinterpret_cast<ragtag::path_t*>(item2);
+  const SortHelper sort_helper = *reinterpret_cast<SortHelper*>(sort_data);
+  const ragtag::TagMap& tag_map = *sort_helper.p_tag_map;  // Alias for convenience
+  auto setting1 = tag_map.getTagSetting(path1, sort_helper.tag);
+  auto setting2 = tag_map.getTagSetting(path2, sort_helper.tag);
+
+  if (!setting1.has_value()) {
+    setting1 = ragtag::TagSetting::UNCOMMITTED;
+  }
+  if (!setting2.has_value()) {
+    setting2 = ragtag::TagSetting::UNCOMMITTED;
+  }
+
+  int natural_sort = 0;
+  if (*setting1 == *setting2) {
+    natural_sort = 0;
+  }
+  else if (*setting1 == ragtag::TagSetting::YES
+    || (*setting1 == ragtag::TagSetting::UNCOMMITTED && *setting2 == ragtag::TagSetting::NO)) {
+    natural_sort = 1;
+  }
+  else {
+    natural_sort = -1;
+  }
+
+  return sort_helper.sort_ascending ? natural_sort : -natural_sort;
 }
