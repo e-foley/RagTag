@@ -14,8 +14,16 @@ public:
   void refresh();
 
 private:
+  static const wxString GLYPH_CHECKED;
+  static const wxString GLYPH_UNCOMMITTED;
+  static const wxString GLYPH_UNCHECKED;
+  static const wxString GLYPH_RATING_FULL_STAR;
+  static const wxString GLYPH_RATING_HALF_STAR;
+  static const int MAX_STARS;
+
   void OnResetSelections(wxCommandEvent& event);
   void OnCopySelections(wxCommandEvent& event);
+  static wxString getStarTextForRating(float rating);
 
   ragtag::TagMap tag_map_{};
   wxListCtrl* lc_summary_{};
