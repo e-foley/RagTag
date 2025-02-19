@@ -101,7 +101,18 @@ void SummaryFrame::OnCopySelections(wxCommandEvent& event)
 void SummaryFrame::OnClickHeading(wxListEvent& event)
 {
   const int column = event.GetColumn();
-  const bool ascending = lc_summary_->GetUpdatedAscendingSortIndicator(column);
+  if (column == -1) {
+    // User clicked the header bar away from a column. Ignore.
+    return;
+  }
+
+  // GetSortIndicator() returns the column in which the current sort indicator is shown, or -1.
+  // When a new column is clicked, we prefer to sort descending first, which is the opposite of the
+  // default behavior.
+  bool ascending = false;
+  if (lc_summary_->GetSortIndicator() == column) {
+    ascending = lc_summary_->GetUpdatedAscendingSortIndicator(column);
+  }
 
   if (column >= FIRST_TAG_COLUMN_INDEX) {
     // This is a pain, but because wxListCtrl's sort operation requires a free-floating function
