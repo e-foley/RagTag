@@ -20,12 +20,24 @@ private:
   static const wxString GLYPH_RATING_FULL_STAR;
   static const wxString GLYPH_RATING_HALF_STAR;
   static const int MAX_STARS;
+  static const int FIRST_TAG_COLUMN_INDEX;
+
+  struct SortHelper {
+    ragtag::TagMap* p_tag_map{ nullptr };
+    ragtag::tag_t tag{};
+    bool sort_ascending{ false };
+  };
 
   void OnResetSelections(wxCommandEvent& event);
   void OnCopySelections(wxCommandEvent& event);
+  void OnClickHeading(wxListEvent& event);
+
   static wxString getStarTextForRating(float rating);
 
+  static int wxCALLBACK tagSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
+
   ragtag::TagMap tag_map_{};
+  std::vector<ragtag::path_t> file_paths_{};  // Indices to match those of wxListCtrl sequencing
   wxListCtrl* lc_summary_{};
 };
 
