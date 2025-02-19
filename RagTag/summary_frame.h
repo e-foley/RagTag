@@ -2,11 +2,9 @@
 #define INCLUDE_SUMMARY_FRAME_H
 
 #include "tag_map.h"
-#include <wx/bmpbndl.h>
 #include <wx/event.h>
 #include <wx/frame.h>
 #include <wx/listctrl.h>
-#include <wx/vector.h>
 #include <wx/window.h>
 
 class SummaryFrame : public wxFrame {
