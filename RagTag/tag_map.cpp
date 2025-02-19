@@ -221,7 +221,7 @@ namespace ragtag {
     return file_map_.contains(path);
   }
 
-  std::optional<std::vector<path_t>> TagMap::getFileTags(const path_t& path) const
+  std::optional<std::vector<tag_t>> TagMap::getFileTags(const path_t& path) const
   {
     const auto file_it = file_map_.find(path);
     if (file_it == file_map_.end()) {
@@ -229,11 +229,11 @@ namespace ragtag {
       return {};
     }
 
-    std::vector<path_t> paths_returning;
+    std::vector<tag_t> tags_returning;
     for (const auto& tag_it : file_it->second.tags) {
-      paths_returning.emplace_back(tag_it.first);
+      tags_returning.emplace_back(tag_it.first);
     }
-    return paths_returning;
+    return tags_returning;
   }
 
   std::vector<path_t> TagMap::getAllFiles() const {
