@@ -58,6 +58,25 @@ void SummaryFrame::refresh()
   const auto all_files = tag_map_.getAllFiles();
   for (int i = 0; i < all_files.size(); ++i) {
     lc_summary_->InsertItem(i, all_files[i].generic_wstring());
+    // Show rating...
+    auto rating = tag_map_.getRating(all_files[i]);
+    // TODO: Show star icons rather than textual representation of number.
+    lc_summary_->SetItem(i, 1, rating.has_value() ? std::to_string(*rating) : "--");
+    // Show state of tags...
+    for (int j = 0; j < all_tags.size(); ++j) {
+      int icon_index = -1;
+      auto tag_setting = tag_map_.getTagSetting(all_files[i], all_tags[j].first);
+      // TODO: Don't use magic numbers here.
+      if (!tag_setting.has_value()) {
+        icon_index = -1;  // Uncommitted
+      }
+      else if (*tag_setting == ragtag::TagSetting::YES) {
+        icon_index = 0;
+      }
+      
+      // Set j+2 column because of Path and Rating columns taking indices 0 and 1.
+      lc_summary_->SetItem(i, j + 2, "test", icon_index);
+    }
   }
 }
 
