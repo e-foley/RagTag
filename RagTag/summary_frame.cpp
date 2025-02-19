@@ -28,17 +28,17 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   sz_main->Add(p_summary_buttons, 0, wxEXPAND | wxALL, 0);
 
   // Approach heavily follows wxWidgets listctrl sample project.
-  normal_images_.push_back(wxIcon("icon1", wxBITMAP_TYPE_ICO_RESOURCE));
-  normal_images_.push_back(wxIcon("icon2", wxBITMAP_TYPE_ICO_RESOURCE));
-  normal_images_.push_back(wxIcon("icon3", wxBITMAP_TYPE_ICO_RESOURCE));
-  normal_images_.push_back(wxIcon("icon4", wxBITMAP_TYPE_ICO_RESOURCE));
-  normal_images_.push_back(wxIcon("icon5", wxBITMAP_TYPE_ICO_RESOURCE));
-  normal_images_.push_back(wxIcon("icon6", wxBITMAP_TYPE_ICO_RESOURCE));
-  normal_images_.push_back(wxIcon("icon7", wxBITMAP_TYPE_ICO_RESOURCE));
-  normal_images_.push_back(wxIcon("icon8", wxBITMAP_TYPE_ICO_RESOURCE));
-  normal_images_.push_back(wxIcon("icon9", wxBITMAP_TYPE_ICO_RESOURCE));
   small_images_.push_back(wxIcon("iconsmall", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
-  lc_summary_->SetNormalImages(normal_images_);
+  small_images_.push_back(wxIcon("icon1", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
+  small_images_.push_back(wxIcon("icon2", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
+  small_images_.push_back(wxIcon("icon_check", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
+  small_images_.push_back(wxIcon("icon4", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
+  small_images_.push_back(wxIcon("icon5", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
+  small_images_.push_back(wxIcon("icon6", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
+  small_images_.push_back(wxIcon("icon7", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
+  small_images_.push_back(wxIcon("icon8", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
+  small_images_.push_back(wxIcon("icon9", wxBITMAP_TYPE_ICO_RESOURCE, 16, 16));
+  //lc_summary_->SetNormalImages(normal_images_);
   lc_summary_->SetSmallImages(small_images_);
 }
 
@@ -50,10 +50,10 @@ void SummaryFrame::refresh()
 {
   lc_summary_->ClearAll();
   lc_summary_->AppendColumn("Path", wxLIST_FORMAT_LEFT, 500);
-  lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_LEFT, wxLIST_AUTOSIZE_USEHEADER);
+  lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE_USEHEADER);
   const auto all_tags = tag_map_.getAllTags();
   for (const auto& tag : all_tags) {
-    lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_LEFT, wxLIST_AUTOSIZE_USEHEADER);
+    lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE_USEHEADER);
   }
   const auto all_files = tag_map_.getAllFiles();
   for (int i = 0; i < all_files.size(); ++i) {
@@ -64,18 +64,18 @@ void SummaryFrame::refresh()
     lc_summary_->SetItem(i, 1, rating.has_value() ? std::to_string(*rating) : "--");
     // Show state of tags...
     for (int j = 0; j < all_tags.size(); ++j) {
-      int icon_index = -1;
+      int icon_index = 0;
       auto tag_setting = tag_map_.getTagSetting(all_files[i], all_tags[j].first);
       // TODO: Don't use magic numbers here.
       if (!tag_setting.has_value()) {
-        icon_index = -1;  // Uncommitted
+        icon_index = 1;  // Uncommitted
       }
       else if (*tag_setting == ragtag::TagSetting::YES) {
-        icon_index = 0;
+        icon_index = 3;
       }
       
       // Set j+2 column because of Path and Rating columns taking indices 0 and 1.
-      lc_summary_->SetItem(i, j + 2, "test", icon_index);
+      lc_summary_->SetItem(i, j + 2, wxEmptyString, icon_index);
     }
   }
 }

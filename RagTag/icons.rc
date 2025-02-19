@@ -2,7 +2,7 @@
 
 icon1       ICON    "icons/toolbrai.ico"
 icon2       ICON    "icons/toolchar.ico"
-icon3       ICON    "icons/toolchec.ico"
+icon_check  ICON    "icons/toolchec.ico"
 icon4       ICON    "icons/tooldata.ico"
 icon5       ICON    "icons/toolgame.ico"
 icon6       ICON    "icons/toolnote.ico"
