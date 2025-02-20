@@ -116,23 +116,25 @@ void SummaryFrame::OnClickHeading(wxListEvent& event)
   sort_helper.p_tag_map = &tag_map_;
 
   // GetSortIndicator() returns the column in which the current sort indicator is shown, or -1.
-  // When a new column is clicked, we prefer to sort descending first, which is the opposite of the
-  // default behavior.
-  bool ascending = false;
+  // When a new column is clicked, we prefer to sort descending first (except for text), which
+  // is the opposite of the default behavior.
+  bool ascending = column == PATH_COLUMN_INDEX;
   if (lc_summary_->GetSortIndicator() == column) {
+    // Same column is re-clicked.
     ascending = lc_summary_->GetUpdatedAscendingSortIndicator(column);
   }
+  sort_helper.sort_ascending = ascending;
 
-  if (column == RATING_COLUMN_INDEX) {
-    sort_helper.sort_ascending = ascending;
+  if (column == PATH_COLUMN_INDEX) {
+    lc_summary_->SortItems(&SummaryFrame::pathSort, reinterpret_cast<wxIntPtr>(&sort_helper));
+  }
+  else if (column == RATING_COLUMN_INDEX) {
     lc_summary_->SortItems(&SummaryFrame::ratingSort, reinterpret_cast<wxIntPtr>(&sort_helper));
-    SetStatusText("Sorting by rating...");
   }
   else if (column >= FIRST_TAG_COLUMN_INDEX) {
     // TODO: Consider caching all tags when refreshing so we don't need to re-procure the list here.
     const auto all_tags = tag_map_.getAllTags();
     sort_helper.tag = all_tags[column - FIRST_TAG_COLUMN_INDEX].first;
-    sort_helper.sort_ascending = ascending;
     lc_summary_->SortItems(&SummaryFrame::tagSort, reinterpret_cast<wxIntPtr>(&sort_helper));
   }
 
@@ -152,6 +154,16 @@ wxString SummaryFrame::getStarTextForRating(float rating)
   }
 
   return returning;
+}
+
+int wxCALLBACK SummaryFrame::pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data)
+{
+  // It's understood that the items to sort are paths and that `sort_data` is a pointer to our
+  // sorting helper struct.
+  const ragtag::path_t path1 = *reinterpret_cast<ragtag::path_t*>(item1);
+  const ragtag::path_t path2 = *reinterpret_cast<ragtag::path_t*>(item2);
+  const SortHelper sort_helper = *reinterpret_cast<SortHelper*>(sort_data);
+  return sort_helper.sort_ascending ? path1.compare(path2) : -path1.compare(path2);
 }
 
 int wxCALLBACK SummaryFrame::tagSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data)
