@@ -20,6 +20,8 @@ private:
   static const wxString GLYPH_RATING_FULL_STAR;
   static const wxString GLYPH_RATING_HALF_STAR;
   static const int MAX_STARS;
+  static const int PATH_COLUMN_INDEX;
+  static const int RATING_COLUMN_INDEX;
   static const int FIRST_TAG_COLUMN_INDEX;
 
   struct SortHelper {
@@ -35,6 +37,7 @@ private:
   static wxString getStarTextForRating(float rating);
 
   static int wxCALLBACK tagSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
+  static int wxCALLBACK ratingSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
 
   ragtag::TagMap tag_map_{};
   std::vector<ragtag::path_t> file_paths_{};  // Indices to match those of wxListCtrl sequencing

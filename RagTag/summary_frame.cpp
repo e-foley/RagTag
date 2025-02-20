@@ -16,6 +16,8 @@ const wxString SummaryFrame::GLYPH_RATING_HALF_STAR = L"\U00002BE8";  // U+2BE8 
 const wxString SummaryFrame::GLYPH_RATING_HALF_STAR = L"\U000000BD";  // U+00BD is a half fraction.
 #endif
 const int SummaryFrame::MAX_STARS = 5;
+const int SummaryFrame::PATH_COLUMN_INDEX = 0;
+const int SummaryFrame::RATING_COLUMN_INDEX = 1;
 const int SummaryFrame::FIRST_TAG_COLUMN_INDEX = 2;
 
 SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Project Summary",
@@ -106,6 +108,13 @@ void SummaryFrame::OnClickHeading(wxListEvent& event)
     return;
   }
 
+  // This is a pain, but because wxListCtrl's sort operation requires a free-floating function
+  // (not a member function that has access to object internals), we have to manually supply it a
+  // snapshot of the information we would like to sort. We do this by sending it a pointer to an
+  // instance of a helper struct we populate with information the sorting function requires.
+  SortHelper sort_helper;
+  sort_helper.p_tag_map = &tag_map_;
+
   // GetSortIndicator() returns the column in which the current sort indicator is shown, or -1.
   // When a new column is clicked, we prefer to sort descending first, which is the opposite of the
   // default behavior.
@@ -114,13 +123,12 @@ void SummaryFrame::OnClickHeading(wxListEvent& event)
     ascending = lc_summary_->GetUpdatedAscendingSortIndicator(column);
   }
 
-  if (column >= FIRST_TAG_COLUMN_INDEX) {
-    // This is a pain, but because wxListCtrl's sort operation requires a free-floating function
-    // (not a member function that has access to object internals), we have to manually supply it a
-    // snapshot of the information we would like to sort. We do this by sending it a pointer to an
-    // instance of a helper struct we populate with information the sorting function requires.
-    SortHelper sort_helper;
-    sort_helper.p_tag_map = &tag_map_;
+  if (column == RATING_COLUMN_INDEX) {
+    sort_helper.sort_ascending = ascending;
+    lc_summary_->SortItems(&SummaryFrame::ratingSort, reinterpret_cast<wxIntPtr>(&sort_helper));
+    SetStatusText("Sorting by rating...");
+  }
+  else if (column >= FIRST_TAG_COLUMN_INDEX) {
     // TODO: Consider caching all tags when refreshing so we don't need to re-procure the list here.
     const auto all_tags = tag_map_.getAllTags();
     sort_helper.tag = all_tags[column - FIRST_TAG_COLUMN_INDEX].first;
@@ -174,6 +182,33 @@ int wxCALLBACK SummaryFrame::tagSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr so
   }
   else {
     natural_sort = -1;
+  }
+
+  return sort_helper.sort_ascending ? natural_sort : -natural_sort;
+}
+
+int wxCALLBACK SummaryFrame::ratingSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data)
+{
+  const ragtag::path_t path1 = *reinterpret_cast<ragtag::path_t*>(item1);
+  const ragtag::path_t path2 = *reinterpret_cast<ragtag::path_t*>(item2);
+  const SortHelper sort_helper = *reinterpret_cast<SortHelper*>(sort_data);
+  const ragtag::TagMap& tag_map = *sort_helper.p_tag_map;  // Alias for convenience
+  auto rating1 = tag_map.getRating(path1);
+  auto rating2 = tag_map.getRating(path2);
+  
+  int natural_sort = 0;
+  if (!rating1.has_value() && !rating2.has_value()) {
+    natural_sort = 0;
+  }
+  else if (rating1.has_value() && !rating2.has_value()) {
+    natural_sort = 1;
+  }
+  else if (!rating1.has_value() && rating2.has_value()) {
+    natural_sort = -1;
+  }
+  else {
+    natural_sort = *rating1 > *rating2 ? 1 :
+                   *rating1 < *rating2 ? -1 : 0;
   }
 
   return sort_helper.sort_ascending ? natural_sort : -natural_sort;
