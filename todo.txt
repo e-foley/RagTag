@@ -35,6 +35,7 @@ PROJECT INFRASTRUCTURE
 
 EXECUTION
 * Document all classes, functions, fields, etc.
+* Write a project readme.
 * Use std::map::max_size() in relevant functions that check capacity.
 * Define JSON labels ("id", "tag", etc.) as constants rather than use them as magic strings.
 * Add appropriate licenses (wxWidgets, Catch, nlohmann JSON).
