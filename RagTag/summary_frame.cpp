@@ -46,7 +46,7 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   sz_rating_filter->Add(sl_max_rating, 0, wxEXPAND | wxALL, 5);
   wxCheckBox* cb_include_unrated = new wxCheckBox(p_rating_filter, wxID_ANY, "Include unrated",
     wxDefaultPosition, wxDefaultSize);
-  cb_include_unrated->Set3StateValue(wxCHK_CHECKED);
+  cb_include_unrated->SetValue(wxCHK_CHECKED);
   sz_rating_filter->Add(cb_include_unrated, 0, wxEXPAND | wxALL, 5);
   sz_rating_filter->AddStretchSpacer(1);  // Empty space at bottom to top-align
 
