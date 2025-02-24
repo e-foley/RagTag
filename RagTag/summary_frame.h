@@ -43,7 +43,12 @@ private:
   static int wxCALLBACK ratingSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
 
   ragtag::TagMap tag_map_{};
-  std::vector<ragtag::path_t> file_paths_{};  // Indices to match those of wxListCtrl sequencing
+
+  // Helper caches for linking controls to client data.
+  std::vector<ragtag::tag_t> tags_{};  // Indices to match those of dd_tag_selection_
+  std::vector<ragtag::path_t> file_paths_{};  // Indices to match those of lc_summary_
+
+  // Dynamic controls
   wxComboBox* dd_tag_selection_{};
   wxListCtrl* lc_summary_{};
 };

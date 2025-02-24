@@ -141,15 +141,31 @@ void SummaryFrame::refreshFileList()
 
 void SummaryFrame::refreshTagFilter()
 {
-  // TODO: Invoke this only on detected changes to tag list so that we're not constantly resetting
-  // the user's selection.
+  std::optional<ragtag::tag_t> last_tag_selection;
+  int last_tag_selection_index = dd_tag_selection_->GetSelection();
+  // Exclude 0 index, which always has "[No filter]" text, and offset by 1 accordingly.
+  if (last_tag_selection_index != wxNOT_FOUND && last_tag_selection_index != 0) {
+    last_tag_selection = tags_[last_tag_selection_index - 1];
+  }
+
+  const auto all_tags = tag_map_.getAllTags();
+  tags_.resize(all_tags.size());
+  for (int i = 0; i < all_tags.size(); ++i) {
+    tags_[i] = all_tags[i].first;
+  }
+
   dd_tag_selection_->Clear();
   dd_tag_selection_->Append("[No filter]");
-  const auto all_tags = tag_map_.getAllTags();
-  for (int i = 0; i < all_tags.size(); ++i) {
-    dd_tag_selection_->Append(all_tags[i].first);
+  int current_tag_selection_index = 0;
+  for (int i = 0; i < tags_.size(); ++i) {
+    dd_tag_selection_->Append(tags_[i]);
+    if (last_tag_selection.has_value() && tags_[i] == *last_tag_selection) {
+      // The tag label matches the label of the tag that was most recently selected, so let's
+      // reselect that item as a convenience to the user. (Offset by 1 to acccount for [No filter].)
+      current_tag_selection_index = i + 1;
+    }
   }
-  dd_tag_selection_->SetSelection(0);
+  dd_tag_selection_->SetSelection(current_tag_selection_index);
 }
 
 void SummaryFrame::OnResetSelections(wxCommandEvent& event)
