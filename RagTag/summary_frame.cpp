@@ -54,6 +54,7 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxPanel* p_tag_filter = new wxPanel(p_filters, wxID_ANY);
   wxStaticBoxSizer* sz_tag_filter = new wxStaticBoxSizer(wxVERTICAL, p_tag_filter,
     "Tag Filter");
+  p_tag_filter->SetSizer(sz_tag_filter);
   sz_filters->Add(p_tag_filter, 0, wxEXPAND | wxALL, 5);
   sz_filters->AddStretchSpacer(1);
   sz_main->Add(p_filters, 0, wxEXPAND | wxALL, 0);
