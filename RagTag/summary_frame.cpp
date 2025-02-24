@@ -55,7 +55,7 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxStaticBoxSizer* sz_tag_filter = new wxStaticBoxSizer(wxVERTICAL, p_tag_filter,
     "Tag Filter");
   p_tag_filter->SetSizer(sz_tag_filter);
-  wxArrayString options = { "[No filter]", "Tag 1", "Tag 2" };
+  wxArrayString options = { "[No filter]" };
   dd_tag_selection_ = new wxComboBox(p_tag_filter, wxID_ANY, "[No filter]",
     wxDefaultPosition, wxDefaultSize, options, wxCB_READONLY | wxCB_DROPDOWN);
   sz_tag_filter->Add(dd_tag_selection_, 0, wxEXPAND | wxALL, 5);
@@ -101,10 +101,22 @@ void SummaryFrame::setTagMap(const ragtag::TagMap& tag_map) {
 
 void SummaryFrame::refresh()
 {
+  const auto all_tags = tag_map_.getAllTags();
+
+  // Update tag filter display
+  // TODO: Invoke this only on detected changes to tag list so that we're not constantly resetting
+  // the user's selection.
+  dd_tag_selection_->Clear();
+  dd_tag_selection_->Append("[No filter]");
+  for (int i = 0; i < all_tags.size(); ++i) {
+    dd_tag_selection_->Append(all_tags[i].first);
+  }
+  dd_tag_selection_->SetSelection(0);
+
+  // Update file listing display
   lc_summary_->ClearAll();
   lc_summary_->AppendColumn("Path", wxLIST_FORMAT_LEFT, 500);
   lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_LEFT, 65);
-  const auto all_tags = tag_map_.getAllTags();
   for (const auto& tag : all_tags) {
     lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE_USEHEADER);
   }
