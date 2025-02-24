@@ -2,6 +2,7 @@
 #define INCLUDE_SUMMARY_FRAME_H
 
 #include "tag_map.h"
+#include <wx/combobox.h>
 #include <wx/event.h>
 #include <wx/frame.h>
 #include <wx/listctrl.h>
@@ -42,6 +43,7 @@ private:
 
   ragtag::TagMap tag_map_{};
   std::vector<ragtag::path_t> file_paths_{};  // Indices to match those of wxListCtrl sequencing
+  wxComboBox* dd_tag_selection_{};
   wxListCtrl* lc_summary_{};
 };
 

@@ -49,12 +49,29 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   cb_include_unrated->SetValue(wxCHK_CHECKED);
   sz_rating_filter->Add(cb_include_unrated, 0, wxEXPAND | wxALL, 5);
   sz_rating_filter->AddStretchSpacer(1);  // Empty space at bottom to top-align
-
   sz_filters->Add(p_rating_filter, 0, wxEXPAND | wxALL, 5);
+
   wxPanel* p_tag_filter = new wxPanel(p_filters, wxID_ANY);
   wxStaticBoxSizer* sz_tag_filter = new wxStaticBoxSizer(wxVERTICAL, p_tag_filter,
     "Tag Filter");
   p_tag_filter->SetSizer(sz_tag_filter);
+  wxArrayString options = { "[No filter]", "Tag 1", "Tag 2" };
+  dd_tag_selection_ = new wxComboBox(p_tag_filter, wxID_ANY, "[No filter]",
+    wxDefaultPosition, wxDefaultSize, options, wxCB_READONLY | wxCB_DROPDOWN);
+  sz_tag_filter->Add(dd_tag_selection_, 0, wxEXPAND | wxALL, 5);
+  wxCheckBox* cb_show_yes = new wxCheckBox(p_tag_filter, wxID_ANY, "Show yes", wxDefaultPosition,
+    wxDefaultSize);
+  cb_show_yes->SetValue(wxCHK_CHECKED);
+  sz_tag_filter->Add(cb_show_yes, 0, wxEXPAND | wxALL, 5);
+  wxCheckBox* cb_show_no = new wxCheckBox(p_tag_filter, wxID_ANY, "Show no", wxDefaultPosition,
+    wxDefaultSize);
+  cb_show_no->SetValue(wxCHK_CHECKED);
+  sz_tag_filter->Add(cb_show_no, 0, wxEXPAND | wxALL, 5);
+  wxCheckBox* cb_show_uncommitted = new wxCheckBox(p_tag_filter, wxID_ANY, "Show uncommitted",
+    wxDefaultPosition, wxDefaultSize);
+  cb_show_uncommitted->SetValue(wxCHK_CHECKED);
+  sz_tag_filter->Add(cb_show_uncommitted, 0, wxEXPAND | wxALL, 5);
+
   sz_filters->Add(p_tag_filter, 0, wxEXPAND | wxALL, 5);
   sz_filters->AddStretchSpacer(1);
   sz_main->Add(p_filters, 0, wxEXPAND | wxALL, 0);
