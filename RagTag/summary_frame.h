@@ -12,7 +12,8 @@ class SummaryFrame : public wxFrame {
 public:
   SummaryFrame(wxWindow* parent);
   void setTagMap(const ragtag::TagMap& tag_map);
-  void refresh();
+  void refreshFileList();
+  void refreshTagFilter();
 
 private:
   static const wxString GLYPH_CHECKED;

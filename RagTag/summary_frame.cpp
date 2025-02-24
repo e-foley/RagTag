@@ -99,24 +99,12 @@ void SummaryFrame::setTagMap(const ragtag::TagMap& tag_map) {
   tag_map_ = tag_map;
 }
 
-void SummaryFrame::refresh()
+void SummaryFrame::refreshFileList()
 {
-  const auto all_tags = tag_map_.getAllTags();
-
-  // Update tag filter display
-  // TODO: Invoke this only on detected changes to tag list so that we're not constantly resetting
-  // the user's selection.
-  dd_tag_selection_->Clear();
-  dd_tag_selection_->Append("[No filter]");
-  for (int i = 0; i < all_tags.size(); ++i) {
-    dd_tag_selection_->Append(all_tags[i].first);
-  }
-  dd_tag_selection_->SetSelection(0);
-
-  // Update file listing display
   lc_summary_->ClearAll();
   lc_summary_->AppendColumn("Path", wxLIST_FORMAT_LEFT, 500);
   lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_LEFT, 65);
+  const auto all_tags = tag_map_.getAllTags();
   for (const auto& tag : all_tags) {
     lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE_USEHEADER);
   }
@@ -149,6 +137,19 @@ void SummaryFrame::refresh()
       lc_summary_->SetItem(i, j + FIRST_TAG_COLUMN_INDEX, tag_state_glyph, -1);
     }
   }
+}
+
+void SummaryFrame::refreshTagFilter()
+{
+  // TODO: Invoke this only on detected changes to tag list so that we're not constantly resetting
+  // the user's selection.
+  dd_tag_selection_->Clear();
+  dd_tag_selection_->Append("[No filter]");
+  const auto all_tags = tag_map_.getAllTags();
+  for (int i = 0; i < all_tags.size(); ++i) {
+    dd_tag_selection_->Append(all_tags[i].first);
+  }
+  dd_tag_selection_->SetSelection(0);
 }
 
 void SummaryFrame::OnResetSelections(wxCommandEvent& event)
