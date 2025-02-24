@@ -4,6 +4,7 @@
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/slider.h>
+#include <wx/statbox.h>
 
 // The font used by wxWidgets does not display half-star characters as of writing.
 // #define HALF_STAR_GLYPH_SUPPORTED
@@ -35,17 +36,20 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxSizer* sz_filters = new wxBoxSizer(wxHORIZONTAL);
   p_filters->SetSizer(sz_filters);
   wxPanel* p_rating_filter = new wxPanel(p_filters, wxID_ANY);
+  // Note: When using StaticBoxSizer, items added to the panel actually need the sizer's StaticBox
+  // to be their parent instead of the panel like other sizers would have. I don't know exactly why
+  // this is, but wxWidgets is consistent at advising us to do this, and who are we to question it?
   wxStaticBoxSizer* sz_rating_filter = new wxStaticBoxSizer(wxVERTICAL, p_rating_filter,
     "Rating Filter");
   p_rating_filter->SetSizer(sz_rating_filter);
-  wxSlider* sl_min_rating = new wxSlider(p_rating_filter, wxID_ANY, 0, 0, 5, wxDefaultPosition,
-    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
+  wxSlider* sl_min_rating = new wxSlider(sz_rating_filter->GetStaticBox(), wxID_ANY, 0, 0, 5,
+    wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
   sz_rating_filter->Add(sl_min_rating, 0, wxEXPAND | wxALL, 5);
-  wxSlider* sl_max_rating = new wxSlider(p_rating_filter, wxID_ANY, 5, 0, 5, wxDefaultPosition,
-    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
+  wxSlider* sl_max_rating = new wxSlider(sz_rating_filter->GetStaticBox(), wxID_ANY, 5, 0, 5,
+    wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
   sz_rating_filter->Add(sl_max_rating, 0, wxEXPAND | wxALL, 5);
-  wxCheckBox* cb_include_unrated = new wxCheckBox(p_rating_filter, wxID_ANY, "Include unrated",
-    wxDefaultPosition, wxDefaultSize);
+  wxCheckBox* cb_include_unrated = new wxCheckBox(sz_rating_filter->GetStaticBox(), wxID_ANY,
+    "Include unrated", wxDefaultPosition, wxDefaultSize);
   cb_include_unrated->SetValue(wxCHK_CHECKED);
   sz_rating_filter->Add(cb_include_unrated, 0, wxEXPAND | wxALL, 5);
   sz_rating_filter->AddStretchSpacer(1);  // Empty space at bottom to top-align
@@ -56,19 +60,19 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
     "Tag Filter");
   p_tag_filter->SetSizer(sz_tag_filter);
   wxArrayString options = { "[No filter]" };
-  dd_tag_selection_ = new wxComboBox(p_tag_filter, wxID_ANY, "[No filter]",
+  dd_tag_selection_ = new wxComboBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "[No filter]",
     wxDefaultPosition, wxDefaultSize, options, wxCB_READONLY | wxCB_DROPDOWN);
   sz_tag_filter->Add(dd_tag_selection_, 0, wxEXPAND | wxALL, 5);
-  wxCheckBox* cb_show_yes = new wxCheckBox(p_tag_filter, wxID_ANY, "Show yes", wxDefaultPosition,
-    wxDefaultSize);
+  wxCheckBox* cb_show_yes = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "Show yes",
+    wxDefaultPosition, wxDefaultSize);
   cb_show_yes->SetValue(wxCHK_CHECKED);
   sz_tag_filter->Add(cb_show_yes, 0, wxEXPAND | wxALL, 5);
-  wxCheckBox* cb_show_no = new wxCheckBox(p_tag_filter, wxID_ANY, "Show no", wxDefaultPosition,
-    wxDefaultSize);
+  wxCheckBox* cb_show_no = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "Show no",
+    wxDefaultPosition, wxDefaultSize);
   cb_show_no->SetValue(wxCHK_CHECKED);
   sz_tag_filter->Add(cb_show_no, 0, wxEXPAND | wxALL, 5);
-  wxCheckBox* cb_show_uncommitted = new wxCheckBox(p_tag_filter, wxID_ANY, "Show uncommitted",
-    wxDefaultPosition, wxDefaultSize);
+  wxCheckBox* cb_show_uncommitted = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY,
+    "Show uncommitted", wxDefaultPosition, wxDefaultSize);
   cb_show_uncommitted->SetValue(wxCHK_CHECKED);
   sz_tag_filter->Add(cb_show_uncommitted, 0, wxEXPAND | wxALL, 5);
 
