@@ -1,5 +1,4 @@
 #include "main_frame.h"
-#include "summary_frame.h"
 #include "tag_entry_dialog.h"
 #include "tag_toggle_panel.h"
 #include <wx/filedlg.h>
@@ -174,16 +173,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   sz_right->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
 
-  // TODO: Replace this temporary location with real paths once application is stable.
-  //const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
-  const wxString debug_project_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
-  //displayMediaFile(std::wstring(debug_media_dir) + L"videomp4.mp4");
-  //displayMediaFile(std::wstring(debug_media_dir) + L"imagejpg.jpg");
-  //displayMediaFile(std::wstring(debug_media_dir) + L"imagepng.png");
-  loadProject(std::wstring(debug_project_dir) + L"beachcoolrainbow.tagdef");
-
   sz_main->Add(p_left, 2, wxEXPAND | wxALL, 5);
   sz_main->Add(p_right, 3, wxEXPAND | wxALL, 5);
+
+  f_summary_ = new SummaryFrame(this);
+  refreshSummary();
 
   Bind(wxEVT_MENU, &MainFrame::OnNewProject, this, ID_NEW_PROJECT);
   Bind(wxEVT_MENU, &MainFrame::OnOpenProject, this, ID_OPEN_PROJECT);
@@ -203,6 +197,14 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   // object.) Figure out the difference and implement a fix such that the custom event matches how
   // ordinary events on other objects are handled.
   Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
+
+  // TODO: Replace this temporary location with real paths once application is stable.
+  //const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
+  const wxString debug_project_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
+  //displayMediaFile(std::wstring(debug_media_dir) + L"videomp4.mp4");
+  //displayMediaFile(std::wstring(debug_media_dir) + L"imagejpg.jpg");
+  //displayMediaFile(std::wstring(debug_media_dir) + L"imagepng.png");
+  loadProject(std::wstring(debug_project_dir) + L"beachcoolrainbow.tagdef");
 }
 
 void MainFrame::refreshTagToggles() {
@@ -364,6 +366,13 @@ void MainFrame::refreshFileView()
   file_view_modification_in_progress_ = false;
 }
 
+void MainFrame::refreshSummary()
+{
+  f_summary_->setTagMap(tag_map_);
+  f_summary_->refreshTagFilter();
+  f_summary_->refreshFileList();
+}
+
 void MainFrame::OnNewProject(wxCommandEvent& event) {
   if (is_dirty_) {
     const UserIntention intention = promptUnsavedChanges();
@@ -404,6 +413,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
   active_file_ = {};
   refreshTagToggles();
   refreshFileView();
+  refreshSummary();
   user_initiated_stop_media_ = true;
   stopMedia();
   SetStatusText("Created new project.");
@@ -498,11 +508,12 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
 
 void MainFrame::OnShowSummary(wxCommandEvent& event)
 {
-  SummaryFrame* f_summary = new SummaryFrame(this);
-  f_summary->setTagMap(tag_map_);
-  f_summary->refreshTagFilter();
-  f_summary->refreshFileList();
-  f_summary->Show();
+  if (f_summary_->IsShown()) {
+    f_summary_->SetFocus();
+  }
+  else {
+    f_summary_->Show();
+  }
 }
 
 void MainFrame::OnLoadFile(wxCommandEvent& event)
@@ -666,6 +677,7 @@ void MainFrame::OnClearTagsFromFile(wxCommandEvent& event)
 
   refreshTagToggles();
   refreshFileView();
+  refreshSummary();
 }
 
 void MainFrame::OnSetTagsToDefaults(wxCommandEvent& event)
@@ -680,6 +692,7 @@ void MainFrame::OnSetTagsToDefaults(wxCommandEvent& event)
 
   refreshTagToggles();
   refreshFileView();
+  refreshSummary();
 }
 
 void MainFrame::OnStopMedia(wxCommandEvent& event) {
@@ -825,6 +838,7 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
   is_dirty_ = true;
   refreshTagToggles();
   refreshFileView();
+  refreshSummary();
 }
 
 void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
@@ -916,6 +930,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
   // presenting the latest information to the user.
   refreshTagToggles();
   refreshFileView();
+  refreshSummary();
 }
 
 void MainFrame::OnMediaLoaded(wxMediaEvent& event)
@@ -983,6 +998,7 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
         // User might have deleted last file in its directory.
         active_file_ = {};
         refreshFileView();
+        refreshSummary();
       }
     }
   }
@@ -1114,6 +1130,7 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
 
   refreshTagToggles();
   refreshFileView();
+  refreshSummary();
   SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
   return true;
 }
@@ -1131,6 +1148,7 @@ bool MainFrame::loadProject(const ragtag::path_t& path)
   active_file_ = {};
   refreshTagToggles();
   refreshFileView();
+  refreshSummary();
   user_initiated_stop_media_ = true;
   stopMedia();
   // TODO: Find a way to either reset the wxMediaCtrl or disable playing until a file is loaded.

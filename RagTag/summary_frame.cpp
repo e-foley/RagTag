@@ -118,6 +118,8 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   b_copy_selections->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
   sz_summary_buttons->Add(b_copy_selections, 0, wxALL, 5);
   sz_main->Add(p_summary_buttons, 0, wxEXPAND | wxALL, 0);
+
+  Bind(wxEVT_CLOSE_WINDOW, &SummaryFrame::OnClose, this);
 }
 
 void SummaryFrame::setTagMap(const ragtag::TagMap& tag_map) {
@@ -313,6 +315,13 @@ void SummaryFrame::OnMaxSliderMove(wxCommandEvent& event) {
 void SummaryFrame::OnClickShowRated(wxCommandEvent& event)
 {
   updateRatingFilterEnabledState();
+}
+
+void SummaryFrame::OnClose(wxCloseEvent& event)
+{
+  // For convenience of synchronization between the main frame and the summary frame, it's more
+  // convenient if we don't flat-out destroy the summary frame when it's closed but merely hide it.
+  Hide();
 }
 
 void SummaryFrame::updateRatingFilterEnabledState() {

@@ -1,6 +1,7 @@
 #ifndef INCLUDE_MAIN_FRAME_H
 #define INCLUDE_MAIN_FRAME_H
 
+#include "summary_frame.h"
 #include "tag_map.h"
 #include "tag_toggle_panel.h"
 #include <filesystem>
@@ -71,6 +72,7 @@ private:
   // Functions updating view to match model
   void refreshTagToggles();
   void refreshFileView();
+  void refreshSummary();
   // Menu events
   void OnNewProject(wxCommandEvent& event);
   void OnOpenProject(wxCommandEvent& event);
@@ -141,6 +143,7 @@ private:
   wxButton* b_play_pause_media_{ nullptr };
   wxStaticText* st_current_directory_{ nullptr };
   wxListCtrl* lc_files_in_directory_{ nullptr };
+  SummaryFrame* f_summary_{ nullptr };
   // Parallel array of full paths to files presented by lc_files_in_directory_, since they cannot be
   // included directly. It's not pretty design, but it's the best way I could come up with given
   // wxListCtrl's limitations.
