@@ -986,9 +986,15 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
       // Cache next file name so that we can switch to it if deletion is successful.
       const auto next_file = qualifiedFileNavigator(
         *active_file_, [](const ragtag::path_t&) {return true; }, true);
-      if (!deleteFile(*active_file_)) {
+      if (!deleteFile(path_cache)) {
         // TODO: Report error.
         SetStatusText(L"Could not delete file '" + path_cache.generic_wstring() + L"'.");
+      }
+
+      // Remove the file from our project also.
+      if (!tag_map_.removeFile(path_cache)) {
+        SetStatusText(L"Could not remove file '" + path_cache.generic_wstring() +
+          L"' from the project.");
       }
 
       if (next_file.has_value()) {
