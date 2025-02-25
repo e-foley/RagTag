@@ -3,6 +3,7 @@
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
+#include <wx/stattext.h>
 
 // The font used by wxWidgets does not display half-star characters as of writing.
 // #define HALF_STAR_GLYPH_SUPPORTED
@@ -40,14 +41,24 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxStaticBoxSizer* sz_rating_filter = new wxStaticBoxSizer(wxVERTICAL, p_rating_filter,
     "Rating Filter");
   p_rating_filter->SetSizer(sz_rating_filter);
-  sl_min_rating_ = new wxSlider(sz_rating_filter->GetStaticBox(), wxID_ANY, 0, 0, 5,
+
+  wxPanel* p_sliders = new wxPanel(sz_rating_filter->GetStaticBox(), wxID_ANY);
+  wxFlexGridSizer* sz_sliders = new wxFlexGridSizer(2);
+  p_sliders->SetSizer(sz_sliders);
+  wxStaticText* min_rating_label = new wxStaticText(p_sliders, wxID_ANY, "Min:");
+  sz_sliders->Add(min_rating_label, 0, wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL, 5);
+  sl_min_rating_ = new wxSlider(p_sliders, wxID_ANY, 0, 0, 5,
     wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
   sl_min_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnFilterChange, this);
-  sz_rating_filter->Add(sl_min_rating_, 0, wxEXPAND | wxALL, 5);
-  sl_max_rating_ = new wxSlider(sz_rating_filter->GetStaticBox(), wxID_ANY, 5, 0, 5,
+  sz_sliders->Add(sl_min_rating_, 0, wxEXPAND | wxALL, 5);
+  wxStaticText* max_rating_label = new wxStaticText(p_sliders, wxID_ANY, "Max:");
+  sz_sliders->Add(max_rating_label, 0, wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL, 5);
+  sl_max_rating_ = new wxSlider(p_sliders, wxID_ANY, 5, 0, 5,
     wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
   sl_max_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnFilterChange, this);
-  sz_rating_filter->Add(sl_max_rating_, 0, wxEXPAND | wxALL, 5);
+  sz_sliders->Add(sl_max_rating_, 0, wxEXPAND | wxALL, 5);
+  sz_rating_filter->Add(p_sliders, 0, wxEXPAND | wxALL, 0);
+
   cb_include_unrated_ = new wxCheckBox(sz_rating_filter->GetStaticBox(), wxID_ANY,
     "Include unrated", wxDefaultPosition, wxDefaultSize);
   cb_include_unrated_->SetValue(wxCHK_CHECKED);
