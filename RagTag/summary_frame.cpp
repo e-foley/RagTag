@@ -49,13 +49,13 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   sz_sliders->Add(min_rating_label, 0, wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL, 5);
   sl_min_rating_ = new wxSlider(p_sliders, wxID_ANY, 0, 0, 5,
     wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
-  sl_min_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnFilterChange, this);
+  sl_min_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnMinSliderMove, this);
   sz_sliders->Add(sl_min_rating_, 0, wxEXPAND | wxALL, 5);
   wxStaticText* max_rating_label = new wxStaticText(p_sliders, wxID_ANY, "Max:");
   sz_sliders->Add(max_rating_label, 0, wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL, 5);
   sl_max_rating_ = new wxSlider(p_sliders, wxID_ANY, 5, 0, 5,
     wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
-  sl_max_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnFilterChange, this);
+  sl_max_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnMaxSliderMove, this);
   sz_sliders->Add(sl_max_rating_, 0, wxEXPAND | wxALL, 5);
   sz_rating_filter->Add(p_sliders, 0, wxEXPAND | wxALL, 0);
 
@@ -293,6 +293,20 @@ void SummaryFrame::OnClickHeading(wxListEvent& event)
 
 void SummaryFrame::OnFilterChange(wxCommandEvent& event)
 {
+  refreshFileList();
+}
+
+void SummaryFrame::OnMinSliderMove(wxCommandEvent& event) {
+  if (sl_min_rating_->GetValue() > sl_max_rating_->GetValue()) {
+    sl_max_rating_->SetValue(sl_min_rating_->GetValue());
+  }
+  refreshFileList();
+}
+
+void SummaryFrame::OnMaxSliderMove(wxCommandEvent& event) {
+  if (sl_max_rating_->GetValue() < sl_min_rating_->GetValue()) {
+    sl_min_rating_->SetValue(sl_max_rating_->GetValue());
+  }
   refreshFileList();
 }
 

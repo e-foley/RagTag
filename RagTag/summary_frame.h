@@ -42,6 +42,8 @@ private:
   void OnCopySelections(wxCommandEvent& event);
   void OnClickHeading(wxListEvent& event);
   void OnFilterChange(wxCommandEvent& event);
+  void OnMinSliderMove(wxCommandEvent& event);
+  void OnMaxSliderMove(wxCommandEvent& event);
 
   static wxString getStarTextForRating(float rating);
 
