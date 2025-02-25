@@ -43,7 +43,7 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   p_rating_filter->SetSizer(sz_rating_filter);
 
   wxPanel* p_sliders = new wxPanel(sz_rating_filter->GetStaticBox(), wxID_ANY);
-  wxFlexGridSizer* sz_sliders = new wxFlexGridSizer(2);
+  wxFlexGridSizer* sz_sliders = new wxFlexGridSizer(4);
   p_sliders->SetSizer(sz_sliders);
   wxStaticText* min_rating_label = new wxStaticText(p_sliders, wxID_ANY, "Min:");
   sz_sliders->Add(min_rating_label, 0, wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL, 5);
