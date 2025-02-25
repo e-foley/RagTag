@@ -42,16 +42,16 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   p_rating_filter->SetSizer(sz_rating_filter);
   sl_min_rating_ = new wxSlider(sz_rating_filter->GetStaticBox(), wxID_ANY, 0, 0, 5,
     wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
-  sl_min_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnSliderMove, this);
+  sl_min_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnFilterChange, this);
   sz_rating_filter->Add(sl_min_rating_, 0, wxEXPAND | wxALL, 5);
   sl_max_rating_ = new wxSlider(sz_rating_filter->GetStaticBox(), wxID_ANY, 5, 0, 5,
     wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
-  sl_max_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnSliderMove, this);
+  sl_max_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnFilterChange, this);
   sz_rating_filter->Add(sl_max_rating_, 0, wxEXPAND | wxALL, 5);
   cb_include_unrated_ = new wxCheckBox(sz_rating_filter->GetStaticBox(), wxID_ANY,
     "Include unrated", wxDefaultPosition, wxDefaultSize);
   cb_include_unrated_->SetValue(wxCHK_CHECKED);
-  cb_include_unrated_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnToggleIncludeUnrated, this);
+  cb_include_unrated_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
   sz_rating_filter->Add(cb_include_unrated_, 0, wxEXPAND | wxALL, 5);
   sz_rating_filter->AddStretchSpacer(1);  // Empty space at bottom to top-align
   sz_filters->Add(p_rating_filter, 0, wxEXPAND | wxALL, 5);
@@ -63,19 +63,23 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxArrayString options = { "[No filter]" };
   dd_tag_selection_ = new wxComboBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "[No filter]",
     wxDefaultPosition, wxDefaultSize, options, wxCB_READONLY | wxCB_DROPDOWN);
+  dd_tag_selection_->Bind(wxEVT_COMBOBOX, &SummaryFrame::OnFilterChange, this);
   sz_tag_filter->Add(dd_tag_selection_, 0, wxEXPAND | wxALL, 5);
-  wxCheckBox* cb_show_yes = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "Show yes",
+  cb_show_yes_ = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "Show yes",
     wxDefaultPosition, wxDefaultSize);
-  cb_show_yes->SetValue(wxCHK_CHECKED);
-  sz_tag_filter->Add(cb_show_yes, 0, wxEXPAND | wxALL, 5);
-  wxCheckBox* cb_show_no = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "Show no",
+  cb_show_yes_->SetValue(wxCHK_CHECKED);
+  cb_show_yes_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
+  sz_tag_filter->Add(cb_show_yes_, 0, wxEXPAND | wxALL, 5);
+  cb_show_no_ = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "Show no",
     wxDefaultPosition, wxDefaultSize);
-  cb_show_no->SetValue(wxCHK_CHECKED);
-  sz_tag_filter->Add(cb_show_no, 0, wxEXPAND | wxALL, 5);
-  wxCheckBox* cb_show_uncommitted = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY,
+  cb_show_no_->SetValue(wxCHK_CHECKED);
+  cb_show_no_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
+  sz_tag_filter->Add(cb_show_no_, 0, wxEXPAND | wxALL, 5);
+  cb_show_uncommitted_ = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY,
     "Show uncommitted", wxDefaultPosition, wxDefaultSize);
-  cb_show_uncommitted->SetValue(wxCHK_CHECKED);
-  sz_tag_filter->Add(cb_show_uncommitted, 0, wxEXPAND | wxALL, 5);
+  cb_show_uncommitted_->SetValue(wxCHK_CHECKED);
+  cb_show_uncommitted_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
+  sz_tag_filter->Add(cb_show_uncommitted_, 0, wxEXPAND | wxALL, 5);
 
   sz_filters->Add(p_tag_filter, 0, wxEXPAND | wxALL, 5);
   sz_filters->AddStretchSpacer(1);
@@ -114,7 +118,7 @@ void SummaryFrame::refreshFileList()
     // TODO: Figure out a way to get autosizing to play nicely upon refresh.
     lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, /*wxLIST_AUTOSIZE_USEHEADER*/ 80);
   }
-  file_paths_ = tag_map_.selectFiles(getRuleFromRatingFilterUi());
+  file_paths_ = tag_map_.selectFiles(getOverallRuleFromFilterUi());
   for (int i = 0; i < file_paths_.size(); ++i) {
     lc_summary_->InsertItem(i, file_paths_[i].generic_wstring());
      
@@ -176,9 +180,9 @@ void SummaryFrame::refreshTagFilter()
 
 ragtag::TagMap::file_qualifier_t SummaryFrame::getRuleFromRatingFilterUi()
 {
-  int min_rating = sl_min_rating_->GetValue();
-  int max_rating = sl_max_rating_->GetValue();
-  bool include_unrated = cb_include_unrated_->IsChecked();
+  const int min_rating = sl_min_rating_->GetValue();
+  const int max_rating = sl_max_rating_->GetValue();
+  const bool include_unrated = cb_include_unrated_->IsChecked();
   return [=](const ragtag::TagMap::FileInfo& info) {
     if (info.rating.has_value()) {
       return *info.rating >= min_rating && *info.rating <= max_rating;
@@ -186,6 +190,36 @@ ragtag::TagMap::file_qualifier_t SummaryFrame::getRuleFromRatingFilterUi()
     else {
       return include_unrated;
     }
+    };
+}
+
+ragtag::TagMap::file_qualifier_t SummaryFrame::getRuleFromTagFilterUi()
+{
+  const int selection_index = dd_tag_selection_->GetSelection();
+  if (selection_index == 0) {
+    // The selected item is the one representing no filter, so include all the files.
+    return [](const ragtag::TagMap::FileInfo& info) {return true;};
+  }
+
+  // -1 accounts for first option being the default "no filter" option, which isn't tied to a tag.
+  const ragtag::tag_t tag = tags_[dd_tag_selection_->GetSelection() - 1];
+  const bool include_yes = cb_show_yes_->IsChecked();
+  const bool include_no = cb_show_no_->IsChecked();
+  const bool include_uncommitted = cb_show_uncommitted_->IsChecked();
+  return [=](const ragtag::TagMap::FileInfo& info) {
+    const ragtag::TagSetting setting = info.f_tag_setting(tag);
+    return setting == ragtag::TagSetting::YES && include_yes ||
+      setting == ragtag::TagSetting::NO && include_no ||
+      setting == ragtag::TagSetting::UNCOMMITTED && include_uncommitted;
+    };
+}
+
+ragtag::TagMap::file_qualifier_t SummaryFrame::getOverallRuleFromFilterUi()
+{
+  // Composes the rating filter and the tag filter (but can be expanded for other filters as we
+  // implement them).
+  return [=](const ragtag::TagMap::FileInfo& info) {
+    return getRuleFromRatingFilterUi()(info) && getRuleFromTagFilterUi()(info);
     };
 }
 
@@ -240,12 +274,7 @@ void SummaryFrame::OnClickHeading(wxListEvent& event)
   lc_summary_->ShowSortIndicator(column, ascending);
 }
 
-void SummaryFrame::OnSliderMove(wxCommandEvent& event)
-{
-  refreshFileList();
-}
-
-void SummaryFrame::OnToggleIncludeUnrated(wxCommandEvent& event)
+void SummaryFrame::OnFilterChange(wxCommandEvent& event)
 {
   refreshFileList();
 }

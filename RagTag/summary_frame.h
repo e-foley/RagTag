@@ -35,12 +35,13 @@ private:
   };
 
   ragtag::TagMap::file_qualifier_t getRuleFromRatingFilterUi();
+  ragtag::TagMap::file_qualifier_t getRuleFromTagFilterUi();
+  ragtag::TagMap::file_qualifier_t getOverallRuleFromFilterUi();
 
   void OnRefreshWindow(wxCommandEvent& event);
   void OnCopySelections(wxCommandEvent& event);
   void OnClickHeading(wxListEvent& event);
-  void OnSliderMove(wxCommandEvent& event);
-  void OnToggleIncludeUnrated(wxCommandEvent& event);
+  void OnFilterChange(wxCommandEvent& event);
 
   static wxString getStarTextForRating(float rating);
 
@@ -59,6 +60,9 @@ private:
   wxSlider* sl_max_rating_{};
   wxCheckBox* cb_include_unrated_{};
   wxComboBox* dd_tag_selection_{};
+  wxCheckBox* cb_show_yes_{};
+  wxCheckBox* cb_show_no_{};
+  wxCheckBox* cb_show_uncommitted_{};
   wxListCtrl* lc_summary_{};
 };
 
