@@ -2,10 +2,12 @@
 #define INCLUDE_SUMMARY_FRAME_H
 
 #include "tag_map.h"
+#include <wx/checkbox.h>
 #include <wx/combobox.h>
 #include <wx/event.h>
 #include <wx/frame.h>
 #include <wx/listctrl.h>
+#include <wx/slider.h>
 #include <wx/window.h>
 
 class SummaryFrame : public wxFrame {
@@ -32,9 +34,13 @@ private:
     bool sort_ascending{ false };
   };
 
-  void OnResetSelections(wxCommandEvent& event);
+  ragtag::TagMap::file_qualifier_t getRuleFromRatingFilterUi();
+
+  void OnRefreshWindow(wxCommandEvent& event);
   void OnCopySelections(wxCommandEvent& event);
   void OnClickHeading(wxListEvent& event);
+  void OnSliderMove(wxCommandEvent& event);
+  void OnToggleIncludeUnrated(wxCommandEvent& event);
 
   static wxString getStarTextForRating(float rating);
 
@@ -49,6 +55,9 @@ private:
   std::vector<ragtag::path_t> file_paths_{};  // Indices to match those of lc_summary_
 
   // Dynamic controls
+  wxSlider* sl_min_rating_{};
+  wxSlider* sl_max_rating_{};
+  wxCheckBox* cb_include_unrated_{};
   wxComboBox* dd_tag_selection_{};
   wxListCtrl* lc_summary_{};
 };

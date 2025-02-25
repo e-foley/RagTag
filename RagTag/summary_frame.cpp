@@ -1,9 +1,7 @@
 #include "summary_frame.h"
 #include <wx/button.h>
-#include <wx/checkbox.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
-#include <wx/slider.h>
 #include <wx/statbox.h>
 
 // The font used by wxWidgets does not display half-star characters as of writing.
@@ -42,16 +40,19 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxStaticBoxSizer* sz_rating_filter = new wxStaticBoxSizer(wxVERTICAL, p_rating_filter,
     "Rating Filter");
   p_rating_filter->SetSizer(sz_rating_filter);
-  wxSlider* sl_min_rating = new wxSlider(sz_rating_filter->GetStaticBox(), wxID_ANY, 0, 0, 5,
+  sl_min_rating_ = new wxSlider(sz_rating_filter->GetStaticBox(), wxID_ANY, 0, 0, 5,
     wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
-  sz_rating_filter->Add(sl_min_rating, 0, wxEXPAND | wxALL, 5);
-  wxSlider* sl_max_rating = new wxSlider(sz_rating_filter->GetStaticBox(), wxID_ANY, 5, 0, 5,
+  sl_min_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnSliderMove, this);
+  sz_rating_filter->Add(sl_min_rating_, 0, wxEXPAND | wxALL, 5);
+  sl_max_rating_ = new wxSlider(sz_rating_filter->GetStaticBox(), wxID_ANY, 5, 0, 5,
     wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_VALUE_LABEL);
-  sz_rating_filter->Add(sl_max_rating, 0, wxEXPAND | wxALL, 5);
-  wxCheckBox* cb_include_unrated = new wxCheckBox(sz_rating_filter->GetStaticBox(), wxID_ANY,
+  sl_max_rating_->Bind(wxEVT_SLIDER, &SummaryFrame::OnSliderMove, this);
+  sz_rating_filter->Add(sl_max_rating_, 0, wxEXPAND | wxALL, 5);
+  cb_include_unrated_ = new wxCheckBox(sz_rating_filter->GetStaticBox(), wxID_ANY,
     "Include unrated", wxDefaultPosition, wxDefaultSize);
-  cb_include_unrated->SetValue(wxCHK_CHECKED);
-  sz_rating_filter->Add(cb_include_unrated, 0, wxEXPAND | wxALL, 5);
+  cb_include_unrated_->SetValue(wxCHK_CHECKED);
+  cb_include_unrated_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnToggleIncludeUnrated, this);
+  sz_rating_filter->Add(cb_include_unrated_, 0, wxEXPAND | wxALL, 5);
   sz_rating_filter->AddStretchSpacer(1);  // Empty space at bottom to top-align
   sz_filters->Add(p_rating_filter, 0, wxEXPAND | wxALL, 5);
 
@@ -89,9 +90,9 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxBoxSizer* sz_summary_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_summary_buttons->SetSizer(sz_summary_buttons);
   sz_summary_buttons->AddStretchSpacer(1);  // Stretch spacer at left to right-align buttons
-  wxButton* b_reset_selections = new wxButton(p_summary_buttons, wxID_ANY, "Reset Selections");
-  b_reset_selections->Bind(wxEVT_BUTTON, &SummaryFrame::OnResetSelections, this);
-  sz_summary_buttons->Add(b_reset_selections, 0, wxALL, 5);
+  wxButton* b_refresh_window = new wxButton(p_summary_buttons, wxID_ANY, "Refresh");
+  b_refresh_window->Bind(wxEVT_BUTTON, &SummaryFrame::OnRefreshWindow, this);
+  sz_summary_buttons->Add(b_refresh_window, 0, wxALL, 5);
   wxButton* b_copy_selections = new wxButton(p_summary_buttons, wxID_ANY,
     "Copy Selected Files to Directory...");
   b_copy_selections->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
@@ -110,11 +111,12 @@ void SummaryFrame::refreshFileList()
   lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_LEFT, 65);
   const auto all_tags = tag_map_.getAllTags();
   for (const auto& tag : all_tags) {
-    lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE_USEHEADER);
+    // TODO: Figure out a way to get autosizing to play nicely upon refresh.
+    lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, /*wxLIST_AUTOSIZE_USEHEADER*/ 80);
   }
-  file_paths_ = tag_map_.getAllFiles();
+  file_paths_ = tag_map_.selectFiles(getRuleFromRatingFilterUi());
   for (int i = 0; i < file_paths_.size(); ++i) {
-    lc_summary_->InsertItem(i, file_paths_[i].generic_wstring(), -1);
+    lc_summary_->InsertItem(i, file_paths_[i].generic_wstring());
      
     // Associate user data with the wxListCtrl item by giving it a pointer--in this case, to the
     // path we've cached within file_paths_. (It's not ideal, but we play along.)
@@ -172,8 +174,25 @@ void SummaryFrame::refreshTagFilter()
   dd_tag_selection_->SetSelection(current_tag_selection_index);
 }
 
-void SummaryFrame::OnResetSelections(wxCommandEvent& event)
+ragtag::TagMap::file_qualifier_t SummaryFrame::getRuleFromRatingFilterUi()
 {
+  int min_rating = sl_min_rating_->GetValue();
+  int max_rating = sl_max_rating_->GetValue();
+  bool include_unrated = cb_include_unrated_->IsChecked();
+  return [=](const ragtag::TagMap::FileInfo& info) {
+    if (info.rating.has_value()) {
+      return *info.rating >= min_rating && *info.rating <= max_rating;
+    }
+    else {
+      return include_unrated;
+    }
+    };
+}
+
+void SummaryFrame::OnRefreshWindow(wxCommandEvent& event)
+{
+  refreshTagFilter();
+  refreshFileList();
 }
 
 void SummaryFrame::OnCopySelections(wxCommandEvent& event)
@@ -219,6 +238,16 @@ void SummaryFrame::OnClickHeading(wxListEvent& event)
   }
 
   lc_summary_->ShowSortIndicator(column, ascending);
+}
+
+void SummaryFrame::OnSliderMove(wxCommandEvent& event)
+{
+  refreshFileList();
+}
+
+void SummaryFrame::OnToggleIncludeUnrated(wxCommandEvent& event)
+{
+  refreshFileList();
 }
 
 wxString SummaryFrame::getStarTextForRating(float rating)
