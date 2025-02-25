@@ -59,11 +59,16 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   sz_sliders->Add(sl_max_rating_, 0, wxEXPAND | wxALL, 5);
   sz_rating_filter->Add(p_sliders, 0, wxEXPAND | wxALL, 0);
 
-  cb_include_unrated_ = new wxCheckBox(sz_rating_filter->GetStaticBox(), wxID_ANY,
-    "Include unrated", wxDefaultPosition, wxDefaultSize);
-  cb_include_unrated_->SetValue(wxCHK_CHECKED);
-  cb_include_unrated_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
-  sz_rating_filter->Add(cb_include_unrated_, 0, wxEXPAND | wxALL, 5);
+  cb_show_rated_ = new wxCheckBox(sz_rating_filter->GetStaticBox(), wxID_ANY, "Show rated",
+    wxDefaultPosition, wxDefaultSize);
+  cb_show_rated_->SetValue(wxCHK_CHECKED);
+  cb_show_rated_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
+  sz_rating_filter->Add(cb_show_rated_, 0, wxEXPAND | wxALL, 5);
+  cb_show_unrated_ = new wxCheckBox(sz_rating_filter->GetStaticBox(), wxID_ANY, "Show unrated",
+    wxDefaultPosition, wxDefaultSize);
+  cb_show_unrated_->SetValue(wxCHK_CHECKED);
+  cb_show_unrated_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
+  sz_rating_filter->Add(cb_show_unrated_, 0, wxEXPAND | wxALL, 5);
   sz_rating_filter->AddStretchSpacer(1);  // Empty space at bottom to top-align
   sz_filters->Add(p_rating_filter, 0, wxEXPAND | wxALL, 5);
 
@@ -193,13 +198,14 @@ ragtag::TagMap::file_qualifier_t SummaryFrame::getRuleFromRatingFilterUi()
 {
   const int min_rating = sl_min_rating_->GetValue();
   const int max_rating = sl_max_rating_->GetValue();
-  const bool include_unrated = cb_include_unrated_->IsChecked();
+  const bool show_rated = cb_show_rated_->IsChecked();
+  const bool show_unrated = cb_show_unrated_->IsChecked();
   return [=](const ragtag::TagMap::FileInfo& info) {
     if (info.rating.has_value()) {
-      return *info.rating >= min_rating && *info.rating <= max_rating;
+      return show_rated && *info.rating >= min_rating && *info.rating <= max_rating;
     }
     else {
-      return include_unrated;
+      return show_unrated;
     }
     };
 }

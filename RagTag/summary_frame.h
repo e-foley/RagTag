@@ -58,7 +58,8 @@ private:
   // Dynamic controls
   wxSlider* sl_min_rating_{};
   wxSlider* sl_max_rating_{};
-  wxCheckBox* cb_include_unrated_{};
+  wxCheckBox* cb_show_rated_{};
+  wxCheckBox* cb_show_unrated_{};
   wxComboBox* dd_tag_selection_{};
   wxCheckBox* cb_show_yes_{};
   wxCheckBox* cb_show_no_{};
