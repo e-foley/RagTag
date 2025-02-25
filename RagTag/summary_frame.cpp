@@ -62,12 +62,12 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   cb_show_rated_ = new wxCheckBox(sz_rating_filter->GetStaticBox(), wxID_ANY, "Show rated",
     wxDefaultPosition, wxDefaultSize);
   cb_show_rated_->SetValue(wxCHK_CHECKED);
-  cb_show_rated_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
+  cb_show_rated_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnClickShowRated, this);
   sz_rating_filter->Add(cb_show_rated_, 0, wxEXPAND | wxALL, 5);
   cb_show_unrated_ = new wxCheckBox(sz_rating_filter->GetStaticBox(), wxID_ANY, "Show unrated",
     wxDefaultPosition, wxDefaultSize);
   cb_show_unrated_->SetValue(wxCHK_CHECKED);
-  cb_show_unrated_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
+  cb_show_unrated_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChangeGeneric, this);
   sz_rating_filter->Add(cb_show_unrated_, 0, wxEXPAND | wxALL, 5);
   sz_rating_filter->AddStretchSpacer(1);  // Empty space at bottom to top-align
   sz_filters->Add(p_rating_filter, 0, wxEXPAND | wxALL, 5);
@@ -79,22 +79,22 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxArrayString options = { "[No filter]" };
   dd_tag_selection_ = new wxComboBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "[No filter]",
     wxDefaultPosition, wxDefaultSize, options, wxCB_READONLY | wxCB_DROPDOWN);
-  dd_tag_selection_->Bind(wxEVT_COMBOBOX, &SummaryFrame::OnFilterChange, this);
+  dd_tag_selection_->Bind(wxEVT_COMBOBOX, &SummaryFrame::OnFilterChangeGeneric, this);
   sz_tag_filter->Add(dd_tag_selection_, 0, wxEXPAND | wxALL, 5);
   cb_show_yes_ = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "Show yes",
     wxDefaultPosition, wxDefaultSize);
   cb_show_yes_->SetValue(wxCHK_CHECKED);
-  cb_show_yes_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
+  cb_show_yes_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChangeGeneric, this);
   sz_tag_filter->Add(cb_show_yes_, 0, wxEXPAND | wxALL, 5);
   cb_show_no_ = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "Show no",
     wxDefaultPosition, wxDefaultSize);
   cb_show_no_->SetValue(wxCHK_CHECKED);
-  cb_show_no_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
+  cb_show_no_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChangeGeneric, this);
   sz_tag_filter->Add(cb_show_no_, 0, wxEXPAND | wxALL, 5);
   cb_show_uncommitted_ = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY,
     "Show uncommitted", wxDefaultPosition, wxDefaultSize);
   cb_show_uncommitted_->SetValue(wxCHK_CHECKED);
-  cb_show_uncommitted_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChange, this);
+  cb_show_uncommitted_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChangeGeneric, this);
   sz_tag_filter->Add(cb_show_uncommitted_, 0, wxEXPAND | wxALL, 5);
 
   sz_filters->Add(p_tag_filter, 0, wxEXPAND | wxALL, 5);
@@ -291,7 +291,7 @@ void SummaryFrame::OnClickHeading(wxListEvent& event)
   lc_summary_->ShowSortIndicator(column, ascending);
 }
 
-void SummaryFrame::OnFilterChange(wxCommandEvent& event)
+void SummaryFrame::OnFilterChangeGeneric(wxCommandEvent& event)
 {
   refreshFileList();
 }
@@ -308,6 +308,22 @@ void SummaryFrame::OnMaxSliderMove(wxCommandEvent& event) {
     sl_min_rating_->SetValue(sl_max_rating_->GetValue());
   }
   refreshFileList();
+}
+
+void SummaryFrame::OnClickShowRated(wxCommandEvent& event)
+{
+  updateRatingFilterEnabledState();
+}
+
+void SummaryFrame::updateRatingFilterEnabledState() {
+  if (cb_show_rated_->IsChecked()) {
+    sl_min_rating_->Enable();
+    sl_max_rating_->Enable();
+  }
+  else {
+    sl_min_rating_->Disable();
+    sl_max_rating_->Disable();
+  }
 }
 
 wxString SummaryFrame::getStarTextForRating(float rating)

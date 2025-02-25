@@ -41,10 +41,12 @@ private:
   void OnRefreshWindow(wxCommandEvent& event);
   void OnCopySelections(wxCommandEvent& event);
   void OnClickHeading(wxListEvent& event);
-  void OnFilterChange(wxCommandEvent& event);
+  void OnFilterChangeGeneric(wxCommandEvent& event);
   void OnMinSliderMove(wxCommandEvent& event);
   void OnMaxSliderMove(wxCommandEvent& event);
+  void OnClickShowRated(wxCommandEvent& event);
 
+  void updateRatingFilterEnabledState();
   static wxString getStarTextForRating(float rating);
 
   static int wxCALLBACK pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
