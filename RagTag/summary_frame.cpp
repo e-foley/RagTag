@@ -190,6 +190,7 @@ void SummaryFrame::refreshFileList()
     for (int j = 0; j < previously_checked_items.size(); ++j) {
       if (file_paths_[i] == previously_checked_items[j]) {
         lc_summary_->CheckItem(i, true);
+        break;
       }
     }
   }
