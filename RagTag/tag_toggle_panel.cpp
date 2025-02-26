@@ -96,17 +96,16 @@ void TagTogglePanel::OnKeyDown(wxKeyEvent& event)
 {
   if (hotkey_.has_value() && event.GetUnicodeKey() == *hotkey_) {
     TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::UPDATE_TAG_STATE);
+    const wxCheckBoxState current_checked_state = cb_tag_toggle_->Get3StateValue();
     switch (event.GetModifiers()) {
     case wxMOD_NONE:
-      sending.setDesiredState(ragtag::TagSetting::YES);
-      wxPostEvent(GetParent(), sending);
-      break;
-    case wxMOD_ALT:
-      sending.setDesiredState(ragtag::TagSetting::UNCOMMITTED);
+      sending.setDesiredState(current_checked_state == wxCHK_CHECKED ?
+        ragtag::TagSetting::UNCOMMITTED : ragtag::TagSetting::YES);
       wxPostEvent(GetParent(), sending);
       break;
     case wxMOD_SHIFT:
-      sending.setDesiredState(ragtag::TagSetting::NO);
+      sending.setDesiredState(current_checked_state == wxCHK_UNCHECKED ?
+        ragtag::TagSetting::UNCOMMITTED : ragtag::TagSetting::NO);
       wxPostEvent(GetParent(), sending);
       break;
     default:
