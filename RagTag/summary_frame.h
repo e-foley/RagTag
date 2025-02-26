@@ -34,13 +34,15 @@ private:
   ragtag::TagMap::file_qualifier_t getOverallRuleFromFilterUi();
 
   void OnRefreshWindow(wxCommandEvent& event);
-  void OnCopySelections(wxCommandEvent& event);
   void OnClickHeading(wxListEvent& event);
   void OnFilterChangeGeneric(wxCommandEvent& event);
   void OnMinSliderMove(wxCommandEvent& event);
   void OnMaxSliderMove(wxCommandEvent& event);
   void OnClickShowRated(wxCommandEvent& event);
   void OnResetFilters(wxCommandEvent& event);
+  void OnSelectAllFiles(wxCommandEvent& event);
+  void OnDeselectAllFiles(wxCommandEvent& event);
+  void OnCopySelections(wxCommandEvent& event);
   void OnClose(wxCloseEvent& event);
 
   void updateRatingFilterEnabledState();

@@ -100,6 +100,7 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
 
   lc_summary_ = new wxListCtrl(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
     wxLC_REPORT | wxLC_SINGLE_SEL);
+  lc_summary_->EnableCheckBoxes();
   lc_summary_->Bind(wxEVT_LIST_COL_CLICK, &SummaryFrame::OnClickHeading, this);
   sz_main->Add(lc_summary_, 1, wxEXPAND | wxALL, 5);
 
@@ -110,6 +111,12 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxButton* b_refresh_window = new wxButton(p_summary_buttons, wxID_ANY, "Refresh");
   b_refresh_window->Bind(wxEVT_BUTTON, &SummaryFrame::OnRefreshWindow, this);
   sz_summary_buttons->Add(b_refresh_window, 0, wxALL, 5);
+  wxButton* b_select_all_files = new wxButton(p_summary_buttons, wxID_ANY, "Select All Files");
+  b_select_all_files->Bind(wxEVT_BUTTON, &SummaryFrame::OnSelectAllFiles, this);
+  sz_summary_buttons->Add(b_select_all_files, 0, wxALL, 5);
+  wxButton* b_deselect_all_files = new wxButton(p_summary_buttons, wxID_ANY, "Deselect All Files");
+  b_deselect_all_files->Bind(wxEVT_BUTTON, &SummaryFrame::OnDeselectAllFiles, this);
+  sz_summary_buttons->Add(b_deselect_all_files, 0, wxALL, 5);
   wxButton* b_copy_selections = new wxButton(p_summary_buttons, wxID_ANY,
     "Copy Selected Files to Directory...");
   b_copy_selections->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
@@ -325,6 +332,20 @@ void SummaryFrame::OnResetFilters(wxCommandEvent& event)
   resetFilters();
   updateRatingFilterEnabledState();
   refreshFileList();
+}
+
+void SummaryFrame::OnSelectAllFiles(wxCommandEvent& event)
+{
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    lc_summary_->CheckItem(i, true);
+  }
+}
+
+void SummaryFrame::OnDeselectAllFiles(wxCommandEvent& event)
+{
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    lc_summary_->CheckItem(i, false);
+  }
 }
 
 void SummaryFrame::OnClose(wxCloseEvent& event)
