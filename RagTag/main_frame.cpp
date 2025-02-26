@@ -1072,22 +1072,20 @@ std::optional<ragtag::path_t> MainFrame::promptLoadFile() {
 
 bool MainFrame::promptConfirmTagDeletion(ragtag::tag_t tag)
 {
-  wxMessageDialog* dialog = new wxMessageDialog(this, "Are you sure you wish to delete tag '" + tag
+  wxMessageDialog dialog(this, "Are you sure you wish to delete tag '" + tag
     + "'?\n\nDeleting a tag will remove it from all files in this project.", "Confirm Tag Deletion",
     wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
-  dialog->SetOKCancelLabels("Delete tag", "Cancel");
-  const int result = dialog->ShowModal();
-  return result == wxID_OK;
+  dialog.SetOKCancelLabels("Delete tag", "Cancel");
+  return dialog.ShowModal() == wxID_OK;
 }
 
 bool MainFrame::promptConfirmFileDeletion(const ragtag::path_t& path)
 {
-  wxMessageDialog* dialog = new wxMessageDialog(this, L"Are you sure you wish to delete file '"
+  wxMessageDialog dialog(this, L"Are you sure you wish to delete file '"
     + path.generic_wstring() + L"'?\n\nThis action will remove the file from your machine.",
     "Confirm File Deletion", wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
-  dialog->SetOKCancelLabels("Delete file", "Cancel");
-  const int result = dialog->ShowModal();
-  return result == wxID_OK;
+  dialog.SetOKCancelLabels("Delete file", "Cancel");
+  return dialog.ShowModal() == wxID_OK;
 }
 
 void MainFrame::newProject() {
