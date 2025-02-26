@@ -363,6 +363,10 @@ void MainFrame::refreshFileView()
     }
   }
 
+  // Without a refresh, old text can linger visually even though we've updated the data the control
+  // displays.
+  lc_files_in_directory_->Refresh();
+
   file_view_modification_in_progress_ = false;
 }
 
