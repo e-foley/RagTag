@@ -1,6 +1,5 @@
 #include "rag_tag_util.h"
 #include "summary_frame.h"
-#include <wx/button.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
@@ -102,6 +101,8 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
     wxLC_REPORT | wxLC_SINGLE_SEL);
   lc_summary_->EnableCheckBoxes();
   lc_summary_->Bind(wxEVT_LIST_COL_CLICK, &SummaryFrame::OnClickHeading, this);
+  lc_summary_->Bind(wxEVT_LIST_ITEM_CHECKED, &SummaryFrame::OnFileChecked, this);
+  lc_summary_->Bind(wxEVT_LIST_ITEM_UNCHECKED, &SummaryFrame::OnFileUnchecked, this);
   sz_main->Add(lc_summary_, 1, wxEXPAND | wxALL, 5);
 
   wxPanel* p_summary_buttons = new wxPanel(p_main, wxID_ANY);
@@ -117,10 +118,10 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   b_refresh_window->Bind(wxEVT_BUTTON, &SummaryFrame::OnRefreshWindow, this);
   sz_summary_buttons->Add(b_refresh_window, 0, wxALL, 5);
   sz_summary_buttons->AddStretchSpacer(1);  // Stretch spacer at center to separate button groups
-  wxButton* b_copy_selections = new wxButton(p_summary_buttons, wxID_ANY,
+  b_copy_selections_ = new wxButton(p_summary_buttons, wxID_ANY,
     "Copy Selected Files to Directory...");
-  b_copy_selections->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
-  sz_summary_buttons->Add(b_copy_selections, 0, wxALL, 5);
+  b_copy_selections_->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
+  sz_summary_buttons->Add(b_copy_selections_, 0, wxALL, 5);
   sz_main->Add(p_summary_buttons, 0, wxEXPAND | wxALL, 0);
 
   Bind(wxEVT_CLOSE_WINDOW, &SummaryFrame::OnClose, this);
@@ -175,6 +176,7 @@ void SummaryFrame::refreshFileList()
 
   st_filtered_file_count_->SetLabel("Current filters: " + std::to_string(file_paths_.size()) + "/" +
     std::to_string(tag_map_.numFiles()) + " project files");
+  updateCopyButtonTextForSelections();
 }
 
 void SummaryFrame::refreshTagFilter()
@@ -303,6 +305,16 @@ void SummaryFrame::OnClickHeading(wxListEvent& event)
   lc_summary_->ShowSortIndicator(column, ascending);
 }
 
+void SummaryFrame::OnFileChecked(wxListEvent& event)
+{
+  updateCopyButtonTextForSelections();
+}
+
+void SummaryFrame::OnFileUnchecked(wxListEvent& event)
+{
+  updateCopyButtonTextForSelections();
+}
+
 void SummaryFrame::OnFilterChangeGeneric(wxCommandEvent& event)
 {
   refreshFileList();
@@ -364,6 +376,20 @@ void SummaryFrame::updateRatingFilterEnabledState() {
     sl_min_rating_->Disable();
     sl_max_rating_->Disable();
   }
+}
+
+void SummaryFrame::updateCopyButtonTextForSelections()
+{
+  int selected_item_count = 0;
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    if (lc_summary_->IsItemChecked(i)) {
+      ++selected_item_count;
+    }
+  }
+
+  const std::string file_plural = selected_item_count != 1 ? "s" : "";
+  b_copy_selections_->SetLabel("Copy " + std::to_string(selected_item_count) +
+    " Selected File" + file_plural + " to Directory...");
 }
 
 void SummaryFrame::resetFilters()

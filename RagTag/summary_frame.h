@@ -2,6 +2,7 @@
 #define INCLUDE_SUMMARY_FRAME_H
 
 #include "tag_map.h"
+#include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/combobox.h>
 #include <wx/event.h>
@@ -35,6 +36,8 @@ private:
 
   void OnRefreshWindow(wxCommandEvent& event);
   void OnClickHeading(wxListEvent& event);
+  void OnFileChecked(wxListEvent& event);
+  void OnFileUnchecked(wxListEvent& event);
   void OnFilterChangeGeneric(wxCommandEvent& event);
   void OnMinSliderMove(wxCommandEvent& event);
   void OnMaxSliderMove(wxCommandEvent& event);
@@ -46,6 +49,7 @@ private:
   void OnClose(wxCloseEvent& event);
 
   void updateRatingFilterEnabledState();
+  void updateCopyButtonTextForSelections();
   void resetFilters();
 
   static int wxCALLBACK pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
@@ -69,6 +73,7 @@ private:
   wxCheckBox* cb_show_uncommitted_{};
   wxStaticText* st_filtered_file_count_{};
   wxListCtrl* lc_summary_{};
+  wxButton* b_copy_selections_{};
 };
 
 #endif  // INCLUDE_SUMMARY_FRAME_H
