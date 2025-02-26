@@ -107,16 +107,16 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxPanel* p_summary_buttons = new wxPanel(p_main, wxID_ANY);
   wxBoxSizer* sz_summary_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_summary_buttons->SetSizer(sz_summary_buttons);
-  sz_summary_buttons->AddStretchSpacer(1);  // Stretch spacer at left to right-align buttons
-  wxButton* b_refresh_window = new wxButton(p_summary_buttons, wxID_ANY, "Refresh");
-  b_refresh_window->Bind(wxEVT_BUTTON, &SummaryFrame::OnRefreshWindow, this);
-  sz_summary_buttons->Add(b_refresh_window, 0, wxALL, 5);
   wxButton* b_select_all_files = new wxButton(p_summary_buttons, wxID_ANY, "Select All Files");
   b_select_all_files->Bind(wxEVT_BUTTON, &SummaryFrame::OnSelectAllFiles, this);
   sz_summary_buttons->Add(b_select_all_files, 0, wxALL, 5);
   wxButton* b_deselect_all_files = new wxButton(p_summary_buttons, wxID_ANY, "Deselect All Files");
   b_deselect_all_files->Bind(wxEVT_BUTTON, &SummaryFrame::OnDeselectAllFiles, this);
   sz_summary_buttons->Add(b_deselect_all_files, 0, wxALL, 5);
+  wxButton* b_refresh_window = new wxButton(p_summary_buttons, wxID_ANY, "Refresh");
+  b_refresh_window->Bind(wxEVT_BUTTON, &SummaryFrame::OnRefreshWindow, this);
+  sz_summary_buttons->Add(b_refresh_window, 0, wxALL, 5);
+  sz_summary_buttons->AddStretchSpacer(1);  // Stretch spacer at center to separate button groups
   wxButton* b_copy_selections = new wxButton(p_summary_buttons, wxID_ANY,
     "Copy Selected Files to Directory...");
   b_copy_selections->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
