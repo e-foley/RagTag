@@ -1,22 +1,10 @@
+#include "rag_tag_util.h"
 #include "summary_frame.h"
 #include <wx/button.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
 
-// The font used by wxWidgets does not display half-star characters as of writing.
-// #define HALF_STAR_GLYPH_SUPPORTED
-
-const wxString SummaryFrame::GLYPH_CHECKED = L"\U00002611";  // U+2611 is a checkmark in a box.
-const wxString SummaryFrame::GLYPH_UNCOMMITTED = L"\U00002012";  // U+2012 is a figure dash.
-const wxString SummaryFrame::GLYPH_UNCHECKED = L"\U00002610";  // U+2610 is an empty checkbox.
-const wxString SummaryFrame::GLYPH_RATING_FULL_STAR = L"\U00002605";  // U+2605 is a full star.
-#ifdef HALF_STAR_GLYPH_SUPPORTED
-const wxString SummaryFrame::GLYPH_RATING_HALF_STAR = L"\U00002BE8";  // U+2BE8 is a half star.
-#else
-const wxString SummaryFrame::GLYPH_RATING_HALF_STAR = L"\U000000BD";  // U+00BD is a half fraction.
-#endif
-const int SummaryFrame::MAX_STARS = 5;
 const int SummaryFrame::PATH_COLUMN_INDEX = 0;
 const int SummaryFrame::RATING_COLUMN_INDEX = 1;
 const int SummaryFrame::FIRST_TAG_COLUMN_INDEX = 2;
@@ -157,19 +145,20 @@ void SummaryFrame::refreshFileList()
 
     // Show rating...
     auto rating = tag_map_.getRating(file_paths_[i]);
-    lc_summary_->SetItem(i, 1, rating.has_value() ? getStarTextForRating(*rating) : wxString("--"));
+    lc_summary_->SetItem(i, 1, rating.has_value() ?
+      RagTagUtil::getStarTextForRating(*rating) : wxString("--"));
     // Show state of tags...
     for (int j = 0; j < all_tags.size(); ++j) {  
       wxString tag_state_glyph = wxEmptyString;
       auto tag_setting = tag_map_.getTagSetting(file_paths_[i], all_tags[j].first);
       if (!tag_setting.has_value() || *tag_setting == ragtag::TagSetting::UNCOMMITTED) {
-        tag_state_glyph = GLYPH_UNCOMMITTED;
+        tag_state_glyph = RagTagUtil::GLYPH_UNCOMMITTED;
       }
       else if (*tag_setting == ragtag::TagSetting::YES) {
-        tag_state_glyph = GLYPH_CHECKED;
+        tag_state_glyph = RagTagUtil::GLYPH_CHECKED;
       }
       else if (*tag_setting == ragtag::TagSetting::NO) {
-        tag_state_glyph = GLYPH_UNCHECKED;
+        tag_state_glyph = RagTagUtil::GLYPH_UNCHECKED;
       }
 
       // Offset edited column because of Path and Rating columns taking indices 0 and 1.
@@ -366,21 +355,6 @@ void SummaryFrame::resetFilters()
   cb_show_yes_->SetValue(wxCHK_CHECKED);
   cb_show_no_->SetValue(wxCHK_CHECKED);
   cb_show_uncommitted_->SetValue(wxCHK_CHECKED);
-}
-
-wxString SummaryFrame::getStarTextForRating(float rating)
-{
-  wxString returning = wxEmptyString;
-  for (int i = 1; i <= MAX_STARS; ++i) {
-    if (rating >= static_cast<float>(i)) {
-      returning.Append(GLYPH_RATING_FULL_STAR);
-    }
-    else if (rating >= static_cast<float>(i) - 0.5f) {
-      returning.Append(GLYPH_RATING_HALF_STAR);
-    }
-  }
-
-  return returning;
 }
 
 int wxCALLBACK SummaryFrame::pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data)

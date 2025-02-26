@@ -19,12 +19,6 @@ public:
   void refreshTagFilter();
 
 private:
-  static const wxString GLYPH_CHECKED;
-  static const wxString GLYPH_UNCOMMITTED;
-  static const wxString GLYPH_UNCHECKED;
-  static const wxString GLYPH_RATING_FULL_STAR;
-  static const wxString GLYPH_RATING_HALF_STAR;
-  static const int MAX_STARS;
   static const int PATH_COLUMN_INDEX;
   static const int RATING_COLUMN_INDEX;
   static const int FIRST_TAG_COLUMN_INDEX;
@@ -51,7 +45,6 @@ private:
 
   void updateRatingFilterEnabledState();
   void resetFilters();
-  static wxString getStarTextForRating(float rating);
 
   static int wxCALLBACK pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
   static int wxCALLBACK tagSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);

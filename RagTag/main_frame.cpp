@@ -1,4 +1,5 @@
 #include "main_frame.h"
+#include "rag_tag_util.h"
 #include "tag_entry_dialog.h"
 #include "tag_toggle_panel.h"
 #include <wx/filedlg.h>
@@ -303,7 +304,8 @@ void MainFrame::refreshFileView()
     // Handle file rating...
     const auto rating_ret = tag_map_.getRating(file_it->path());
     if (rating_ret.has_value()) {
-      lc_files_in_directory_->SetItem(i, COLUMN_RATING, wxString::Format("%4.2f", *rating_ret));
+      lc_files_in_directory_->SetItem(i, COLUMN_RATING,
+        RagTagUtil::getStarTextForRating(*rating_ret));
     }
     else {
       lc_files_in_directory_->SetItem(i, COLUMN_RATING, L"--");
