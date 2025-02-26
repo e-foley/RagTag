@@ -148,7 +148,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
   lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
   lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
-  lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_SELECTED, &MainFrame::OnSelectFile, this);
+  lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
   refreshFileView();
 
   sz_right->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
@@ -775,7 +775,7 @@ void MainFrame::OnMuteBoxToggle(wxCommandEvent& event)
   mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
 }
 
-void MainFrame::OnSelectFile(wxListEvent& event)
+void MainFrame::OnFocusFile(wxListEvent& event)
 {
   if (file_view_modification_in_progress_) {
     // When items are removed from the list view, such as when redrawing the control after loading a

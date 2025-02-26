@@ -99,7 +99,7 @@ private:
   // Checkbox events
   void OnMuteBoxToggle(wxCommandEvent& event);
   // List control events
-  void OnSelectFile(wxListEvent& event);
+  void OnFocusFile(wxListEvent& event);
   // Media events
   void OnMediaLoaded(wxMediaEvent& event);
   void OnMediaStop(wxMediaEvent& event);
