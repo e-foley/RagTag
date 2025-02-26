@@ -147,14 +147,56 @@ void SummaryFrame::refreshFileList()
     }
   }
 
-  lc_summary_->ClearAll();
-  lc_summary_->AppendColumn("Path", wxLIST_FORMAT_LEFT, 500);
-  lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_LEFT, 65);
+  // Determine whether we need to redraw columns. We do this by seeing whether the tags in the tag
+  // map we're tasked with displaying are different from the tags currently displayed in the table.
+  // By only re-creating the columns when needed, we preserve any custom width modifications the
+  // user has made to them--a nice little quality of life feature.
+  bool redraw_columns = false;
   const auto all_tags = tag_map_.getAllTags();
-  for (const auto& tag : all_tags) {
-    // TODO: Figure out a way to get autosizing to play nicely upon refresh.
-    lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, /*wxLIST_AUTOSIZE_USEHEADER*/ 80);
+  // +2 accounts for Path and Rating columns.
+  if (lc_summary_->GetColumnCount() != all_tags.size() + 2) {
+    redraw_columns = true;
   }
+  else {
+    for (int i = 0; i < all_tags.size(); ++i) {
+      bool match = false;
+      // Here again, 2 accounts for Path and Rating columns.
+      for (int j = 2; j < lc_summary_->GetColumnCount(); ++j) {
+        wxListItem column;
+        column.SetMask(wxLIST_MASK_TEXT);
+        if (!lc_summary_->GetColumn(j, column)) { // `column` is in/out argument
+          continue;
+        }
+        if (all_tags[i].first == column.GetText()) {
+          match = true;
+          break;
+        }
+      }
+      if (!match) {
+        redraw_columns = true;
+        break;
+      }
+    }
+  }
+
+  if (redraw_columns) {
+    lc_summary_->DeleteAllColumns();
+    lc_summary_->AppendColumn("Path", wxLIST_FORMAT_LEFT, 500);
+    lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_LEFT, 65);
+    Freeze();  // If we don't freeze here, we get flickering.
+    for (const auto& tag : all_tags) {
+      // This width is temporary. If we use wxLIST_AUTOSIZE_USEHEADER here, then the first column that
+      // we add will get stretched to the remaining width of the list control. Instead, we temporarily
+      // set the width to a placeholder and fix it right after.
+      lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, 0);
+    }
+    for (int i = 2; i < lc_summary_->GetColumnCount(); ++i) {
+      lc_summary_->SetColumnWidth(i, wxLIST_AUTOSIZE_USEHEADER);
+    }
+    Thaw();
+  }
+
+  lc_summary_->DeleteAllItems();
   file_paths_ = tag_map_.selectFiles(getOverallRuleFromFilterUi());
   for (int i = 0; i < file_paths_.size(); ++i) {
     lc_summary_->InsertItem(i, file_paths_[i].generic_wstring());
@@ -198,6 +240,8 @@ void SummaryFrame::refreshFileList()
   st_filtered_file_count_->SetLabel("Current filters: " + std::to_string(file_paths_.size()) + "/" +
     std::to_string(tag_map_.numFiles()) + " project files");
   updateCopyButtonTextForSelections();
+
+  Refresh();
 }
 
 void SummaryFrame::refreshTagFilter()
