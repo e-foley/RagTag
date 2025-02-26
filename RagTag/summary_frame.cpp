@@ -135,6 +135,18 @@ void SummaryFrame::setTagMap(const ragtag::TagMap& tag_map) {
 
 void SummaryFrame::refreshFileList()
 {
+  // Cache items that have checkboxes marked so that we can re-check the relevant items after
+  // populating the list. We do this as a convenience for our users so that an innocent act like
+  // changing one tag on a file doesn't deselect every single file in the project.
+  // Note: We do this by path rather than matching text displayed in the control just in case two
+  // different paths evaluate to the same wxString (if that's even possible).
+  std::vector<ragtag::path_t> previously_checked_items;
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    if (lc_summary_->IsItemChecked(i)) {
+      previously_checked_items.push_back(file_paths_[i]);
+    }
+  }
+
   lc_summary_->ClearAll();
   lc_summary_->AppendColumn("Path", wxLIST_FORMAT_LEFT, 500);
   lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_LEFT, 65);
@@ -171,6 +183,14 @@ void SummaryFrame::refreshFileList()
 
       // Offset edited column because of Path and Rating columns taking indices 0 and 1.
       lc_summary_->SetItem(i, j + FIRST_TAG_COLUMN_INDEX, tag_state_glyph, -1);
+    }
+
+    // Check the item if it was previously checked.
+    // This is O(m*n) time, but we're dealing with small lists and very fast vector operations.
+    for (int j = 0; j < previously_checked_items.size(); ++j) {
+      if (file_paths_[i] == previously_checked_items[j]) {
+        lc_summary_->CheckItem(i, true);
+      }
     }
   }
 
