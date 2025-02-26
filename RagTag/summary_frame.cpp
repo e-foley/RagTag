@@ -3,7 +3,6 @@
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
-#include <wx/stattext.h>
 
 // The font used by wxWidgets does not display half-star characters as of writing.
 // #define HALF_STAR_GLYPH_SUPPORTED
@@ -101,6 +100,16 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   sz_filters->AddStretchSpacer(1);
   sz_main->Add(p_filters, 0, wxEXPAND | wxALL, 0);
 
+  wxPanel* p_filter_info = new wxPanel(p_main, wxID_ANY);
+  wxBoxSizer* sz_filter_info = new wxBoxSizer(wxHORIZONTAL);
+  p_filter_info->SetSizer(sz_filter_info);
+  wxButton* b_reset_filters = new wxButton(p_filter_info, wxID_ANY, "Reset Filters");
+  b_reset_filters->Bind(wxEVT_BUTTON, &SummaryFrame::OnResetFilters, this);
+  sz_filter_info->Add(b_reset_filters, 0, wxEXPAND | wxALL, 5);
+  st_filtered_file_count_ = new wxStaticText(p_filter_info, wxID_ANY, wxEmptyString);
+  sz_filter_info->Add(st_filtered_file_count_, wxEXPAND | wxALIGN_CENTRE_VERTICAL | wxALL , 5);
+  sz_main->Add(p_filter_info, 0, wxEXPAND | wxALL, 0);
+
   lc_summary_ = new wxListCtrl(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
     wxLC_REPORT | wxLC_SINGLE_SEL);
   lc_summary_->Bind(wxEVT_LIST_COL_CLICK, &SummaryFrame::OnClickHeading, this);
@@ -120,6 +129,8 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   sz_main->Add(p_summary_buttons, 0, wxEXPAND | wxALL, 0);
 
   Bind(wxEVT_CLOSE_WINDOW, &SummaryFrame::OnClose, this);
+
+  resetFilters();
 }
 
 void SummaryFrame::setTagMap(const ragtag::TagMap& tag_map) {
@@ -165,6 +176,9 @@ void SummaryFrame::refreshFileList()
       lc_summary_->SetItem(i, j + FIRST_TAG_COLUMN_INDEX, tag_state_glyph, -1);
     }
   }
+
+  st_filtered_file_count_->SetLabel("Current filters: " + std::to_string(file_paths_.size()) + "/" +
+    std::to_string(tag_map_.numFiles()) + " project files");
 }
 
 void SummaryFrame::refreshTagFilter()
@@ -317,6 +331,13 @@ void SummaryFrame::OnClickShowRated(wxCommandEvent& event)
   updateRatingFilterEnabledState();
 }
 
+void SummaryFrame::OnResetFilters(wxCommandEvent& event)
+{
+  resetFilters();
+  updateRatingFilterEnabledState();
+  refreshFileList();
+}
+
 void SummaryFrame::OnClose(wxCloseEvent& event)
 {
   // For convenience of synchronization between the main frame and the summary frame, it's more
@@ -333,6 +354,18 @@ void SummaryFrame::updateRatingFilterEnabledState() {
     sl_min_rating_->Disable();
     sl_max_rating_->Disable();
   }
+}
+
+void SummaryFrame::resetFilters()
+{
+  sl_min_rating_->SetValue(0);
+  sl_max_rating_->SetValue(5);
+  cb_show_rated_->SetValue(wxCHK_CHECKED);
+  cb_show_unrated_->SetValue(wxCHK_CHECKED);
+  dd_tag_selection_->SetSelection(0);
+  cb_show_yes_->SetValue(wxCHK_CHECKED);
+  cb_show_no_->SetValue(wxCHK_CHECKED);
+  cb_show_uncommitted_->SetValue(wxCHK_CHECKED);
 }
 
 wxString SummaryFrame::getStarTextForRating(float rating)

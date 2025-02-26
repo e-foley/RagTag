@@ -8,6 +8,7 @@
 #include <wx/frame.h>
 #include <wx/listctrl.h>
 #include <wx/slider.h>
+#include <wx/stattext.h>
 #include <wx/window.h>
 
 class SummaryFrame : public wxFrame {
@@ -45,9 +46,11 @@ private:
   void OnMinSliderMove(wxCommandEvent& event);
   void OnMaxSliderMove(wxCommandEvent& event);
   void OnClickShowRated(wxCommandEvent& event);
+  void OnResetFilters(wxCommandEvent& event);
   void OnClose(wxCloseEvent& event);
 
   void updateRatingFilterEnabledState();
+  void resetFilters();
   static wxString getStarTextForRating(float rating);
 
   static int wxCALLBACK pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
@@ -69,6 +72,7 @@ private:
   wxCheckBox* cb_show_yes_{};
   wxCheckBox* cb_show_no_{};
   wxCheckBox* cb_show_uncommitted_{};
+  wxStaticText* st_filtered_file_count_{};
   wxListCtrl* lc_summary_{};
 };
 
