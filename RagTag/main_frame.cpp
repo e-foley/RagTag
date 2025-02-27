@@ -3,6 +3,7 @@
 #include "tag_entry_dialog.h"
 #include "tag_toggle_panel.h"
 #include <wx/filedlg.h>
+#include <wx/tglbtn.h>
 #include <wx/statusbr.h>
 #include <wx/stdpaths.h>
 
@@ -47,6 +48,41 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     wxBORDER_SUNKEN);
   wxBoxSizer* sz_left = new wxBoxSizer(wxVERTICAL);
   p_left->SetSizer(sz_left);
+
+  wxPanel* p_rating_buttons = new wxPanel(p_left, wxID_ANY, wxDefaultPosition,
+    wxDefaultSize, wxBORDER_SUNKEN);
+  wxBoxSizer* sz_rating_buttons = new wxBoxSizer(wxHORIZONTAL);
+  p_rating_buttons->SetSizer(sz_rating_buttons);
+  sz_rating_buttons->AddStretchSpacer(1);
+  wxToggleButton* b_no_rating = new wxToggleButton(p_rating_buttons, wxID_ANY, "No Rating",
+    wxDefaultPosition, wxDefaultSize, 0 * wxBU_EXACTFIT);
+  sz_rating_buttons->Add(b_no_rating, 0, wxEXPAND | wxALL, 5);
+  wxToggleButton* b_0_stars = new wxToggleButton(p_rating_buttons, wxID_ANY,
+    wxString("0") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
+    wxBU_EXACTFIT);
+  sz_rating_buttons->Add(b_0_stars, 0, wxEXPAND | wxALL, 5);
+  wxToggleButton* b_1_star = new wxToggleButton(p_rating_buttons, wxID_ANY,
+    wxString("1") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
+    wxBU_EXACTFIT);
+  sz_rating_buttons->Add(b_1_star, 0, wxEXPAND | wxALL, 5);
+  wxToggleButton* b_2_stars = new wxToggleButton(p_rating_buttons, wxID_ANY,
+    wxString("2") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
+    wxBU_EXACTFIT);
+  sz_rating_buttons->Add(b_2_stars, 0, wxEXPAND | wxALL, 5);
+  wxToggleButton* b_3_stars = new wxToggleButton(p_rating_buttons, wxID_ANY,
+    wxString("3") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
+    wxBU_EXACTFIT);
+  sz_rating_buttons->Add(b_3_stars, 0, wxEXPAND | wxALL, 5);
+  wxToggleButton* b_4_stars = new wxToggleButton(p_rating_buttons, wxID_ANY,
+    wxString("4") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
+    wxBU_EXACTFIT);
+  sz_rating_buttons->Add(b_4_stars, 0, wxEXPAND | wxALL, 5);
+  wxToggleButton* b_5_stars = new wxToggleButton(p_rating_buttons, wxID_ANY,
+    wxString("5") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
+    wxBU_EXACTFIT);
+  sz_rating_buttons->Add(b_5_stars, 0, wxEXPAND | wxALL, 5);
+  sz_rating_buttons->AddStretchSpacer(1);
+  sz_left->Add(p_rating_buttons, 0, wxEXPAND | wxALL, 5);
 
   p_tag_toggles_ = new wxScrolledWindow(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
     wxBORDER_SUNKEN);
@@ -179,6 +215,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   f_summary_ = new SummaryFrame(this);
   refreshSummary();
+
+  Layout();  // Without a Layout() here, certain controls get squished.
 
   Bind(wxEVT_MENU, &MainFrame::OnNewProject, this, ID_NEW_PROJECT);
   Bind(wxEVT_MENU, &MainFrame::OnOpenProject, this, ID_OPEN_PROJECT);
