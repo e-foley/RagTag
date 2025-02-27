@@ -65,8 +65,8 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxStaticBoxSizer* sz_tag_filter = new wxStaticBoxSizer(wxVERTICAL, p_tag_filter,
     "Tag Filter");
   p_tag_filter->SetSizer(sz_tag_filter);
-  wxArrayString options = { "[No filter]" };
-  dd_tag_selection_ = new wxComboBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "[No filter]",
+  wxArrayString options = { "(None)" };
+  dd_tag_selection_ = new wxComboBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "(None)",
     wxDefaultPosition, wxDefaultSize, options, wxCB_READONLY | wxCB_DROPDOWN);
   dd_tag_selection_->Bind(wxEVT_COMBOBOX, &SummaryFrame::OnFilterChangeGeneric, this);
   sz_tag_filter->Add(dd_tag_selection_, 0, wxEXPAND | wxALL, 5);
@@ -251,7 +251,7 @@ void SummaryFrame::refreshTagFilter()
 {
   std::optional<ragtag::tag_t> last_tag_selection;
   int last_tag_selection_index = dd_tag_selection_->GetSelection();
-  // Exclude 0 index, which always has "[No filter]" text, and offset by 1 accordingly.
+  // Exclude 0 index, which always has "(None)" text, and offset by 1 accordingly.
   if (last_tag_selection_index != wxNOT_FOUND && last_tag_selection_index != 0) {
     last_tag_selection = tags_[last_tag_selection_index - 1];
   }
@@ -263,13 +263,13 @@ void SummaryFrame::refreshTagFilter()
   }
 
   dd_tag_selection_->Clear();
-  dd_tag_selection_->Append("[No filter]");
+  dd_tag_selection_->Append("(None)");
   int current_tag_selection_index = 0;
   for (int i = 0; i < tags_.size(); ++i) {
     dd_tag_selection_->Append(tags_[i]);
     if (last_tag_selection.has_value() && tags_[i] == *last_tag_selection) {
       // The tag label matches the label of the tag that was most recently selected, so let's
-      // reselect that item as a convenience to the user. (Offset by 1 to acccount for [No filter].)
+      // reselect that item as a convenience to the user. (Offset by 1 to acccount for "(None)".)
       current_tag_selection_index = i + 1;
     }
   }
