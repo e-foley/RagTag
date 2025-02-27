@@ -139,7 +139,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     "Directory: ");
   sz_current_directory_line->Add(st_current_directory_label, 0, wxALL, 5);
   st_current_directory_ = new wxStaticText(p_current_directory_line, wxID_ANY, wxEmptyString,
-    wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_START);
+    wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_START | wxST_NO_AUTORESIZE);
   sz_current_directory_line->Add(st_current_directory_, 1, wxALL, 5);
   sz_right->Add(p_current_directory_line, 0, wxEXPAND | wxALL, 0);
 
@@ -281,7 +281,6 @@ void MainFrame::refreshFileView()
 
   const ragtag::path_t parent_directory = active_file_->parent_path();
   st_current_directory_->SetLabelText(parent_directory.generic_wstring());
-  doEllipseHack();
 
   int i = 0;
   // Note: directory_iterator documentation explains that the end iterator is equal to the
@@ -1327,22 +1326,4 @@ std::optional<long> MainFrame::getPathListCtrlIndex(const ragtag::path_t& path) 
   }
 
   return {};
-}
-
-void MainFrame::doEllipseHack()
-{
-  // For whatever reason, ellipses are only inserted in the current directory display after the
-  // window is resized, not when the text is changed. Reasserting the current window size doesn't
-  // work; it actually has to change dimensions.
-  //
-  // I did a good amount of research on this issue but couldn't find much. One thread documenting a
-  // somewhat similar issue highlighted a troubled interaction between wxStaticText and the
-  // calculation of optimal size that wxBoxSizer uses, so it's possible the same trouble affects us.
-  //
-  // TODO: Find and implement a better approach.
-  int w = 0;
-  int h = 0;
-  GetSize(&w, &h);
-  SetSize(w, h+1);
-  SetSize(w, h);
 }
