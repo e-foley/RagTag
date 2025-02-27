@@ -1102,6 +1102,14 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
       setRatingOfActiveFile(desired_rating);
     }
   }
+  else if (key_code >= WXK_NUMPAD0 && key_code <= WXK_NUMPAD5) {
+    const int desired_rating = key_code - WXK_NUMPAD0;
+    setRatingOfActiveFile(desired_rating);
+  }
+  else if (key_code == WXK_NUMPAD_DECIMAL) {
+    // We provide this option because shift+numpad navigates controls by default.
+    clearRatingOfActiveFile();
+  }
 
   event.Skip();
 }
