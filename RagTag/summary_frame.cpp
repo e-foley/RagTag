@@ -1,5 +1,8 @@
 #include "rag_tag_util.h"
 #include "summary_frame.h"
+#include <filesystem>
+#include <wx/dirdlg.h> 
+#include <wx/msgdlg.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
@@ -327,6 +330,54 @@ void SummaryFrame::OnRefreshWindow(wxCommandEvent& event)
 
 void SummaryFrame::OnCopySelections(wxCommandEvent& event)
 {
+  std::vector<ragtag::path_t> files_to_copy;
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    if (lc_summary_->IsItemChecked(i)) {
+      files_to_copy.push_back(file_paths_[i]);
+    }
+  }
+
+  if (files_to_copy.empty()) {
+    // Nothing to copy...
+    wxMessageDialog dialog(this, "Please select one or more files to copy, then try again.",
+      "No Files to Copy");
+    dialog.ShowModal();
+    return;
+  }
+
+  auto directory = promptCopyDestination();
+  if (!directory.has_value()) {
+    // User canceled dialog; don't do anything.
+    return;
+  }
+
+  int num_files_successfully_copied = 0;
+  for (const auto& file : files_to_copy) {
+    // TODO: Somehow prompt whether we'd like to overwrite files.
+    bool success = std::filesystem::copy_file(file, *directory / file.filename(),
+      std::filesystem::copy_options::skip_existing);
+    if (success) {
+      ++num_files_successfully_copied;
+    }
+  }
+
+  if (num_files_successfully_copied == files_to_copy.size()) {
+    // TODO: Make custom dialog that allows user to choose whether to show the folder to which the
+    // files were copied.
+    const std::string file_plural = num_files_successfully_copied == 1 ? "file was" : "files were";
+    wxMessageDialog dialog(this, std::to_string(num_files_successfully_copied) + " " + file_plural
+      + " copied successfully.", "Copy Success");
+    dialog.ShowModal();
+  }
+  else {
+    // TODO: Be more specific about which files were not copied.
+    wxMessageDialog dialog(this, "Not all files were copied successfully.\n\n"
+      "Perhaps the directory contains a file sharing the name of a file you are attempting to copy."
+      " Otherwise, there may be a permissions issue.", "Copy Incomplete",
+      wxOK | wxCENTER | wxICON_WARNING);
+    dialog.ShowModal();
+  }
+  ShellExecute(NULL, L"open", directory->c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
 void SummaryFrame::OnClickHeading(wxListEvent& event)
@@ -430,6 +481,18 @@ void SummaryFrame::OnClose(wxCloseEvent& event)
   // For convenience of synchronization between the main frame and the summary frame, it's more
   // convenient if we don't flat-out destroy the summary frame when it's closed but merely hide it.
   Hide();
+}
+
+std::optional<ragtag::path_t> SummaryFrame::promptCopyDestination()
+{
+  wxString wx_path = wxDirSelector("Select Directory to Copy To", wxEmptyString, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST | wxDD_NEW_DIR_BUTTON,
+    wxDefaultPosition, this);
+  if (wx_path.empty()) {
+    // User canceled the dialog.
+    return {};
+  }
+
+  return ragtag::path_t(wx_path.ToStdWstring());
 }
 
 void SummaryFrame::updateRatingFilterEnabledState() {

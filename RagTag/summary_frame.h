@@ -2,6 +2,7 @@
 #define INCLUDE_SUMMARY_FRAME_H
 
 #include "tag_map.h"
+#include <optional>
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/combobox.h>
@@ -48,6 +49,7 @@ private:
   void OnCopySelections(wxCommandEvent& event);
   void OnClose(wxCloseEvent& event);
 
+  std::optional<ragtag::path_t> promptCopyDestination();
   void updateRatingFilterEnabledState();
   void updateCopyButtonTextForSelections();
   void resetFilters();
