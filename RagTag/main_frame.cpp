@@ -124,18 +124,18 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   p_file_navigation->SetSizer(sz_file_navigation);
   wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
   b_open_file->Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this);
-  sz_file_navigation->Add(b_open_file, 1, wxALL, 5);
+  sz_file_navigation->Add(b_open_file, 1, wxEXPAND | wxALL, 5);
   wxButton* b_refresh_file_view = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
   b_refresh_file_view->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
-  sz_file_navigation->Add(b_refresh_file_view, 1, wxALL, 5);
+  sz_file_navigation->Add(b_refresh_file_view, 1, wxEXPAND | wxALL, 5);
   wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
-    "Previous Untagged");
+    "Previous\nUntagged");
   b_previous_file->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
-  sz_file_navigation->Add(b_previous_file, 1, wxALL, 5);
+  sz_file_navigation->Add(b_previous_file, 1, wxEXPAND | wxALL, 5);
 
-  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next Untagged");
+  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next\nUntagged");
   b_next_file->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
-  sz_file_navigation->Add(b_next_file, 1, wxALL, 5);
+  sz_file_navigation->Add(b_next_file, 1, wxEXPAND | wxALL, 5);
 
   sz_left->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
   sz_main->Add(p_left, 3, wxEXPAND | wxALL, 5);
