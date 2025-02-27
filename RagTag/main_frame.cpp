@@ -3,7 +3,6 @@
 #include "tag_entry_dialog.h"
 #include "tag_toggle_panel.h"
 #include <wx/filedlg.h>
-#include <wx/tglbtn.h>
 #include <wx/statusbr.h>
 #include <wx/stdpaths.h>
 
@@ -153,30 +152,13 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxToggleButton* b_no_rating = new wxToggleButton(p_rating_buttons, wxID_ANY, "No Rating",
     wxDefaultPosition, wxDefaultSize, 0 * wxBU_EXACTFIT);
   sz_rating_buttons->Add(b_no_rating, 0, wxEXPAND | wxALL, 5);
-  wxToggleButton* b_0_stars = new wxToggleButton(p_rating_buttons, wxID_ANY,
-    wxString("0") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
-    wxBU_EXACTFIT);
-  sz_rating_buttons->Add(b_0_stars, 0, wxEXPAND | wxALL, 5);
-  wxToggleButton* b_1_star = new wxToggleButton(p_rating_buttons, wxID_ANY,
-    wxString("1") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
-    wxBU_EXACTFIT);
-  sz_rating_buttons->Add(b_1_star, 0, wxEXPAND | wxALL, 5);
-  wxToggleButton* b_2_stars = new wxToggleButton(p_rating_buttons, wxID_ANY,
-    wxString("2") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
-    wxBU_EXACTFIT);
-  sz_rating_buttons->Add(b_2_stars, 0, wxEXPAND | wxALL, 5);
-  wxToggleButton* b_3_stars = new wxToggleButton(p_rating_buttons, wxID_ANY,
-    wxString("3") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
-    wxBU_EXACTFIT);
-  sz_rating_buttons->Add(b_3_stars, 0, wxEXPAND | wxALL, 5);
-  wxToggleButton* b_4_stars = new wxToggleButton(p_rating_buttons, wxID_ANY,
-    wxString("4") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
-    wxBU_EXACTFIT);
-  sz_rating_buttons->Add(b_4_stars, 0, wxEXPAND | wxALL, 5);
-  wxToggleButton* b_5_stars = new wxToggleButton(p_rating_buttons, wxID_ANY,
-    wxString("5") + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
-    wxBU_EXACTFIT);
-  sz_rating_buttons->Add(b_5_stars, 0, wxEXPAND | wxALL, 5);
+  for (int r = 0; r <= 5; ++r) {
+    wxToggleButton* b_rating = new wxToggleButton(p_rating_buttons, ID_RATING_0 + r,
+      std::to_string(r) + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
+      wxBU_EXACTFIT);
+    b_ratings_[r] = b_rating;
+    sz_rating_buttons->Add(b_rating, 0, wxEXPAND | wxALL, 5);
+  }
   sz_rating_buttons->AddStretchSpacer(1);
   sz_right->Add(p_rating_buttons, 0, wxEXPAND | wxALL, 5);
 

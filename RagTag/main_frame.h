@@ -15,6 +15,7 @@
 #include <wx/scrolwin.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
+#include <wx/tglbtn.h>
 
 class MainFrame : public wxFrame {
 public:
@@ -42,7 +43,9 @@ private:
     ID_MEDIA_CTRL,
     ID_STOP_MEDIA,
     ID_PLAY_PAUSE_MEDIA,
-    ID_MUTE_BOX
+    ID_MUTE_BOX,
+    ID_RATING_0,
+    ID_RATING_MAX = ID_RATING_0 + 5  // Implied ratings 1-5
   };
 
   enum class UserIntention {
@@ -140,6 +143,7 @@ private:
   wxCheckBox* cb_loop_{ nullptr };
   wxCheckBox* cb_mute_{ nullptr };
   wxButton* b_play_pause_media_{ nullptr };
+  std::vector<wxToggleButton*> b_ratings_{6};  // 6 ratings: 0 through 5 inclusive
   wxStaticText* st_current_directory_{ nullptr };
   wxListCtrl* lc_files_in_directory_{ nullptr };
   SummaryFrame* f_summary_{ nullptr };
