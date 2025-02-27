@@ -518,6 +518,13 @@ void SummaryFrame::updateCopyButtonTextForSelections()
   const std::string file_plural = selected_item_count != 1 ? "s" : "";
   b_copy_selections_->SetLabel("Copy " + std::to_string(selected_item_count) +
     " Selected File" + file_plural + " to Directory...");
+
+  if (selected_item_count == 0) {
+    b_copy_selections_->Disable();
+  }
+  else {
+    b_copy_selections_->Enable();
+  }
 }
 
 void SummaryFrame::resetFilters()
