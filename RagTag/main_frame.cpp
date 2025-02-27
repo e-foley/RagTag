@@ -49,7 +49,103 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_left = new wxBoxSizer(wxVERTICAL);
   p_left->SetSizer(sz_left);
 
-  wxPanel* p_rating_buttons = new wxPanel(p_left, wxID_ANY, wxDefaultPosition,
+  // Note: Even though wxWidgets says we should "almost certainly leave [the backend selection] up
+  //       to wxMediaCtrl," a documented bug involving wxWidgets' interaction with the DirectShow
+  //       API used by default suppresses the media-loaded event. This also affects the mediaplayer
+  //       demo provided by wxWidgets itself. To circumvent this, we explicitly choose the Windows
+  //       Media Player backend.
+  // See: https://docs.wxwidgets.org/stable/classwx_media_ctrl.html
+  // See: https://forums.wxwidgets.org/viewtopic.php?t=47476
+  // See: https://github.com/wxWidgets/wxWidgets/issues/18976   
+  mc_media_display_ = new wxMediaCtrl(p_left, ID_MEDIA_CTRL, wxEmptyString, wxDefaultPosition,
+    wxDefaultSize, wxMC_NO_AUTORESIZE, wxMEDIABACKEND_WMP10);
+  mc_media_display_->Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this);
+  mc_media_display_->Bind(wxEVT_MEDIA_STOP, &MainFrame::OnMediaStop, this);
+  mc_media_display_->Bind(wxEVT_MEDIA_FINISHED, &MainFrame::OnMediaFinished, this);
+  mc_media_display_->Bind(wxEVT_MEDIA_PLAY, &MainFrame::OnMediaPlay, this);
+  mc_media_display_->Bind(wxEVT_MEDIA_PAUSE, &MainFrame::OnMediaPause, this);
+
+  sz_left->Add(mc_media_display_, 1, wxEXPAND | wxALL, 0);
+
+  wxPanel* p_media_buttons = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
+  wxBoxSizer* sz_media_buttons = new wxBoxSizer(wxHORIZONTAL);
+  p_media_buttons->SetSizer(sz_media_buttons);
+  wxButton* b_stop_media = new wxButton(p_media_buttons, ID_STOP_MEDIA, "Stop");
+  b_stop_media->Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this);
+  sz_media_buttons->Add(b_stop_media, 1, wxALL, 5);
+  b_play_pause_media_ = new wxButton(p_media_buttons, ID_PLAY_PAUSE_MEDIA, "Play");
+  b_play_pause_media_->Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
+  sz_media_buttons->Add(b_play_pause_media_, 1, wxALL, 5);
+
+  sz_left->Add(p_media_buttons, 0, wxEXPAND | wxALL, 5);
+
+  wxPanel* p_media_options = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
+  wxBoxSizer* sz_media_options = new wxBoxSizer(wxHORIZONTAL);
+  p_media_options->SetSizer(sz_media_options);
+  cb_autoplay_ = new wxCheckBox(p_media_options, wxID_ANY, "Autoplay");
+  cb_autoplay_->SetValue(true);  // True == checked
+  sz_media_options->Add(cb_autoplay_, 1, wxALL, 5);
+  cb_loop_ = new wxCheckBox(p_media_options, wxID_ANY, "Loop");
+  cb_loop_->SetValue(true);  // True == checked
+  sz_media_options->Add(cb_loop_, 1, wxALL, 5);
+  cb_mute_ = new wxCheckBox(p_media_options, ID_MUTE_BOX, "Mute");
+  cb_mute_->Bind(wxEVT_CHECKBOX, &MainFrame::OnMuteBoxToggle, this);
+  cb_mute_->SetValue(true);  // True == checked
+  sz_media_options->Add(cb_mute_, 1, wxALL, 5);
+
+  sz_left->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
+
+  wxPanel* p_current_directory_line = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+  wxBoxSizer* sz_current_directory_line = new wxBoxSizer(wxHORIZONTAL);
+  p_current_directory_line->SetSizer(sz_current_directory_line);
+  wxStaticText* st_current_directory_label = new wxStaticText(p_current_directory_line, wxID_ANY,
+    "Directory: ");
+  sz_current_directory_line->Add(st_current_directory_label, 0, wxALL, 5);
+  st_current_directory_ = new wxStaticText(p_current_directory_line, wxID_ANY, wxEmptyString,
+    wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_START | wxST_NO_AUTORESIZE);
+  sz_current_directory_line->Add(st_current_directory_, 1, wxALL, 5);
+  sz_left->Add(p_current_directory_line, 0, wxEXPAND | wxALL, 0);
+
+  lc_files_in_directory_ = new wxListCtrl(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxLC_REPORT | wxLC_SINGLE_SEL);
+  lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
+  lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
+  lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
+  lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
+  refreshFileView();
+
+  sz_left->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
+
+  wxPanel* p_file_navigation = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
+  wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
+  p_file_navigation->SetSizer(sz_file_navigation);
+  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
+  b_open_file->Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this);
+  sz_file_navigation->Add(b_open_file, 1, wxALL, 5);
+  wxButton* b_refresh_file_view = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
+  b_refresh_file_view->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
+  sz_file_navigation->Add(b_refresh_file_view, 1, wxALL, 5);
+  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
+    "Previous Untagged");
+  b_previous_file->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
+  sz_file_navigation->Add(b_previous_file, 1, wxALL, 5);
+
+  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next Untagged");
+  b_next_file->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
+  sz_file_navigation->Add(b_next_file, 1, wxALL, 5);
+
+  sz_left->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
+  sz_main->Add(p_left, 3, wxEXPAND | wxALL, 5);
+
+  wxPanel* p_right = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
+  wxBoxSizer* sz_right = new wxBoxSizer(wxVERTICAL);
+  p_right->SetSizer(sz_right);
+
+  wxPanel* p_rating_buttons = new wxPanel(p_right, wxID_ANY, wxDefaultPosition,
     wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_rating_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_rating_buttons->SetSizer(sz_rating_buttons);
@@ -82,9 +178,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     wxBU_EXACTFIT);
   sz_rating_buttons->Add(b_5_stars, 0, wxEXPAND | wxALL, 5);
   sz_rating_buttons->AddStretchSpacer(1);
-  sz_left->Add(p_rating_buttons, 0, wxEXPAND | wxALL, 5);
+  sz_right->Add(p_rating_buttons, 0, wxEXPAND | wxALL, 5);
 
-  p_tag_toggles_ = new wxScrolledWindow(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+  p_tag_toggles_ = new wxScrolledWindow(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
     wxBORDER_SUNKEN);
   sz_tag_toggles_ = new wxBoxSizer(wxVERTICAL);
   p_tag_toggles_->SetSizer(sz_tag_toggles_);
@@ -95,9 +191,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   p_tag_toggles_->FitInside();
   p_tag_toggles_->SetScrollRate(5, 5);
 
-  sz_left->Add(p_tag_toggles_, 1, wxEXPAND | wxALL, 5);
+  sz_right->Add(p_tag_toggles_, 1, wxEXPAND | wxALL, 5);
 
-  wxPanel* p_tag_toggles_button_bar = new wxPanel(p_left, wxID_ANY, wxDefaultPosition,
+  wxPanel* p_tag_toggles_button_bar = new wxPanel(p_right, wxID_ANY, wxDefaultPosition,
     wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_tag_toggles_button_bar = new wxBoxSizer(wxHORIZONTAL);
   p_tag_toggles_button_bar->SetSizer(sz_tag_toggles_button_bar);
@@ -113,105 +209,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     "Define New Tag...");
   b_define_new_tag->Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this);
   sz_tag_toggles_button_bar->Add(b_define_new_tag, 0, wxALL, 5);
-  sz_left->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 5);
+  sz_right->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 5);
 
-  wxPanel* p_right = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxBORDER_SUNKEN);
-  wxBoxSizer* sz_right = new wxBoxSizer(wxVERTICAL);
-  p_right->SetSizer(sz_right);
-
-  // Note: Even though wxWidgets says we should "almost certainly leave [the backend selection] up
-  //       to wxMediaCtrl," a documented bug involving wxWidgets' interaction with the DirectShow
-  //       API used by default suppresses the media-loaded event. This also affects the mediaplayer
-  //       demo provided by wxWidgets itself. To circumvent this, we explicitly choose the Windows
-  //       Media Player backend.
-  // See: https://docs.wxwidgets.org/stable/classwx_media_ctrl.html
-  // See: https://forums.wxwidgets.org/viewtopic.php?t=47476
-  // See: https://github.com/wxWidgets/wxWidgets/issues/18976   
-  mc_media_display_ = new wxMediaCtrl(p_right, ID_MEDIA_CTRL, wxEmptyString, wxDefaultPosition,
-      wxDefaultSize, wxMC_NO_AUTORESIZE, wxMEDIABACKEND_WMP10);
-  mc_media_display_->Bind(wxEVT_MEDIA_LOADED, &MainFrame::OnMediaLoaded, this);
-  mc_media_display_->Bind(wxEVT_MEDIA_STOP, &MainFrame::OnMediaStop, this);
-  mc_media_display_->Bind(wxEVT_MEDIA_FINISHED, &MainFrame::OnMediaFinished, this);
-  mc_media_display_->Bind(wxEVT_MEDIA_PLAY, &MainFrame::OnMediaPlay, this);
-  mc_media_display_->Bind(wxEVT_MEDIA_PAUSE, &MainFrame::OnMediaPause, this);
-
-  sz_right->Add(mc_media_display_, 1, wxEXPAND | wxALL, 0);
-
-  wxPanel* p_media_buttons = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxBORDER_SUNKEN);
-  wxBoxSizer* sz_media_buttons = new wxBoxSizer(wxHORIZONTAL);
-  p_media_buttons->SetSizer(sz_media_buttons);
-  wxButton* b_stop_media = new wxButton(p_media_buttons, ID_STOP_MEDIA, "Stop");
-  b_stop_media->Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this);
-  sz_media_buttons->Add(b_stop_media, 1, wxALL, 5);
-  b_play_pause_media_ = new wxButton(p_media_buttons, ID_PLAY_PAUSE_MEDIA, "Play");
-  b_play_pause_media_->Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
-  sz_media_buttons->Add(b_play_pause_media_, 1, wxALL, 5);
-
-  sz_right->Add(p_media_buttons, 0, wxEXPAND | wxALL, 5);
-
-  wxPanel* p_media_options = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxBORDER_SUNKEN);
-  wxBoxSizer* sz_media_options = new wxBoxSizer(wxHORIZONTAL);
-  p_media_options->SetSizer(sz_media_options);
-  cb_autoplay_ = new wxCheckBox(p_media_options, wxID_ANY, "Autoplay");
-  cb_autoplay_->SetValue(true);  // True == checked
-  sz_media_options->Add(cb_autoplay_, 1, wxALL, 5);
-  cb_loop_ = new wxCheckBox(p_media_options, wxID_ANY, "Loop");
-  cb_loop_->SetValue(true);  // True == checked
-  sz_media_options->Add(cb_loop_, 1, wxALL, 5);
-  cb_mute_ = new wxCheckBox(p_media_options, ID_MUTE_BOX, "Mute");
-  cb_mute_->Bind(wxEVT_CHECKBOX, &MainFrame::OnMuteBoxToggle, this);
-  cb_mute_->SetValue(true);  // True == checked
-  sz_media_options->Add(cb_mute_, 1, wxALL, 5);
-
-  sz_right->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
-
-  wxPanel* p_current_directory_line = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize);
-  wxBoxSizer* sz_current_directory_line = new wxBoxSizer(wxHORIZONTAL);
-  p_current_directory_line->SetSizer(sz_current_directory_line);
-  wxStaticText* st_current_directory_label = new wxStaticText(p_current_directory_line, wxID_ANY,
-    "Directory: ");
-  sz_current_directory_line->Add(st_current_directory_label, 0, wxALL, 5);
-  st_current_directory_ = new wxStaticText(p_current_directory_line, wxID_ANY, wxEmptyString,
-    wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_START | wxST_NO_AUTORESIZE);
-  sz_current_directory_line->Add(st_current_directory_, 1, wxALL, 5);
-  sz_right->Add(p_current_directory_line, 0, wxEXPAND | wxALL, 0);
-
-  lc_files_in_directory_ = new wxListCtrl(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxLC_REPORT | wxLC_SINGLE_SEL);
-  lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
-  lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
-  lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
-  lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
-  refreshFileView();
-
-  sz_right->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
-
-  wxPanel* p_file_navigation = new wxPanel(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxBORDER_SUNKEN);
-  wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
-  p_file_navigation->SetSizer(sz_file_navigation);
-  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
-  b_open_file->Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this);
-  sz_file_navigation->Add(b_open_file, 1, wxALL, 5);
-  wxButton* b_refresh_file_view = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
-  b_refresh_file_view->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
-  sz_file_navigation->Add(b_refresh_file_view, 1, wxALL, 5);
-  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
-    "Previous Untagged");
-  b_previous_file->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
-  sz_file_navigation->Add(b_previous_file, 1, wxALL, 5);
-
-  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next Untagged");
-  b_next_file->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
-  sz_file_navigation->Add(b_next_file, 1, wxALL, 5);
-
-  sz_right->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
-
-  sz_main->Add(p_left, 2, wxEXPAND | wxALL, 5);
-  sz_main->Add(p_right, 3, wxEXPAND | wxALL, 5);
+  sz_main->Add(p_right, 2, wxEXPAND | wxALL, 5);
 
   f_summary_ = new SummaryFrame(this);
   refreshSummary();
