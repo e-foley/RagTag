@@ -49,6 +49,48 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_left = new wxBoxSizer(wxVERTICAL);
   p_left->SetSizer(sz_left);
 
+  wxPanel* p_current_directory_line = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+  wxBoxSizer* sz_current_directory_line = new wxBoxSizer(wxHORIZONTAL);
+  p_current_directory_line->SetSizer(sz_current_directory_line);
+  wxStaticText* st_current_directory_label = new wxStaticText(p_current_directory_line, wxID_ANY,
+    "Directory: ");
+  sz_current_directory_line->Add(st_current_directory_label, 0, wxALL, 5);
+  st_current_directory_ = new wxStaticText(p_current_directory_line, wxID_ANY, wxEmptyString,
+    wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_START | wxST_NO_AUTORESIZE);
+  sz_current_directory_line->Add(st_current_directory_, 1, wxALL, 5);
+  sz_left->Add(p_current_directory_line, 0, wxEXPAND | wxALL, 0);
+
+  lc_files_in_directory_ = new wxListCtrl(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxLC_REPORT | wxLC_SINGLE_SEL);
+  lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
+  lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
+  lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
+  lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
+  refreshFileView();
+
+  sz_left->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
+
+  wxPanel* p_file_navigation = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_SUNKEN);
+  wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
+  p_file_navigation->SetSizer(sz_file_navigation);
+  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
+  b_open_file->Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this);
+  sz_file_navigation->Add(b_open_file, 1, wxEXPAND | wxALL, 5);
+  wxButton* b_refresh_file_view = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
+  b_refresh_file_view->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
+  sz_file_navigation->Add(b_refresh_file_view, 1, wxEXPAND | wxALL, 5);
+  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
+    "Previous\nUntagged");
+  b_previous_file->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
+  sz_file_navigation->Add(b_previous_file, 1, wxEXPAND | wxALL, 5);
+
+  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next\nUntagged");
+  b_next_file->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
+  sz_file_navigation->Add(b_next_file, 1, wxEXPAND | wxALL, 5);
+
+  sz_left->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
+
   // Note: Even though wxWidgets says we should "almost certainly leave [the backend selection] up
   //       to wxMediaCtrl," a documented bug involving wxWidgets' interaction with the DirectShow
   //       API used by default suppresses the media-loaded event. This also affects the mediaplayer
@@ -97,47 +139,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   sz_left->Add(p_media_options, 0, wxEXPAND | wxALL, 5);
 
-  wxPanel* p_current_directory_line = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize);
-  wxBoxSizer* sz_current_directory_line = new wxBoxSizer(wxHORIZONTAL);
-  p_current_directory_line->SetSizer(sz_current_directory_line);
-  wxStaticText* st_current_directory_label = new wxStaticText(p_current_directory_line, wxID_ANY,
-    "Directory: ");
-  sz_current_directory_line->Add(st_current_directory_label, 0, wxALL, 5);
-  st_current_directory_ = new wxStaticText(p_current_directory_line, wxID_ANY, wxEmptyString,
-    wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_START | wxST_NO_AUTORESIZE);
-  sz_current_directory_line->Add(st_current_directory_, 1, wxALL, 5);
-  sz_left->Add(p_current_directory_line, 0, wxEXPAND | wxALL, 0);
-
-  lc_files_in_directory_ = new wxListCtrl(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxLC_REPORT | wxLC_SINGLE_SEL);
-  lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
-  lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
-  lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
-  lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
-  refreshFileView();
-
-  sz_left->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
-
-  wxPanel* p_file_navigation = new wxPanel(p_left, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxBORDER_SUNKEN);
-  wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
-  p_file_navigation->SetSizer(sz_file_navigation);
-  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
-  b_open_file->Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this);
-  sz_file_navigation->Add(b_open_file, 1, wxEXPAND | wxALL, 5);
-  wxButton* b_refresh_file_view = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
-  b_refresh_file_view->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
-  sz_file_navigation->Add(b_refresh_file_view, 1, wxEXPAND | wxALL, 5);
-  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
-    "Previous\nUntagged");
-  b_previous_file->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
-  sz_file_navigation->Add(b_previous_file, 1, wxEXPAND | wxALL, 5);
-
-  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next\nUntagged");
-  b_next_file->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
-  sz_file_navigation->Add(b_next_file, 1, wxEXPAND | wxALL, 5);
-
-  sz_left->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
   sz_main->Add(p_left, 3, wxEXPAND | wxALL, 5);
 
   wxPanel* p_right = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
