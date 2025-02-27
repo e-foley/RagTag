@@ -795,11 +795,27 @@ void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
 
 void MainFrame::OnClickRatingButton(wxCommandEvent& event)
 {
+  if (!active_file_.has_value()) {
+    // We can't rate anything if there's no active file.
+    // The button will still change to appear "selected" by default, so we want to reject this.
+    b_no_rating_->SetValue(false);
+    for (int r = 0; r <= 5; ++r) {
+      b_ratings_[r]->SetValue(false);
+    }
+    return;
+  }
+
   if (event.GetId() == ID_NO_RATING) {
     b_no_rating_->SetValue(true);
     for (int r = 0; r <= 5; ++r) {
       b_ratings_[r]->SetValue(false);
     }
+    if (!tag_map_.clearRating(*active_file_)) {
+      // TODO: Report error.
+      SetStatusText(L"Could not clear rating on file '" + active_file_->generic_wstring() + L"'.");
+    }
+    is_dirty_ = true;
+    refreshFileView();
   }
   else {
     b_no_rating_->SetValue(false);
@@ -807,6 +823,12 @@ void MainFrame::OnClickRatingButton(wxCommandEvent& event)
     for (int r = 0; r <= 5; ++r) {
       b_ratings_[r]->SetValue(r == desired_rating);  // True means to display as "selected."
     }
+    if (!tag_map_.setRating(*active_file_, desired_rating)) {
+      // TODO: Report error.
+      SetStatusText(L"Could not set rating on file '" + active_file_->generic_wstring() + L"'.");
+    }
+    is_dirty_ = true;
+    refreshFileView();
   }
 }
 
