@@ -838,6 +838,7 @@ void MainFrame::OnClickRatingButton(wxCommandEvent& event)
     is_dirty_ = true;
     refreshFileView();
     refreshRatingButtons();
+    refreshSummary();
     return;
   }
   else {
@@ -849,6 +850,7 @@ void MainFrame::OnClickRatingButton(wxCommandEvent& event)
     is_dirty_ = true;
     refreshFileView();
     refreshRatingButtons();
+    refreshSummary();
     return;
   }
 }
