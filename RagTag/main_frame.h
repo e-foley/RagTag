@@ -76,6 +76,7 @@ private:
   // Functions updating view to match model
   void refreshTagToggles();
   void refreshFileView();
+  void refreshRatingButtons();
   void refreshSummary();
   // Menu events
   void OnNewProject(wxCommandEvent& event);

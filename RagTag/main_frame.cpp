@@ -164,6 +164,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_rating_buttons->AddStretchSpacer(1);
   sz_right->Add(p_rating_buttons, 0, wxEXPAND | wxALL, 5);
 
+  refreshRatingButtons();
+
   p_tag_toggles_ = new wxScrolledWindow(p_right, wxID_ANY, wxDefaultPosition, wxDefaultSize,
     wxBORDER_SUNKEN);
   sz_tag_toggles_ = new wxBoxSizer(wxVERTICAL);
@@ -399,6 +401,33 @@ void MainFrame::refreshFileView()
   file_view_modification_in_progress_ = false;
 }
 
+void MainFrame::refreshRatingButtons()
+{
+  if (!active_file_.has_value()) {
+    // We can't rate anything if there's no active file.
+    // The button will still change to appear "selected" by default, so we want to reject this.
+    b_no_rating_->SetValue(false);
+    for (int r = 0; r <= 5; ++r) {
+      b_ratings_[r]->SetValue(false);
+    }
+    return;
+  }
+
+  const auto rating = tag_map_.getRating(*active_file_);
+  if (!rating.has_value()) {
+    b_no_rating_->SetValue(true);
+    for (int r = 0; r <= 5; ++r) {
+      b_ratings_[r]->SetValue(false);
+    }
+    return;
+  }
+
+  b_no_rating_->SetValue(false);
+  for (int r = 0; r <= 5; ++r) {
+    b_ratings_[r]->SetValue(r == *rating);
+  }
+}
+
 void MainFrame::refreshSummary()
 {
   f_summary_->setTagMap(tag_map_);
@@ -446,6 +475,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
   active_file_ = {};
   refreshTagToggles();
   refreshFileView();
+  refreshRatingButtons();
   refreshSummary();
   user_initiated_stop_media_ = true;
   stopMedia();
@@ -796,39 +826,30 @@ void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
 void MainFrame::OnClickRatingButton(wxCommandEvent& event)
 {
   if (!active_file_.has_value()) {
-    // We can't rate anything if there's no active file.
-    // The button will still change to appear "selected" by default, so we want to reject this.
-    b_no_rating_->SetValue(false);
-    for (int r = 0; r <= 5; ++r) {
-      b_ratings_[r]->SetValue(false);
-    }
+    refreshRatingButtons();
     return;
   }
 
   if (event.GetId() == ID_NO_RATING) {
-    b_no_rating_->SetValue(true);
-    for (int r = 0; r <= 5; ++r) {
-      b_ratings_[r]->SetValue(false);
-    }
     if (!tag_map_.clearRating(*active_file_)) {
       // TODO: Report error.
       SetStatusText(L"Could not clear rating on file '" + active_file_->generic_wstring() + L"'.");
     }
     is_dirty_ = true;
     refreshFileView();
+    refreshRatingButtons();
+    return;
   }
   else {
-    b_no_rating_->SetValue(false);
     const int desired_rating = event.GetId() - ID_RATING_0;
-    for (int r = 0; r <= 5; ++r) {
-      b_ratings_[r]->SetValue(r == desired_rating);  // True means to display as "selected."
-    }
     if (!tag_map_.setRating(*active_file_, desired_rating)) {
       // TODO: Report error.
       SetStatusText(L"Could not set rating on file '" + active_file_->generic_wstring() + L"'.");
     }
     is_dirty_ = true;
     refreshFileView();
+    refreshRatingButtons();
+    return;
   }
 }
 
@@ -1072,6 +1093,7 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
         // User might have deleted last file in its directory.
         active_file_ = {};
         refreshFileView();
+        refreshRatingButtons();
         refreshSummary();
       }
     }
@@ -1202,6 +1224,7 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
 
   refreshTagToggles();
   refreshFileView();
+  refreshRatingButtons();
   refreshSummary();
   SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
   return true;
@@ -1220,6 +1243,7 @@ bool MainFrame::loadProject(const ragtag::path_t& path)
   active_file_ = {};
   refreshTagToggles();
   refreshFileView();
+  refreshRatingButtons();
   refreshSummary();
   user_initiated_stop_media_ = true;
   stopMedia();
