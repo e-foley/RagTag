@@ -117,9 +117,6 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxButton* b_deselect_all_files = new wxButton(p_summary_buttons, wxID_ANY, "Deselect All Files");
   b_deselect_all_files->Bind(wxEVT_BUTTON, &SummaryFrame::OnDeselectAllFiles, this);
   sz_summary_buttons->Add(b_deselect_all_files, 0, wxALL, 5);
-  wxButton* b_refresh_window = new wxButton(p_summary_buttons, wxID_ANY, "Refresh");
-  b_refresh_window->Bind(wxEVT_BUTTON, &SummaryFrame::OnRefreshWindow, this);
-  sz_summary_buttons->Add(b_refresh_window, 0, wxALL, 5);
   sz_summary_buttons->AddStretchSpacer(1);  // Stretch spacer at center to separate button groups
   b_copy_selections_ = new wxButton(p_summary_buttons, wxID_ANY,
     "Copy Selected Files to Directory...");
@@ -128,6 +125,7 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   sz_main->Add(p_summary_buttons, 0, wxEXPAND | wxALL, 0);
 
   Bind(wxEVT_CLOSE_WINDOW, &SummaryFrame::OnClose, this);
+  Bind(wxEVT_CHAR_HOOK, &SummaryFrame::OnKeyPressed, this);
 
   resetFilters();
 }
@@ -322,12 +320,6 @@ ragtag::TagMap::file_qualifier_t SummaryFrame::getOverallRuleFromFilterUi()
     };
 }
 
-void SummaryFrame::OnRefreshWindow(wxCommandEvent& event)
-{
-  refreshTagFilter();
-  refreshFileList();
-}
-
 void SummaryFrame::OnCopySelections(wxCommandEvent& event)
 {
   std::vector<ragtag::path_t> files_to_copy;
@@ -378,6 +370,16 @@ void SummaryFrame::OnCopySelections(wxCommandEvent& event)
     dialog.ShowModal();
   }
   ShellExecute(NULL, L"open", directory->c_str(), NULL, NULL, SW_SHOWNORMAL);
+}
+
+void SummaryFrame::OnKeyPressed(wxKeyEvent& event)
+{
+  if (event.GetKeyCode() == WXK_F5) {
+    refreshTagFilter();
+    refreshFileList();
+  }
+
+  event.Skip();
 }
 
 void SummaryFrame::OnClickHeading(wxListEvent& event)

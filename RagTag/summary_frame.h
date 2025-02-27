@@ -35,7 +35,6 @@ private:
   ragtag::TagMap::file_qualifier_t getRuleFromTagFilterUi();
   ragtag::TagMap::file_qualifier_t getOverallRuleFromFilterUi();
 
-  void OnRefreshWindow(wxCommandEvent& event);
   void OnClickHeading(wxListEvent& event);
   void OnFileChecked(wxListEvent& event);
   void OnFileUnchecked(wxListEvent& event);
@@ -47,6 +46,7 @@ private:
   void OnSelectAllFiles(wxCommandEvent& event);
   void OnDeselectAllFiles(wxCommandEvent& event);
   void OnCopySelections(wxCommandEvent& event);
+  void OnKeyPressed(wxKeyEvent& event);
   void OnClose(wxCloseEvent& event);
 
   std::optional<ragtag::path_t> promptCopyDestination();
