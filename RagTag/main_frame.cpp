@@ -826,32 +826,23 @@ void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
 void MainFrame::OnClickRatingButton(wxCommandEvent& event)
 {
   if (!active_file_.has_value()) {
+    // wxWidgets shows puts the button in its "selected" state upon a click, but we don't want this.
+    // Instead, we refresh the buttons to make them all show as unselected.
     refreshRatingButtons();
     return;
   }
 
   if (event.GetId() == ID_NO_RATING) {
-    if (!tag_map_.clearRating(*active_file_)) {
+    if (!clearRatingOfActiveFile()) {
       // TODO: Report error.
-      SetStatusText(L"Could not clear rating on file '" + active_file_->generic_wstring() + L"'.");
+      SetStatusText("Could not clear rating from active file.");
     }
-    is_dirty_ = true;
-    refreshFileView();
-    refreshRatingButtons();
-    refreshSummary();
-    return;
   }
   else {
-    const int desired_rating = event.GetId() - ID_RATING_0;
-    if (!tag_map_.setRating(*active_file_, desired_rating)) {
+    if (!setRatingOfActiveFile(event.GetId() - ID_RATING_0)) {
       // TODO: Report error.
-      SetStatusText(L"Could not set rating on file '" + active_file_->generic_wstring() + L"'.");
+      SetStatusText("Could not set rating on active file.");
     }
-    is_dirty_ = true;
-    refreshFileView();
-    refreshRatingButtons();
-    refreshSummary();
-    return;
   }
 }
 
@@ -1301,6 +1292,44 @@ bool MainFrame::deleteFile(const ragtag::path_t& path)
   else {
     return true;
   }
+}
+
+bool MainFrame::clearRatingOfActiveFile()
+{
+  if (!active_file_.has_value()) {
+    return false;
+  }
+
+  if (!tag_map_.clearRating(*active_file_)) {
+    // TODO: Log error.
+    SetStatusText(L"Could not clear rating on file '" + active_file_->generic_wstring() + L"'.");
+    return false;
+  }
+
+  is_dirty_ = true;
+  refreshFileView();
+  refreshRatingButtons();
+  refreshSummary();
+  return true;
+}
+
+bool MainFrame::setRatingOfActiveFile(ragtag::rating_t rating)
+{
+  if (!active_file_.has_value()) {
+    return false;
+  }
+
+  if (!tag_map_.setRating(*active_file_, rating)) {
+    // TODO: Log error.
+    SetStatusText(L"Could not set rating on file '" + active_file_->generic_wstring() + L"'.");
+    return false;
+  }
+
+  is_dirty_ = true;
+  refreshFileView();
+  refreshRatingButtons();
+  refreshSummary();
+  return true;
 }
 
 std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigator(

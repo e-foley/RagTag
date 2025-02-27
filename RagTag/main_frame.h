@@ -131,6 +131,8 @@ private:
   bool pauseMedia();
   bool stopMedia();
   bool deleteFile(const ragtag::path_t& path);
+  bool clearRatingOfActiveFile();
+  bool setRatingOfActiveFile(ragtag::rating_t rating);
   // Helper functions
   static std::optional<ragtag::path_t> qualifiedFileNavigator(
     const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);
