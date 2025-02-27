@@ -44,6 +44,7 @@ private:
     ID_STOP_MEDIA,
     ID_PLAY_PAUSE_MEDIA,
     ID_MUTE_BOX,
+    ID_NO_RATING,
     ID_RATING_0,
     ID_RATING_MAX = ID_RATING_0 + 5  // Implied ratings 1-5
   };
@@ -98,6 +99,7 @@ private:
   void OnPlayPauseMedia(wxCommandEvent& event);
   void OnPreviousUntaggedFile(wxCommandEvent& event);
   void OnNextUntaggedFile(wxCommandEvent& event);
+  void OnClickRatingButton(wxCommandEvent& event);
   // Checkbox events
   void OnMuteBoxToggle(wxCommandEvent& event);
   // List control events
@@ -142,6 +144,7 @@ private:
   wxCheckBox* cb_loop_{ nullptr };
   wxCheckBox* cb_mute_{ nullptr };
   wxButton* b_play_pause_media_{ nullptr };
+  wxToggleButton* b_no_rating_{ nullptr };
   std::vector<wxToggleButton*> b_ratings_{6};  // 6 ratings: 0 through 5 inclusive
   wxStaticText* st_current_directory_{ nullptr };
   wxListCtrl* lc_files_in_directory_{ nullptr };

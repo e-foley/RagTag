@@ -149,13 +149,15 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_rating_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_rating_buttons->SetSizer(sz_rating_buttons);
   sz_rating_buttons->AddStretchSpacer(1);
-  wxToggleButton* b_no_rating = new wxToggleButton(p_rating_buttons, wxID_ANY, "No Rating",
+  b_no_rating_ = new wxToggleButton(p_rating_buttons, ID_NO_RATING, "No Rating",
     wxDefaultPosition, wxDefaultSize, 0 * wxBU_EXACTFIT);
-  sz_rating_buttons->Add(b_no_rating, 0, wxEXPAND | wxALL, 5);
+  b_no_rating_->Bind(wxEVT_TOGGLEBUTTON, &MainFrame::OnClickRatingButton, this);
+  sz_rating_buttons->Add(b_no_rating_, 0, wxEXPAND | wxALL, 5);
   for (int r = 0; r <= 5; ++r) {
     wxToggleButton* b_rating = new wxToggleButton(p_rating_buttons, ID_RATING_0 + r,
-      std::to_string(r) + RagTagUtil::GLYPH_RATING_FULL_STAR, wxDefaultPosition, wxDefaultSize,
-      wxBU_EXACTFIT);
+      " " + std::to_string(r) + RagTagUtil::GLYPH_RATING_FULL_STAR + " ", wxDefaultPosition,
+      wxDefaultSize, wxBU_EXACTFIT);
+    b_rating->Bind(wxEVT_TOGGLEBUTTON, &MainFrame::OnClickRatingButton, this);
     b_ratings_[r] = b_rating;
     sz_rating_buttons->Add(b_rating, 0, wxEXPAND | wxALL, 5);
   }
@@ -789,6 +791,23 @@ void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
   }
 
   loadFileAndSetAsActive(*next_untagged_file);
+}
+
+void MainFrame::OnClickRatingButton(wxCommandEvent& event)
+{
+  if (event.GetId() == ID_NO_RATING) {
+    b_no_rating_->SetValue(true);
+    for (int r = 0; r <= 5; ++r) {
+      b_ratings_[r]->SetValue(false);
+    }
+  }
+  else {
+    b_no_rating_->SetValue(false);
+    const int desired_rating = event.GetId() - ID_RATING_0;
+    for (int r = 0; r <= 5; ++r) {
+      b_ratings_[r]->SetValue(r == desired_rating);  // True means to display as "selected."
+    }
+  }
 }
 
 void MainFrame::OnMuteBoxToggle(wxCommandEvent& event)
