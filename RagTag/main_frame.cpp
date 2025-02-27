@@ -1061,7 +1061,9 @@ void MainFrame::OnMediaPause(wxMediaEvent& event)
 
 void MainFrame::OnKeyDown(wxKeyEvent& event)
 {
-  if (event.GetKeyCode() == WXK_DELETE) {
+  const int key_code = event.GetKeyCode();
+  const int modifiers = event.GetModifiers();
+  if (key_code == WXK_DELETE) {
     // Attempt to delete the file with prompting.
     if (active_file_.has_value() && promptConfirmFileDeletion(*active_file_)) {
       ragtag::path_t path_cache = *active_file_;  // Copy for use in error dialog.
@@ -1089,6 +1091,15 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
         refreshRatingButtons();
         refreshSummary();
       }
+    }
+  }
+  else if (key_code >= '0' && key_code <= '5') {
+    if ((modifiers & wxMOD_SHIFT) != 0) {
+      clearRatingOfActiveFile();
+    }
+    else {
+      const int desired_rating = key_code - '0';
+      setRatingOfActiveFile(desired_rating);
     }
   }
 
