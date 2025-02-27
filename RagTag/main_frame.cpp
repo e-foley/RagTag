@@ -209,6 +209,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 }
 
 void MainFrame::refreshTagToggles() {
+  // Freeze to temporarily prevent redrawing as we rebuild our list of tag toggles.
+  p_tag_toggles_->Freeze();
+
   // Clear out existing UI entries.
   sz_tag_toggles_->Clear(true);
 
@@ -219,6 +222,7 @@ void MainFrame::refreshTagToggles() {
   if (is_file_active && !tag_map_.hasFile(*active_file_)) {
     std::cerr << "Active file '" << active_file_->generic_string()
       << "' isn't known to tag map in refreshTagToggles().\n";
+    p_tag_toggles_->Thaw();
     return;
   }
 
@@ -248,6 +252,8 @@ void MainFrame::refreshTagToggles() {
     sz_tag_toggles_->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
     p_tag_toggle->setCheckBoxState(*tag_setting);
   }
+
+  p_tag_toggles_->Thaw();
 
   // Invoking Layout() on the p_tag_toggles_ parent redraws the scrollbar if needed, whereas
   // invoking it on p_tag_toggles_ itself crunches entries into the existing unscrollable area.
