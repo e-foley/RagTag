@@ -791,10 +791,6 @@ void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
   loadFileAndSetAsActive(*next_untagged_file);
 }
 
-void MainFrame::OnDebug(wxCommandEvent& event)
-{
-}
-
 void MainFrame::OnMuteBoxToggle(wxCommandEvent& event)
 {
   mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);

@@ -98,7 +98,6 @@ private:
   void OnPlayPauseMedia(wxCommandEvent& event);
   void OnPreviousUntaggedFile(wxCommandEvent& event);
   void OnNextUntaggedFile(wxCommandEvent& event);
-  void OnDebug(wxCommandEvent& event);  // TODO: Remove me.
   // Checkbox events
   void OnMuteBoxToggle(wxCommandEvent& event);
   // List control events
