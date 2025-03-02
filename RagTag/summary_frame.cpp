@@ -79,12 +79,12 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   sz_tag_filter->Add(cb_show_yes_, 0, wxEXPAND | wxALL, 5);
   cb_show_no_ = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY, "Show no",
     wxDefaultPosition, wxDefaultSize);
-  cb_show_no_->SetValue(wxCHK_CHECKED);
+  cb_show_no_->SetValue(wxCHK_UNCHECKED);
   cb_show_no_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChangeGeneric, this);
   sz_tag_filter->Add(cb_show_no_, 0, wxEXPAND | wxALL, 5);
   cb_show_uncommitted_ = new wxCheckBox(sz_tag_filter->GetStaticBox(), wxID_ANY,
     "Show uncommitted", wxDefaultPosition, wxDefaultSize);
-  cb_show_uncommitted_->SetValue(wxCHK_CHECKED);
+  cb_show_uncommitted_->SetValue(wxCHK_UNCHECKED);
   cb_show_uncommitted_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChangeGeneric, this);
   sz_tag_filter->Add(cb_show_uncommitted_, 0, wxEXPAND | wxALL, 5);
 
@@ -547,8 +547,8 @@ void SummaryFrame::resetFilters()
   cb_show_unrated_->SetValue(wxCHK_CHECKED);
   dd_tag_selection_->SetSelection(0);
   cb_show_yes_->SetValue(wxCHK_CHECKED);
-  cb_show_no_->SetValue(wxCHK_CHECKED);
-  cb_show_uncommitted_->SetValue(wxCHK_CHECKED);
+  cb_show_no_->SetValue(wxCHK_UNCHECKED);
+  cb_show_uncommitted_->SetValue(wxCHK_UNCHECKED);
 }
 
 int wxCALLBACK SummaryFrame::pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data)
