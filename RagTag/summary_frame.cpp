@@ -194,9 +194,11 @@ void SummaryFrame::refreshFileList()
       // set the width to a placeholder and fix it right after.
       lc_summary_->AppendColumn(tag.first, wxLIST_FORMAT_CENTER, 0);
     }
+    lc_summary_->AppendColumn("");  // Add temp column so that last real column isn't stretched.
     for (int i = 2; i < lc_summary_->GetColumnCount(); ++i) {
       lc_summary_->SetColumnWidth(i, wxLIST_AUTOSIZE_USEHEADER);
     }
+    lc_summary_->DeleteColumn(lc_summary_->GetColumnCount() - 1);  // Delete temporary column.
     Thaw();
   }
 
