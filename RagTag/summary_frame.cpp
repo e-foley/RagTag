@@ -465,6 +465,7 @@ void SummaryFrame::OnMaxSliderMove(wxCommandEvent& event) {
 void SummaryFrame::OnClickShowRated(wxCommandEvent& event)
 {
   updateRatingFilterEnabledState();
+  refreshFileList();
 }
 
 void SummaryFrame::OnResetFilters(wxCommandEvent& event)
