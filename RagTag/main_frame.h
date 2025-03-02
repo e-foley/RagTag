@@ -111,6 +111,8 @@ private:
   void OnMediaFinished(wxMediaEvent& event);
   void OnMediaPlay(wxMediaEvent& event);
   void OnMediaPause(wxMediaEvent& event);
+  // Events from child windows
+  void OnSummaryFrameAction(SummaryFrameEvent& event);
   // Key presses
   void OnKeyDown(wxKeyEvent& event);
   // Custom dialog prompts

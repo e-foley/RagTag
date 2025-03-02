@@ -38,6 +38,7 @@ private:
   void OnClickHeading(wxListEvent& event);
   void OnFileChecked(wxListEvent& event);
   void OnFileUnchecked(wxListEvent& event);
+  void OnFileFocused(wxListEvent& event);
   void OnFilterChangeGeneric(wxCommandEvent& event);
   void OnMinSliderMove(wxCommandEvent& event);
   void OnMaxSliderMove(wxCommandEvent& event);
@@ -77,5 +78,56 @@ private:
   wxListCtrl* lc_summary_{};
   wxButton* b_copy_selections_{};
 };
+
+class SummaryFrameEvent;
+wxDECLARE_EVENT(SUMMARY_FRAME_EVENT, SummaryFrameEvent);
+
+// Extension of wxCommandEvent that communicates info about the user's summary frame action.
+// Approach adapted from https://wiki.wxwidgets.org/Custom_Events#Subclassing_wxCommandEvent.
+class SummaryFrameEvent : public wxCommandEvent {
+public:
+  enum class Action {
+    NONE,
+    SELECT_FILE,
+  };
+
+  // NOTE: wxCommandEvent ctrl allows communication of a specific ID. Until we have use for that, we
+  // will default it to 0.
+  SummaryFrameEvent(ragtag::path_t path, Action action)
+    : wxCommandEvent(SUMMARY_FRAME_EVENT, 0), path_(path), action_(action) {
+  }
+
+  SummaryFrameEvent(const SummaryFrameEvent& event) : wxCommandEvent(event) {
+    path_ = event.path_;
+    action_ = event.action_;
+  }
+
+  wxEvent* Clone() const {
+    return new SummaryFrameEvent(*this);
+  }
+
+  ragtag::path_t getPath() const {
+    return path_;
+  }
+
+  void setPath(ragtag::path_t path) {
+    path_ = path;
+  }
+
+  Action getAction() const {
+    return action_;
+  }
+
+  void setAction(Action action) {
+    action_ = action;
+  }
+
+private:
+  ragtag::path_t path_{};
+  Action action_{ Action::NONE };
+};
+
+typedef void (wxEvtHandler::* SummaryFrameEventFunction)(SummaryFrameEvent&);
+#define SummaryFrameEventHandler(func) wxEVENT_HANDLER_CAST(SummaryFrameEventFunction, func)
 
 #endif  // INCLUDE_SUMMARY_FRAME_H

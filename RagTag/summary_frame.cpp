@@ -7,6 +7,8 @@
 #include <wx/sizer.h>
 #include <wx/statbox.h>
 
+wxDEFINE_EVENT(SUMMARY_FRAME_EVENT, SummaryFrameEvent);
+
 const int SummaryFrame::PATH_COLUMN_INDEX = 0;
 const int SummaryFrame::RATING_COLUMN_INDEX = 1;
 const int SummaryFrame::FIRST_TAG_COLUMN_INDEX = 2;
@@ -106,6 +108,7 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   lc_summary_->Bind(wxEVT_LIST_COL_CLICK, &SummaryFrame::OnClickHeading, this);
   lc_summary_->Bind(wxEVT_LIST_ITEM_CHECKED, &SummaryFrame::OnFileChecked, this);
   lc_summary_->Bind(wxEVT_LIST_ITEM_UNCHECKED, &SummaryFrame::OnFileUnchecked, this);
+  lc_summary_->Bind(wxEVT_LIST_ITEM_FOCUSED, &SummaryFrame::OnFileFocused, this);
   sz_main->Add(lc_summary_, 1, wxEXPAND | wxALL, 5);
 
   wxPanel* p_summary_buttons = new wxPanel(p_main, wxID_ANY);
@@ -431,6 +434,13 @@ void SummaryFrame::OnFileChecked(wxListEvent& event)
 void SummaryFrame::OnFileUnchecked(wxListEvent& event)
 {
   updateCopyButtonTextForSelections();
+}
+
+void SummaryFrame::OnFileFocused(wxListEvent& event)
+{
+  SummaryFrameEvent sending(file_paths_[event.GetIndex()], SummaryFrameEvent::Action::SELECT_FILE);
+  wxPostEvent(GetParent(), sending);
+  event.Skip();
 }
 
 void SummaryFrame::OnFilterChangeGeneric(wxCommandEvent& event)

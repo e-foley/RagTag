@@ -222,6 +222,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   // object.) Figure out the difference and implement a fix such that the custom event matches how
   // ordinary events on other objects are handled.
   Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
+  Bind(SUMMARY_FRAME_EVENT, &MainFrame::OnSummaryFrameAction, this);
 
   // TODO: Replace this temporary location with real paths once application is stable.
   //const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
@@ -1057,6 +1058,14 @@ void MainFrame::OnMediaPlay(wxMediaEvent& event)
 void MainFrame::OnMediaPause(wxMediaEvent& event)
 {
   b_play_pause_media_->SetLabel("Play");
+}
+
+void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
+{
+  if (!loadFileAndSetAsActive(event.getPath())) {
+    // TODO: Report error
+    SetStatusText(L"Could not display file '" + event.getPath().generic_wstring() + L"'.");
+  }
 }
 
 void MainFrame::OnKeyDown(wxKeyEvent& event)
