@@ -203,7 +203,12 @@ void SummaryFrame::refreshFileList()
   lc_summary_->DeleteAllItems();
   file_paths_ = tag_map_.selectFiles(getOverallRuleFromFilterUi());
   for (int i = 0; i < file_paths_.size(); ++i) {
-    lc_summary_->InsertItem(i, file_paths_[i].generic_wstring());
+    std::wstring path_displayed = file_paths_[i].generic_wstring();
+    if (!std::filesystem::exists(file_paths_[i])) {
+      path_displayed.append(L" [???]");
+    }
+
+    lc_summary_->InsertItem(i, path_displayed);
      
     // Associate user data with the wxListCtrl item by giving it a pointer--in this case, to the
     // path we've cached within file_paths_. (It's not ideal, but we play along.)
