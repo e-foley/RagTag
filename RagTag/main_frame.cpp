@@ -1223,7 +1223,8 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
     SetStatusText(L"Couldn't display file '" + active_file_->generic_wstring() + L"'.");
   }
 
-  if (!tag_map_.hasFile(*active_file_)) {
+  const bool is_newly_added_file = tag_map_.hasFile(*active_file_);
+  if (is_newly_added_file) {
     is_dirty_ = true;
 
     // Declare file to our tag map.
@@ -1246,7 +1247,12 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
   refreshTagToggles();
   refreshFileView();
   refreshRatingButtons();
-  refreshSummary();
+  if (is_newly_added_file) {
+    // We only update the summary when the file list has changed. Otherwise, after the user selects
+    // a file in the summary view, the invoking of this function instantly deselects the file that
+    // was just clicked on. This makes it rather annoying to navigate project files.
+    refreshSummary();
+  }
   SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
   return true;
 }
