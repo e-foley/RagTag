@@ -1223,7 +1223,7 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
     SetStatusText(L"Couldn't display file '" + active_file_->generic_wstring() + L"'.");
   }
 
-  const bool is_newly_added_file = tag_map_.hasFile(*active_file_);
+  const bool is_newly_added_file = !tag_map_.hasFile(*active_file_);
   if (is_newly_added_file) {
     is_dirty_ = true;
 
