@@ -87,8 +87,24 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   cb_show_uncommitted_->SetValue(wxCHK_UNCHECKED);
   cb_show_uncommitted_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChangeGeneric, this);
   sz_tag_filter->Add(cb_show_uncommitted_, 0, wxEXPAND | wxALL, 5);
-
   sz_filters->Add(p_tag_filter, 0, wxEXPAND | wxALL, 5);
+
+  wxPanel* p_presence_filter = new wxPanel(p_filters, wxID_ANY);
+  wxStaticBoxSizer* sz_presence_filter = new wxStaticBoxSizer(wxVERTICAL, p_presence_filter,
+    "Presence Filter");
+  p_presence_filter->SetSizer(sz_presence_filter);
+  cb_show_present_ = new wxCheckBox(sz_presence_filter->GetStaticBox(), wxID_ANY, "Show present",
+    wxDefaultPosition, wxDefaultSize);
+  cb_show_present_->SetValue(wxCHK_CHECKED);
+  cb_show_present_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChangeGeneric, this);
+  sz_presence_filter->Add(cb_show_present_, 0, wxEXPAND | wxALL, 5);
+  cb_show_missing_ = new wxCheckBox(sz_presence_filter->GetStaticBox(), wxID_ANY, "Show missing",
+    wxDefaultPosition, wxDefaultSize);
+  cb_show_missing_->SetValue(wxCHK_CHECKED);
+  cb_show_missing_->Bind(wxEVT_CHECKBOX, &SummaryFrame::OnFilterChangeGeneric, this);
+  sz_presence_filter->Add(cb_show_missing_, 0, wxEXPAND | wxALL, 5);
+  sz_filters->Add(p_presence_filter, 0, wxEXPAND | wxALL, 5);
+
   sz_filters->AddStretchSpacer(1);
   sz_main->Add(p_filters, 0, wxEXPAND | wxALL, 0);
 
@@ -321,12 +337,23 @@ ragtag::TagMap::file_qualifier_t SummaryFrame::getRuleFromTagFilterUi()
     };
 }
 
+ragtag::TagMap::file_qualifier_t SummaryFrame::getRuleFromPresenceFilterUi()
+{
+  const bool include_present = cb_show_present_->IsChecked();
+  const bool include_missing = cb_show_missing_->IsChecked();
+  return [=](const ragtag::TagMap::FileInfo& info) {
+    const bool is_file_present = std::filesystem::exists(info.path);
+    return include_present && is_file_present || include_missing && !is_file_present;
+  };
+}
+
 ragtag::TagMap::file_qualifier_t SummaryFrame::getOverallRuleFromFilterUi()
 {
   // Composes the rating filter and the tag filter (but can be expanded for other filters as we
   // implement them).
   return [=](const ragtag::TagMap::FileInfo& info) {
-    return getRuleFromRatingFilterUi()(info) && getRuleFromTagFilterUi()(info);
+    return getRuleFromRatingFilterUi()(info) && getRuleFromTagFilterUi()(info)
+      && getRuleFromPresenceFilterUi()(info);
     };
 }
 
@@ -557,6 +584,8 @@ void SummaryFrame::resetFilters()
   cb_show_yes_->SetValue(wxCHK_CHECKED);
   cb_show_no_->SetValue(wxCHK_UNCHECKED);
   cb_show_uncommitted_->SetValue(wxCHK_UNCHECKED);
+  cb_show_present_->SetValue(wxCHK_CHECKED);
+  cb_show_missing_->SetValue(wxCHK_CHECKED);
 }
 
 int wxCALLBACK SummaryFrame::pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data)

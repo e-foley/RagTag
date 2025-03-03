@@ -33,6 +33,7 @@ private:
 
   ragtag::TagMap::file_qualifier_t getRuleFromRatingFilterUi();
   ragtag::TagMap::file_qualifier_t getRuleFromTagFilterUi();
+  ragtag::TagMap::file_qualifier_t getRuleFromPresenceFilterUi();
   ragtag::TagMap::file_qualifier_t getOverallRuleFromFilterUi();
 
   void OnClickHeading(wxListEvent& event);
@@ -74,6 +75,8 @@ private:
   wxCheckBox* cb_show_yes_{};
   wxCheckBox* cb_show_no_{};
   wxCheckBox* cb_show_uncommitted_{};
+  wxCheckBox* cb_show_present_{};
+  wxCheckBox* cb_show_missing_{};
   wxStaticText* st_filtered_file_count_{};
   wxListCtrl* lc_summary_{};
   wxButton* b_copy_selections_{};
