@@ -574,21 +574,13 @@ void SummaryFrame::updateRatingFilterEnabledState() {
 
 void SummaryFrame::updateCopyButtonTextForSelections()
 {
-  int selected_item_count = 0;
-  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
-    if (lc_summary_->IsItemChecked(i)) {
-      ++selected_item_count;
-    }
-  }
-
-  const std::string file_plural = selected_item_count != 1 ? "s" : "";
-  b_copy_selections_->SetLabel("Copy " + std::to_string(selected_item_count) +
-    " Selected File" + file_plural + " to Directory...");
-
+  const int selected_item_count = getPathsOfSelectedFiles().size();
   if (selected_item_count == 0) {
+    b_remove_from_project_->Disable();
     b_copy_selections_->Disable();
   }
   else {
+    b_remove_from_project_->Enable();
     b_copy_selections_->Enable();
   }
 }
