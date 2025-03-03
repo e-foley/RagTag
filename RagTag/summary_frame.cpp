@@ -1,6 +1,7 @@
 #include "rag_tag_util.h"
 #include "summary_frame.h"
 #include <filesystem>
+#include <wx/dcclient.h>
 #include <wx/dirdlg.h> 
 #include <wx/msgdlg.h>
 #include <wx/panel.h>
@@ -230,7 +231,9 @@ void SummaryFrame::refreshFileList()
       path_displayed.append(L" [???]");
     }
 
-    lc_summary_->InsertItem(i, path_displayed);
+    const auto ellipsized = lc_summary_->Ellipsize(path_displayed, wxWindowDC(lc_summary_), wxELLIPSIZE_START, lc_summary_->GetColumnWidth(0) - 50);
+
+    lc_summary_->InsertItem(i, ellipsized);
      
     // Associate user data with the wxListCtrl item by giving it a pointer--in this case, to the
     // path we've cached within file_paths_. (It's not ideal, but we play along.)
