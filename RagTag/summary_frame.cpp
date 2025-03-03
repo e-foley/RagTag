@@ -401,8 +401,8 @@ void SummaryFrame::OnCopySelections(wxCommandEvent& event)
   else {
     // TODO: Be more specific about which files were not copied.
     wxMessageDialog dialog(this, "Not all files were copied successfully.\n\n"
-      "Perhaps the directory contains a file sharing the name of a file you are attempting to copy."
-      " Otherwise, there may be a permissions issue.", "Copy Incomplete",
+      "Perhaps a file is missing or the directory contains a file sharing the name of a file you"
+      " are attempting to copy." " Otherwise, there may be a permissions issue.", "Copy Incomplete",
       wxOK | wxCENTER | wxICON_WARNING);
     dialog.ShowModal();
   }
