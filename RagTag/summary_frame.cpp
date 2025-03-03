@@ -137,6 +137,10 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   b_deselect_all_files->Bind(wxEVT_BUTTON, &SummaryFrame::OnDeselectAllFiles, this);
   sz_summary_buttons->Add(b_deselect_all_files, 0, wxALL, 5);
   sz_summary_buttons->AddStretchSpacer(1);  // Stretch spacer at center to separate button groups
+  b_remove_from_project_ = new wxButton(p_summary_buttons, wxID_ANY,
+    "Remove Selected Files from Project");
+  b_remove_from_project_->Bind(wxEVT_BUTTON, &SummaryFrame::OnRemoveFromProject, this);
+  sz_summary_buttons->Add(b_remove_from_project_, 0, wxALL, 5);
   b_copy_selections_ = new wxButton(p_summary_buttons, wxID_ANY,
     "Copy Selected Files to Directory...");
   b_copy_selections_->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
@@ -359,12 +363,7 @@ ragtag::TagMap::file_qualifier_t SummaryFrame::getOverallRuleFromFilterUi()
 
 void SummaryFrame::OnCopySelections(wxCommandEvent& event)
 {
-  std::vector<ragtag::path_t> files_to_copy;
-  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
-    if (lc_summary_->IsItemChecked(i)) {
-      files_to_copy.push_back(file_paths_[i]);
-    }
-  }
+  const std::vector<ragtag::path_t> files_to_copy = getPathsOfSelectedFiles();
 
   if (files_to_copy.empty()) {
     // Nothing to copy...
@@ -407,6 +406,25 @@ void SummaryFrame::OnCopySelections(wxCommandEvent& event)
     dialog.ShowModal();
   }
   ShellExecute(NULL, L"open", directory->c_str(), NULL, NULL, SW_SHOWNORMAL);
+}
+
+void SummaryFrame::OnRemoveFromProject(wxCommandEvent& event)
+{
+  const std::vector<ragtag::path_t> paths_to_remove = getPathsOfSelectedFiles();
+  const std::string path_plural_1 = paths_to_remove.size() == 1 ? "" : "s";
+  const std::string path_plural_2 = paths_to_remove.size() == 1 ? "this file" : "these files";
+  wxMessageDialog dialog(this, "Are you sure you want to remove "
+    + std::to_string(paths_to_remove.size()) + " file" + path_plural_1 + " from this project?\n\n"
+    "All tags will be removed from " + path_plural_2 + ".", "Confirm File Removal",
+    wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+
+  const SummaryFrameEvent sending(getPathsOfSelectedFiles(),
+    SummaryFrameEvent::Action::REMOVE_FILES);
+  wxPostEvent(GetParent(), sending);
+  event.Skip();
 }
 
 void SummaryFrame::OnKeyPressed(wxKeyEvent& event)
@@ -472,7 +490,8 @@ void SummaryFrame::OnFileUnchecked(wxListEvent& event)
 
 void SummaryFrame::OnFileFocused(wxListEvent& event)
 {
-  SummaryFrameEvent sending(file_paths_[event.GetIndex()], SummaryFrameEvent::Action::SELECT_FILE);
+  std::vector<ragtag::path_t> path_container(1, file_paths_[event.GetIndex()]);
+  SummaryFrameEvent sending(path_container, SummaryFrameEvent::Action::SELECT_FILE);
   wxPostEvent(GetParent(), sending);
   event.Skip();
 }
@@ -586,6 +605,17 @@ void SummaryFrame::resetFilters()
   cb_show_uncommitted_->SetValue(wxCHK_UNCHECKED);
   cb_show_present_->SetValue(wxCHK_CHECKED);
   cb_show_missing_->SetValue(wxCHK_CHECKED);
+}
+
+std::vector<ragtag::path_t> SummaryFrame::getPathsOfSelectedFiles() const
+{
+  std::vector<ragtag::path_t> returning;
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    if (lc_summary_->IsItemChecked(i)) {
+      returning.push_back(file_paths_[i]);
+    }
+  }
+  return returning;
 }
 
 int wxCALLBACK SummaryFrame::pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data)

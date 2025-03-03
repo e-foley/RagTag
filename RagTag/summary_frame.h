@@ -3,6 +3,7 @@
 
 #include "tag_map.h"
 #include <optional>
+#include <vector>
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/combobox.h>
@@ -48,6 +49,7 @@ private:
   void OnSelectAllFiles(wxCommandEvent& event);
   void OnDeselectAllFiles(wxCommandEvent& event);
   void OnCopySelections(wxCommandEvent& event);
+  void OnRemoveFromProject(wxCommandEvent& event);
   void OnKeyPressed(wxKeyEvent& event);
   void OnClose(wxCloseEvent& event);
 
@@ -55,6 +57,7 @@ private:
   void updateRatingFilterEnabledState();
   void updateCopyButtonTextForSelections();
   void resetFilters();
+  std::vector<ragtag::path_t> getPathsOfSelectedFiles() const;
 
   static int wxCALLBACK pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
   static int wxCALLBACK tagSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
@@ -79,6 +82,7 @@ private:
   wxCheckBox* cb_show_missing_{};
   wxStaticText* st_filtered_file_count_{};
   wxListCtrl* lc_summary_{};
+  wxButton* b_remove_from_project_{};
   wxButton* b_copy_selections_{};
 };
 
@@ -92,16 +96,17 @@ public:
   enum class Action {
     NONE,
     SELECT_FILE,
+    REMOVE_FILES,
   };
 
   // NOTE: wxCommandEvent ctrl allows communication of a specific ID. Until we have use for that, we
   // will default it to 0.
-  SummaryFrameEvent(ragtag::path_t path, Action action)
-    : wxCommandEvent(SUMMARY_FRAME_EVENT, 0), path_(path), action_(action) {
+  SummaryFrameEvent(const std::vector<ragtag::path_t>& paths, Action action)
+    : wxCommandEvent(SUMMARY_FRAME_EVENT, 0), paths_(paths), action_(action) {
   }
 
   SummaryFrameEvent(const SummaryFrameEvent& event) : wxCommandEvent(event) {
-    path_ = event.path_;
+    paths_ = event.paths_;
     action_ = event.action_;
   }
 
@@ -109,12 +114,12 @@ public:
     return new SummaryFrameEvent(*this);
   }
 
-  ragtag::path_t getPath() const {
-    return path_;
+  std::vector<ragtag::path_t> getPaths() const {
+    return paths_;
   }
 
-  void setPath(ragtag::path_t path) {
-    path_ = path;
+  void setPaths(const std::vector<ragtag::path_t>& path) {
+    paths_ = path;
   }
 
   Action getAction() const {
@@ -126,7 +131,7 @@ public:
   }
 
 private:
-  ragtag::path_t path_{};
+  std::vector<ragtag::path_t> paths_{};
   Action action_{ Action::NONE };
 };
 

@@ -230,7 +230,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   //displayMediaFile(std::wstring(debug_media_dir) + L"videomp4.mp4");
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagejpg.jpg");
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagepng.png");
-  loadProject(std::wstring(debug_project_dir) + L"beachcoolrainbow.tagdef");
+  //loadProject(std::wstring(debug_project_dir) + L"beachcoolrainbow.tagdef");
 }
 
 void MainFrame::refreshTagToggles() {
@@ -1062,9 +1062,52 @@ void MainFrame::OnMediaPause(wxMediaEvent& event)
 
 void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
 {
-  if (!loadFileAndSetAsActive(event.getPath())) {
-    // TODO: Report error
-    SetStatusText(L"Could not display file '" + event.getPath().generic_wstring() + L"'.");
+  const auto action = event.getAction();
+  switch (action) {
+  case SummaryFrameEvent::Action::SELECT_FILE: {
+    const auto path_container = event.getPaths();
+    if (path_container.empty()) {
+      // This shouldn't happen.
+      std::cerr << "OnSummaryFrameAction called with empty path list.\n";
+    }
+
+    if (!loadFileAndSetAsActive(path_container[0])) {
+      // TODO: Report error
+      SetStatusText(L"Could not display file '" + path_container[0].generic_wstring() + L"'.");
+    }
+    break;
+  }
+  case SummaryFrameEvent::Action::REMOVE_FILES: {
+    // Confirmation has already been granted if this event fires.
+    int removed_file_count = 0;
+    for (const auto& path : event.getPaths()) {
+      // TODO: Use this bool for extra error reporting.
+      if (tag_map_.removeFile(path)) {
+        is_dirty_ = true;
+        ++removed_file_count;
+        if (active_file_.has_value() && path == *active_file_) {
+          // The file we're removing from the project is the actively loaded one. Reset active_file_.
+          active_file_ = {};
+        }
+      }
+    }
+
+    refreshFileView();
+    refreshRatingButtons();
+    refreshSummary();
+
+    // This shouldn't be nullptr, but we still guard against it to be safe.
+    if (f_summary_ != nullptr) {
+      const std::string file_plural = removed_file_count == 1 ? " was" : "s were";
+      wxMessageDialog dialog(f_summary_, std::to_string(removed_file_count)
+        + " file" + file_plural + " removed from the project.", "Files Removed");
+      dialog.ShowModal();
+    }
+    break;
+  }
+  default:
+    std::cerr << "Unrecognized SummaryFrameEvent action.\n";
+    break;
   }
 }
 
