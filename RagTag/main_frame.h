@@ -146,7 +146,6 @@ private:
   TagCoverage getFileTagCoverage(const ragtag::path_t& file) const;
   std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
 
-
   wxScrolledWindow* p_tag_toggles_{ nullptr };
   wxBoxSizer* sz_tag_toggles_{ nullptr };
   wxMediaCtrl* mc_media_display_{ nullptr };
@@ -157,8 +156,13 @@ private:
   wxCheckBox* cb_mute_{ nullptr };
   wxToggleButton* b_no_rating_{ nullptr };
   std::vector<wxToggleButton*> b_ratings_{6};  // 6 ratings: 0 through 5 inclusive
+  wxButton* b_clear_tags_from_file_{ nullptr };
+  wxButton* b_set_tags_to_defaults_{ nullptr };
   wxStaticText* st_current_directory_{ nullptr };
   wxListCtrl* lc_files_in_directory_{ nullptr };
+  wxButton* b_refresh_file_view_{ nullptr };
+  wxButton* b_previous_file_{ nullptr };
+  wxButton* b_next_file_{ nullptr };
   SummaryFrame* f_summary_{ nullptr };
   // Parallel array of full paths to files presented by lc_files_in_directory_, since they cannot be
   // included directly. It's not pretty design, but it's the best way I could come up with given

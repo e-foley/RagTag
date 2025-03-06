@@ -2,7 +2,6 @@
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/sizer.h>
-#include <wx/stattext.h>
 
 wxDEFINE_EVENT(TAG_TOGGLE_BUTTON_EVENT, TagToggleEvent);
 
@@ -13,10 +12,10 @@ TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, wxString lab
   wxBoxSizer* sz_tag_toggle = new wxBoxSizer(wxHORIZONTAL);
   this->SetSizer(sz_tag_toggle);
 
-  wxStaticText* st_hotkey = new wxStaticText(this, wxID_ANY,
+  st_hotkey_ = new wxStaticText(this, wxID_ANY,
     hotkey_.has_value() ? wxString(*hotkey_) : wxString(wxEmptyString), wxDefaultPosition,
     wxSize(12, -1), wxALIGN_CENTRE_HORIZONTAL | wxST_NO_AUTORESIZE);
-  sz_tag_toggle->Add(st_hotkey, 0, wxALIGN_CENTER | wxALL, 5);
+  sz_tag_toggle->Add(st_hotkey_, 0, wxALIGN_CENTER | wxALL, 5);
 
   cb_tag_toggle_ = new wxCheckBox(this, wxID_ANY, label,
     wxDefaultPosition, wxDefaultSize, wxCHK_3STATE | wxCHK_ALLOW_3RD_STATE_FOR_USER);
@@ -30,6 +29,8 @@ TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, wxString lab
     wxDefaultSize, wxBU_EXACTFIT);
   b_tag_delete->Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickDelete, this);
   sz_tag_toggle->Add(b_tag_delete, 0, wxALIGN_CENTER, 5);
+
+  disableCheckboxAndHotkey();
 
   parent->Bind(wxEVT_CHAR_HOOK, &TagTogglePanel::OnKeyDown, this);
 }
@@ -64,6 +65,20 @@ ragtag::TagSetting TagTogglePanel::getCheckBoxState() const {
   }
 }
 
+void TagTogglePanel::disableCheckboxAndHotkey()
+{
+  hotkey_enabled_ = false;
+  st_hotkey_->Disable();
+  cb_tag_toggle_->Disable();
+}
+
+void TagTogglePanel::enableCheckboxAndHotkey()
+{
+  hotkey_enabled_ = true;
+  st_hotkey_->Enable();
+  cb_tag_toggle_->Enable();
+}
+
 void TagTogglePanel::OnClickEdit(wxCommandEvent& event) {
   TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::EDIT_TAG);
   wxPostEvent(GetParent(), sending);
@@ -94,7 +109,7 @@ void TagTogglePanel::OnCheckboxChange(wxCommandEvent& event) {
 
 void TagTogglePanel::OnKeyDown(wxKeyEvent& event)
 {
-  if (hotkey_.has_value() && event.GetUnicodeKey() == *hotkey_) {
+  if (hotkey_enabled_ && hotkey_.has_value() && event.GetUnicodeKey() == *hotkey_) {
     TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::UPDATE_TAG_STATE);
     const wxCheckBoxState current_checked_state = cb_tag_toggle_->Get3StateValue();
     switch (event.GetModifiers()) {

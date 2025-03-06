@@ -140,17 +140,19 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
   b_open_file->Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this);
   sz_file_navigation->Add(b_open_file, 1, wxEXPAND | wxALL, 5);
-  wxButton* b_refresh_file_view = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
-  b_refresh_file_view->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
-  sz_file_navigation->Add(b_refresh_file_view, 1, wxEXPAND | wxALL, 5);
-  wxButton* b_previous_file = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
+  b_refresh_file_view_ = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
+  b_refresh_file_view_->Disable();
+  b_refresh_file_view_->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
+  sz_file_navigation->Add(b_refresh_file_view_, 1, wxEXPAND | wxALL, 5);
+  b_previous_file_ = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
     "Previous\nUntagged");
-  b_previous_file->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
-  sz_file_navigation->Add(b_previous_file, 1, wxEXPAND | wxALL, 5);
-
-  wxButton* b_next_file = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next\nUntagged");
-  b_next_file->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
-  sz_file_navigation->Add(b_next_file, 1, wxEXPAND | wxALL, 5);
+  b_previous_file_->Disable();
+  b_previous_file_->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
+  sz_file_navigation->Add(b_previous_file_, 1, wxEXPAND | wxALL, 5);
+  b_next_file_ = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next\nUntagged");
+  b_next_file_->Disable();
+  b_next_file_->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
+  sz_file_navigation->Add(b_next_file_, 1, wxEXPAND | wxALL, 5);
 
   sz_left->Add(p_file_navigation, 0, wxEXPAND | wxALL, 5);
   sz_main->Add(p_left, 3, wxEXPAND | wxALL, 5);
@@ -199,14 +201,14 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     wxDefaultSize, wxBORDER_SUNKEN);
   wxBoxSizer* sz_tag_toggles_button_bar = new wxBoxSizer(wxHORIZONTAL);
   p_tag_toggles_button_bar->SetSizer(sz_tag_toggles_button_bar);
-  wxButton* b_clear_tags_from_file = new wxButton(p_tag_toggles_button_bar, ID_CLEAR_TAGS_FROM_FILE,
+  b_clear_tags_from_file_ = new wxButton(p_tag_toggles_button_bar, ID_CLEAR_TAGS_FROM_FILE,
     "Clear Tags\nfrom File");
-  b_clear_tags_from_file->Bind(wxEVT_BUTTON, &MainFrame::OnClearTagsFromFile, this);
-  sz_tag_toggles_button_bar->Add(b_clear_tags_from_file, 1, wxEXPAND | wxALL, 5);
-  wxButton* b_set_tags_to_defaults = new wxButton(p_tag_toggles_button_bar, ID_SET_TAGS_TO_DEFAULTS,
+  b_clear_tags_from_file_->Bind(wxEVT_BUTTON, &MainFrame::OnClearTagsFromFile, this);
+  sz_tag_toggles_button_bar->Add(b_clear_tags_from_file_, 1, wxEXPAND | wxALL, 5);
+  b_set_tags_to_defaults_ = new wxButton(p_tag_toggles_button_bar, ID_SET_TAGS_TO_DEFAULTS,
     "Set Tags\nto Defaults");
-  b_set_tags_to_defaults->Bind(wxEVT_BUTTON, &MainFrame::OnSetTagsToDefaults, this);
-  sz_tag_toggles_button_bar->Add(b_set_tags_to_defaults, 1, wxEXPAND | wxALL, 5);
+  b_set_tags_to_defaults_->Bind(wxEVT_BUTTON, &MainFrame::OnSetTagsToDefaults, this);
+  sz_tag_toggles_button_bar->Add(b_set_tags_to_defaults_, 1, wxEXPAND | wxALL, 5);
   wxButton* b_define_new_tag = new wxButton(p_tag_toggles_button_bar, ID_DEFINE_NEW_TAG,
     "Define\nNew Tag...");
   b_define_new_tag->Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this);
@@ -297,6 +299,12 @@ void MainFrame::refreshTagToggles() {
       tag_element.first, tag_element.second.hotkey);
     sz_tag_toggles_->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
     p_tag_toggle->setCheckBoxState(*tag_setting);
+    if (is_file_active) {
+      p_tag_toggle->enableCheckboxAndHotkey();
+    }
+    else {
+      p_tag_toggle->disableCheckboxAndHotkey();
+    }
   }
 
   p_tag_toggles_->Thaw();
@@ -429,10 +437,18 @@ void MainFrame::refreshRatingButtons()
     // We can't rate anything if there's no active file.
     // The button will still change to appear "selected" by default, so we want to reject this.
     b_no_rating_->SetValue(false);
+    b_no_rating_->Disable();
+    // Disable all the buttons since they'd have no effect without an active file.
     for (int r = 0; r <= 5; ++r) {
       b_ratings_[r]->SetValue(false);
+      b_ratings_[r]->Disable();
     }
     return;
+  }
+
+  b_no_rating_->Enable();
+  for (int r = 0; r <= 5; ++r) {
+    b_ratings_[r]->Enable();
   }
 
   const auto rating = tag_map_.getRating(*active_file_);
@@ -1326,6 +1342,12 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
     }
   }
 
+  b_refresh_file_view_->Enable();
+  b_previous_file_->Enable();
+  b_next_file_->Enable();
+  b_clear_tags_from_file_->Enable();
+  b_set_tags_to_defaults_->Enable();
+
   refreshTagToggles();
   refreshFileView();
   refreshRatingButtons();
@@ -1346,6 +1368,11 @@ void MainFrame::resetActiveFile()
   refreshFileView();
   refreshRatingButtons();
   refreshSummary();
+  b_refresh_file_view_->Disable();
+  b_previous_file_->Disable();
+  b_next_file_->Disable();
+  b_clear_tags_from_file_->Disable();
+  b_set_tags_to_defaults_->Disable();
   user_initiated_stop_media_ = true;
   stopMedia();
   // TODO: Find a way to either reset the wxMediaCtrl or disable playing until a file is loaded.

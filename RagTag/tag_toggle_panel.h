@@ -4,6 +4,7 @@
 #include "tag_map.h"
 #include <wx/checkbox.h>
 #include <wx/panel.h>
+#include <wx/stattext.h>
 #include <wx/window.h>
 
 class TagTogglePanel : public wxPanel {
@@ -14,6 +15,8 @@ public:
   // This function does not emit a checkbox event.
   void setCheckBoxState(ragtag::TagSetting state);
   ragtag::TagSetting getCheckBoxState() const;
+  void disableCheckboxAndHotkey();
+  void enableCheckboxAndHotkey();
 
 private:
   void OnClickEdit(wxCommandEvent& event);
@@ -23,6 +26,8 @@ private:
 
   ragtag::tag_t tag_{};
   std::optional<ragtag::rtchar_t> hotkey_{};
+  bool hotkey_enabled_{ false };
+  wxStaticText* st_hotkey_{ nullptr };
   wxCheckBox* cb_tag_toggle_{ nullptr };
 };
 
