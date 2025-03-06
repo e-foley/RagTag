@@ -12,29 +12,43 @@ const wxColour MainFrame::BACKGROUND_COLOR_FULLY_UNTAGGED = wxColour(255, 255, 2
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition,
   wxSize(900, 720)) {
-  wxMenu* menuFile = new wxMenu;
-  menuFile->Append(ID_NEW_PROJECT, "&New Project...\tCtrl-N");
-  menuFile->Append(ID_OPEN_PROJECT, "&Open Project...\tCtrl-Shift-O");
-  menuFile->Append(ID_SAVE_PROJECT, "&Save Project...\tCtrl-S");
-  menuFile->Append(ID_SAVE_PROJECT_AS, "Save Project &As...\tCtrl-Shift-S");
-  menuFile->AppendSeparator();
-  menuFile->Append(ID_SHOW_SUMMARY, "View Project Summary...\tCtrl-P");
-  menuFile->AppendSeparator();
-  menuFile->Append(ID_LOAD_FILE, "Load File...\tCtrl-O");
-  menuFile->Append(ID_NEXT_FILE, "Next File in Directory\tSpace");
-  menuFile->Append(ID_PREVIOUS_FILE, "Previous File in Directory\tShift-Space");
-  menuFile->Append(ID_REFRESH_FILE_VIEW, "Refresh File View\tF5");
-  menuFile->AppendSeparator();
-  menuFile->Append(wxID_EXIT, "Quit\tAlt-F4");
+  wxMenu* m_file = new wxMenu;
+  m_file->Append(ID_NEW_PROJECT, "&New Project...\tCtrl-N");
+  m_file->Append(ID_OPEN_PROJECT, "&Open Project...\tCtrl-Shift-O");
+  m_file->Append(ID_SAVE_PROJECT, "&Save Project...\tCtrl-S");
+  m_file->Append(ID_SAVE_PROJECT_AS, "Save Project &As...\tCtrl-Shift-S");
+  m_file->AppendSeparator();
+  m_file->Append(wxID_EXIT, "&Quit\tAlt-F4");
 
-  wxMenu* menuHelp = new wxMenu;
-  menuHelp->Append(wxID_ABOUT);
+  wxMenu* m_project = new wxMenu;
+  m_project->Append(ID_LOAD_FILE, "&Load File...\tCtrl-O");
+  m_project->AppendSeparator();
+  m_project->Append(ID_NEXT_FILE, "Next File in Directory\t.");
+  m_project->Append(ID_PREVIOUS_FILE, "Previous File in Directory\t,");
+  m_project->Append(ID_NEXT_UNTAGGED_FILE, "Next Untagged File in Directory\tSpace");
+  m_project->Append(ID_PREVIOUS_UNTAGGED_FILE, "Previous Untagged File in Directory\tShift-Space");
 
-  wxMenuBar* menuBar = new wxMenuBar;
-  menuBar->Append(menuFile, "&File");
-  menuBar->Append(menuHelp, "&Help");
+  wxMenu* m_tags = new wxMenu;
+  m_tags->Append(ID_DEFINE_NEW_TAG, "Define New &Tag...\tCtrl-T");
+  m_tags->Append(ID_CLEAR_TAGS_FROM_FILE, "&Clear Tags from Active File\tCtrl-C");
+  m_tags->Append(ID_SET_TAGS_TO_DEFAULTS, "&Default Tags on Active File\tCtrl-D");
 
-  SetMenuBar(menuBar);
+  wxMenu* m_window = new wxMenu;
+  m_window->AppendCheckItem(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-P");
+  m_window->AppendSeparator();
+  m_window->Append(ID_REFRESH_FILE_VIEW, "&Refresh Directory View\tF5");
+
+  wxMenu* m_help = new wxMenu;
+  m_help->Append(wxID_ABOUT);
+
+  wxMenuBar* mb_menu_bar = new wxMenuBar;
+  mb_menu_bar->Append(m_file, "&File");
+  mb_menu_bar->Append(m_project, "&Project");
+  mb_menu_bar->Append(m_tags, "&Tags");
+  mb_menu_bar->Append(m_window, "&Window");
+  mb_menu_bar->Append(m_help, "&Help");
+
+  SetMenuBar(mb_menu_bar);
 
   CreateStatusBar();
 
@@ -213,6 +227,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnRefreshFileView, this, ID_REFRESH_FILE_VIEW);
   Bind(wxEVT_MENU, &MainFrame::OnNextFile, this, ID_NEXT_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnPreviousFile, this, ID_PREVIOUS_FILE);
+  Bind(wxEVT_MENU, &MainFrame::OnNextUntaggedFile, this, ID_NEXT_UNTAGGED_FILE);
+  Bind(wxEVT_MENU, &MainFrame::OnPreviousUntaggedFile, this, ID_PREVIOUS_UNTAGGED_FILE);
+  Bind(wxEVT_MENU, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
+  Bind(wxEVT_MENU, &MainFrame::OnClearTagsFromFile, this, ID_CLEAR_TAGS_FROM_FILE);
+  Bind(wxEVT_MENU, &MainFrame::OnSetTagsToDefaults, this, ID_SET_TAGS_TO_DEFAULTS);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
   Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
