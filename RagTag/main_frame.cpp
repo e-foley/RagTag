@@ -84,10 +84,12 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     wxBORDER_SUNKEN);
   wxBoxSizer* sz_media_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_media_buttons->SetSizer(sz_media_buttons);
-  wxButton* b_stop_media = new wxButton(p_media_buttons, ID_STOP_MEDIA, "Stop");
-  b_stop_media->Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this);
-  sz_media_buttons->Add(b_stop_media, 1, wxALL, 5);
+  b_stop_media_ = new wxButton(p_media_buttons, ID_STOP_MEDIA, "Stop");
+  b_stop_media_->Disable();
+  b_stop_media_->Bind(wxEVT_BUTTON, &MainFrame::OnStopMedia, this);
+  sz_media_buttons->Add(b_stop_media_, 1, wxALL, 5);
   b_play_pause_media_ = new wxButton(p_media_buttons, ID_PLAY_PAUSE_MEDIA, "Play");
+  b_play_pause_media_->Disable();
   b_play_pause_media_->Bind(wxEVT_BUTTON, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
   sz_media_buttons->Add(b_play_pause_media_, 1, wxALL, 5);
 
@@ -1299,6 +1301,15 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
     // File is "loaded," it just can't be displayed.
     // TODO: Display placeholder text or something in the media preview when this happens.
     SetStatusText(L"Couldn't display file '" + active_file_->generic_wstring() + L"'.");
+  }
+
+  if (RagTagUtil::isStaticMedia(*active_file_)) {
+    b_stop_media_->Disable();
+    b_play_pause_media_->Disable();
+  }
+  else {
+    b_stop_media_->Enable();
+    b_play_pause_media_->Enable();
   }
 
   const bool is_newly_added_file = !tag_map_.hasFile(*active_file_);

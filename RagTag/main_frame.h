@@ -149,10 +149,11 @@ private:
   wxScrolledWindow* p_tag_toggles_{ nullptr };
   wxBoxSizer* sz_tag_toggles_{ nullptr };
   wxMediaCtrl* mc_media_display_{ nullptr };
+  wxButton* b_stop_media_{ nullptr };
+  wxButton* b_play_pause_media_{ nullptr };
   wxCheckBox* cb_autoplay_{ nullptr };
   wxCheckBox* cb_loop_{ nullptr };
   wxCheckBox* cb_mute_{ nullptr };
-  wxButton* b_play_pause_media_{ nullptr };
   wxToggleButton* b_no_rating_{ nullptr };
   std::vector<wxToggleButton*> b_ratings_{6};  // 6 ratings: 0 through 5 inclusive
   wxStaticText* st_current_directory_{ nullptr };
