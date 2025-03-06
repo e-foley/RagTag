@@ -8,7 +8,7 @@
 
 class TagTogglePanel : public wxPanel {
 public:
-  TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string label,
+  TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, wxString label,
     std::optional<ragtag::rtchar_t> hotkey);
   virtual ~TagTogglePanel();
   // This function does not emit a checkbox event.

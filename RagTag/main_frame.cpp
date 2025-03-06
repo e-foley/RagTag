@@ -245,7 +245,7 @@ void MainFrame::refreshTagToggles() {
   auto registered_tags = tag_map_.getAllTags();
 
   if (is_file_active && !tag_map_.hasFile(*active_file_)) {
-    std::cerr << "Active file '" << active_file_->generic_string()
+    std::wcerr << "Active file '" << active_file_->generic_wstring()
       << "' isn't known to tag map in refreshTagToggles().\n";
     p_tag_toggles_->Thaw();
     return;
@@ -260,15 +260,15 @@ void MainFrame::refreshTagToggles() {
       // TODO: Replace this logic when hide TagProperties.
       const auto tag_props = tag_map_.getTagProperties(tag_element.first);
       if (!tag_props.has_value()) {
-        std::cerr << "Can't get tag properties for tag '" << tag_element.first << "'.\n";
+        std::wcerr << "Can't get tag properties for tag '" << tag_element.first << "'.\n";
         continue;
       }
       tag_setting = tag_props->default_setting;
     }
 
     if (!tag_setting.has_value()) {
-      std::cerr << "Failed to establish tag setting for '" << tag_element.first << "' within file '"
-        << active_file_->generic_string() << "'.\n";
+      std::wcerr << "Failed to establish tag setting for '" << tag_element.first
+        << "' within file '" << active_file_->generic_wstring() << "'.\n";
       continue;
     }
 
@@ -889,13 +889,13 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
   if (tag_map_.isTagRegistered(tag_entry_result->tag)) {
     // The "newly created" tag has a name that's already registered.
     // TODO: Report error.
-    SetStatusText("Tag '" + tag_entry_result->tag + "' is already registered.");
+    SetStatusText(L"Tag '" + tag_entry_result->tag + L"' is already registered.");
     return;
   }
 
   if (!tag_map_.registerTag(tag_entry_result->tag, tag_entry_result->tag_properties)) {
     // TODO: Report error.
-    SetStatusText("Could not register tag '" + tag_entry_result->tag + "'.");
+    SetStatusText(L"Could not register tag '" + tag_entry_result->tag + L"'.");
     return;
   }
 
@@ -913,7 +913,7 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
     if (!tag_map_.setTag(*active_file_, tag_entry_result->tag,
       tag_entry_result->tag_properties.default_setting)) {
       // TODO: Report error.
-      SetStatusText("Could not set tag '" + tag_entry_result->tag + "' on currently open file.");
+      SetStatusText(L"Could not set tag '" + tag_entry_result->tag + L"' on currently open file.");
     }
   }
 
@@ -932,7 +932,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
     const auto props_ret = tag_map_.getTagProperties(old_tag);
     if (!props_ret.has_value()) {
       // Shouldn't happen.
-      SetStatusText("Couldn't get existing tag properties for tag '" + old_tag + "'.");
+      SetStatusText(L"Couldn't get existing tag properties for tag '" + old_tag + L"'.");
       break;
     }
     const ragtag::TagProperties old_props = *props_ret;
@@ -954,13 +954,13 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
     // If the name is different from before, the tag has been renamed.
     if (new_tag != old_tag) {
       if (!tag_map_.renameTag(old_tag, new_tag)) {
-        SetStatusText("Could not rename tag '" + old_tag + "' to '" + new_tag + "'.");
+        SetStatusText(L"Could not rename tag '" + old_tag + L"' to '" + new_tag + L"'.");
         break;
       }
     }
 
     if (!tag_map_.setTagProperties(new_tag, tag_entry_result->tag_properties)) {
-      SetStatusText("Could not set properties for tag '" + new_tag + "'.");
+      SetStatusText(L"Could not set properties for tag '" + new_tag + L"'.");
     }
 
     // Apply default to all files in project if requested.
@@ -973,7 +973,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
       }
     }
 
-    SetStatusText("Modified tag '" + old_tag + "'/'" + new_tag + "'.");
+    SetStatusText(L"Modified tag '" + old_tag + L"'/'" + new_tag + L"'.");
     break;
   }
   case TagToggleEvent::DesiredAction::DELETE_TAG: {
@@ -982,11 +982,11 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
       is_dirty_ = true;
 
       if (tag_map_.deleteTag(event.getTag())) {
-        SetStatusText("Deleted tag '" + event.getTag() + "'.");
+        SetStatusText(L"Deleted tag '" + event.getTag() + L"'.");
       }
       else {
         // TODO: Report error.
-        SetStatusText("Could not delete tag '" + event.getTag() + "'.");
+        SetStatusText(L"Could not delete tag '" + event.getTag() + L"'.");
       }
     }
     break;
@@ -998,14 +998,14 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
 
       if (!tag_map_.setTag(*active_file_, event.getTag(), event.getDesiredState())) {
         // TODO: Report error.
-        SetStatusText("Could not assert tag '" + event.getTag() + "' on file '"
-          + active_file_->generic_string() + "'.");
+        SetStatusText(L"Could not assert tag '" + event.getTag() + L"' on file '"
+          + active_file_->generic_wstring() + L"'.");
       }
     }
     break;
   }
   default:
-    std::cerr << "Unexpected desired action from tag toggle button.\n";
+    std::wcerr << "Unexpected desired action from tag toggle button.\n";
     break;
   }
 
@@ -1068,7 +1068,7 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
     const auto path_container = event.getPaths();
     if (path_container.empty()) {
       // This shouldn't happen.
-      std::cerr << "OnSummaryFrameAction called with empty path list.\n";
+      std::wcerr << "OnSummaryFrameAction called with empty path list.\n";
     }
 
     if (!loadFileAndSetAsActive(path_container[0])) {
@@ -1106,7 +1106,7 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
     break;
   }
   default:
-    std::cerr << "Unrecognized SummaryFrameEvent action.\n";
+    std::wcerr << "Unrecognized SummaryFrameEvent action.\n";
     break;
   }
 }
@@ -1220,8 +1220,8 @@ std::optional<ragtag::path_t> MainFrame::promptLoadFile() {
 
 bool MainFrame::promptConfirmTagDeletion(ragtag::tag_t tag)
 {
-  wxMessageDialog dialog(this, "Are you sure you wish to delete tag '" + tag
-    + "'?\n\nDeleting a tag will remove it from all files in this project.", "Confirm Tag Deletion",
+  wxMessageDialog dialog(this, L"Are you sure you wish to delete tag '" + tag
+    + L"'?\n\nDeleting a tag will remove it from all files in this project.", L"Confirm Tag Deletion",
     wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
   dialog.SetOKCancelLabels("Delete tag", "Cancel");
   return dialog.ShowModal() == wxID_OK;

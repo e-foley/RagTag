@@ -1,5 +1,6 @@
 #include "tag_map.h"
 #include <algorithm>
+#include <codecvt>
 #include <fstream>
 #include <iostream>
 
@@ -37,8 +38,8 @@ namespace ragtag {
     bool was_tag_cleared_from_all_files = true;
     for (const auto& file_it : file_map_) {
       if (!clearTag(file_it.first, tag)) {
-        std::cerr << "Couldn't clear tag '" << tag << "' from file '"
-          << file_it.first.generic_string() << "'.\n";
+        std::wcerr << L"Couldn't clear tag '" << tag << L"' from file '"
+          << file_it.first.generic_wstring() << L"'.\n";
         was_tag_cleared_from_all_files = false;
       }
     }
@@ -65,8 +66,8 @@ namespace ragtag {
       const auto setting = getTagSetting(file_entry.first, tag);
       if (setting.has_value() && *setting != TagSetting::UNCOMMITTED) {
         if (!setTag(file_entry.first, copy_name, *setting)) {
-          std::cerr << "Could not set tag '" << copy_name << "' on file '"
-            << file_entry.first.generic_string() << "' during tag copy operation.\n";
+          std::wcerr << "Could not set tag '" << copy_name << L"' on file '"
+            << file_entry.first.generic_wstring() << L"' during tag copy operation.\n";
         }
       }
     }
@@ -289,7 +290,7 @@ namespace ragtag {
       tag_to_id.try_emplace(tag_it.first, id);
       nlohmann::json adding;
       adding["id"] = id;
-      adding["tag"] = tag_it.first;
+      adding["tag"] = toUtf8(tag_it.first);
       // TODO: Another place that needs error handling attention.
       auto default_setting_num = tagSettingToNumber(tag_it.second.default_setting);
       if (default_setting_num.has_value()) {
@@ -307,7 +308,7 @@ namespace ragtag {
     nlohmann::json file_array_json;
     for (auto file_it : file_map_) {
       nlohmann::json adding;
-      adding["path"] = file_it.first;
+      adding["path"] = toUtf8(file_it.first);
       if (file_it.second.rating.has_value()) {
         adding["rating"] = *file_it.second.rating;
       }
@@ -318,7 +319,7 @@ namespace ragtag {
         auto tag_id_it = tag_to_id.find(tag_it.first);
         if (tag_id_it == tag_to_id.end()) {
           // TODO: Invoke global log here.
-          std::cerr << "Tag " << tag_it.first << " does not appear in internal tag-to-id map.\n";
+          std::wcerr << L"Tag " << tag_it.first << L" does not appear in internal tag-to-id map.\n";
           continue;
         }
 
@@ -355,7 +356,7 @@ namespace ragtag {
     const auto tag_map_json_it = json.find("tags");
     if (tag_map_json_it == json.end()) {
       // Can't find "tags" definition.
-      std::cerr << "Can't find \"tags\" definition within JSON.\n";
+      std::wcerr << "Can't find \"tags\" definition within JSON.\n";
       return {};
     }
 
@@ -365,20 +366,20 @@ namespace ragtag {
       const auto id_json = tag_it.find("id");
       if (id_json == tag_it.end()) {
         // Tag doesn't have "id" attribute.
-        std::cerr << "Tag lacks \"id\" attribute.\n";
+        std::wcerr << "Tag lacks \"id\" attribute.\n";
         continue;
       }
       const auto tag_json = tag_it.find("tag");
       if (tag_json == tag_it.end()) {
         // Tag doesn't have "tag" attribute.
-        std::cerr << "Tag lacks \"tag\" attribute.\n";
+        std::wcerr << "Tag lacks \"tag\" attribute.\n";
         continue;
       }
 
       const auto default_json = tag_it.find("default");
       if (default_json == tag_it.end()) {
         // Tag doesn't have "default" attribute.
-        std::cerr << "Tag lacks \"default\" attribute.\n";
+        std::wcerr << "Tag lacks \"default\" attribute.\n";
         continue;
       }
 
@@ -388,7 +389,7 @@ namespace ragtag {
       // If we've made it here, the tag entry has "id", "tag", and "default".
       if (id_to_tag_map.contains(*id_json)) {
         // Duplicate ID...
-        std::cerr << "Tag ID " << int(*id_json) << " is duplicated.\n";
+        std::wcerr << "Tag ID " << int(*id_json) << " is duplicated.\n";
         continue;
       }
 
@@ -396,7 +397,7 @@ namespace ragtag {
       auto default_setting = numberToTagSetting(*default_json);
       if (!default_setting.has_value()) {
         // The stated default setting isn't one that we know how to interpret.
-        std::cerr << "Tag has an unrecognized default value.\n";
+        std::wcerr << "Tag has an unrecognized default value.\n";
         continue;
       }
       properties_pending.default_setting = *default_setting;
@@ -407,19 +408,20 @@ namespace ragtag {
         properties_pending.hotkey = *hotkey_json;
       }
 
+      const std::wstring tag = toWString(*tag_json);
       bool insertion_successful =
-        id_to_tag_map.try_emplace(*id_json, *tag_json).second;
+        id_to_tag_map.try_emplace(*id_json, tag).second;
       if (!insertion_successful) {
         // Memory allocation issue? We generally shouldn't see this.
-        std::cerr << "Couldn't insert tag ID " << std::string(*id_json) << " into internal map.\n";
+        std::wcerr << "Couldn't insert tag ID " << tag << " into internal map.\n";
         continue;
       }
 
       // All is good! Add the tag to our fledgling TagMap.
-      bool register_tag_success = tag_map.registerTag(*tag_json, properties_pending);
+      bool register_tag_success = tag_map.registerTag(tag, properties_pending);
       if (!register_tag_success) {
         // Unclear what would cause this error.
-        std::cerr << "Failed to register tag " << std::string(*tag_json) << " with TagMap object.\n";
+        std::wcerr << "Failed to register tag " << tag << " with TagMap object.\n";
         continue;
       }
     }
@@ -427,7 +429,7 @@ namespace ragtag {
     const auto file_map_json_it = json.find("files");
     if (file_map_json_it == json.end()) {
       // Can't find "files" definition.
-      std::cerr << "Can't find \"files\" definition within JSON.\n";
+      std::wcerr << "Can't find \"files\" definition within JSON.\n";
       return {};
     }
 
@@ -436,14 +438,14 @@ namespace ragtag {
       const auto path_json = file_it.find("path");
       if (path_json == file_it.end()) {
         // File doesn't have "path" attribute.
-        std::cerr << "File lacks \"path\" attribute.\n";
+        std::wcerr << "File lacks \"path\" attribute.\n";
         continue;
       }
-      std::filesystem::path path = *path_json;
+      std::filesystem::path path = toWString(*path_json);
 
       bool add_file_success = tag_map.addFile(path);
       if (!add_file_success) {
-        std::cerr << "Failed to add file '" << path.generic_string() << "' to TagMap object.\n";
+        std::wcerr << "Failed to add file '" << path.generic_wstring() << "' to TagMap object.\n";
         continue;
       }
 
@@ -451,7 +453,7 @@ namespace ragtag {
       if (rating_json == file_it.end()) {
         // Not an issue, since "rating" is optional.
         if (!tag_map.clearRating(path)) {
-          std::cerr << "Couldn't clear rating for file '" << path.generic_string() << "'\n";
+          std::wcerr << "Couldn't clear rating for file '" << path.generic_wstring() << "'\n";
           continue;
         }
       }
@@ -465,7 +467,7 @@ namespace ragtag {
       const auto yes_tags_json_it = file_it.find("yes_tags");
       if (yes_tags_json_it == file_it.end()) {
         // Can't find "yes_tags" definition.
-        std::cerr << "File '" << path.generic_string() << "' lacks 'yes_tags' definition.\n";
+        std::wcerr << "File '" << path.generic_wstring() << "' lacks 'yes_tags' definition.\n";
         continue;
       }
       nlohmann::json yes_tags_json = *yes_tags_json_it;
@@ -473,13 +475,13 @@ namespace ragtag {
         const int yes_tag_id = yes_tag_id_json;
         const auto yes_tag_it = id_to_tag_map.find(yes_tag_id);
         if (yes_tag_it == id_to_tag_map.end()) {
-          std::cerr << "Couldn't find yes-tag ID " << yes_tag_id
-            << " within internal map for file '" << path.generic_string() << "'.\n";
+          std::wcerr << "Couldn't find yes-tag ID " << yes_tag_id
+            << " within internal map for file '" << path.generic_wstring() << "'.\n";
           continue;
         }
         if (!tag_map.setTag(path, yes_tag_it->second, TagSetting::YES)) {
-          std::cerr << "Couldn't set tag '" << yes_tag_it->second << "' to YES for file '"
-            << path.generic_string() << "'.\n";
+          std::wcerr << L"Couldn't set tag '" << yes_tag_it->second << L"' to YES for file '"
+            << path.generic_wstring() << L"'.\n";
           continue;
         }
       }
@@ -487,7 +489,7 @@ namespace ragtag {
       const auto no_tags_json_it = file_it.find("no_tags");
       if (no_tags_json_it == file_it.end()) {
         // Can't find "no_tags" definition.
-        std::cerr << "File '" << path.generic_string() << "' lacks 'no_tags' definition.\n";
+        std::wcerr << "File '" << path.generic_wstring() << "' lacks 'no_tags' definition.\n";
         continue;
       }
       nlohmann::json no_tags_json = *no_tags_json_it;
@@ -495,13 +497,13 @@ namespace ragtag {
         const int no_tag_id = no_tag_id_json;
         const auto no_tag_it = id_to_tag_map.find(no_tag_id);
         if (no_tag_it == id_to_tag_map.end()) {
-          std::cerr << "Couldn't find no-tag ID " << no_tag_id
-            << " within internal map for file '" << path.generic_string() << "'.\n";
+          std::wcerr << "Couldn't find no-tag ID " << no_tag_id
+            << " within internal map for file '" << path.generic_wstring() << "'.\n";
           continue;
         }
         if (!tag_map.setTag(path, no_tag_it->second, TagSetting::NO)) {
-          std::cerr << "Couldn't set tag '" << no_tag_it->second << "' to NO for file '"
-            << path.generic_string() << "'.\n";
+          std::wcerr << L"Couldn't set tag '" << no_tag_it->second << L"' to NO for file '"
+            << path.generic_wstring() << L"'.\n";
           continue;
         }
       }
@@ -574,5 +576,17 @@ namespace ragtag {
     default:
       return {};
     }
+  }
+
+  // Implementation copied from from https://json.nlohmann.me/home/faq/#wide-string-handling.
+  std::string TagMap::toUtf8(const std::wstring& wide_string)
+  {
+    static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    return utf8_conv.to_bytes(wide_string);
+  }
+
+  std::wstring TagMap::toWString(const std::string& string) {
+    static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    return utf8_conv.from_bytes(string);
   }
 }  // namespace ragtag

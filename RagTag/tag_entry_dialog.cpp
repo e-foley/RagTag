@@ -5,7 +5,7 @@
 #include <wx/wx.h>
 
 TagEntryDialog::TagEntryDialog(wxWindow* parent)
-  : TagEntryDialog(parent, "new tag", ragtag::TagProperties{}) {
+  : TagEntryDialog(parent, L"new tag", ragtag::TagProperties{}) {
 };
 
 TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
@@ -21,12 +21,12 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
   sz_text_entry_grid->AddGrowableCol(1, 1);
   wxStaticText* st_tag_name = new wxStaticText(this, wxID_ANY, "Tag name:");
   sz_text_entry_grid->Add(st_tag_name, 0, wxALL, 5);
-  std::string default_tag_text = response_.tag;
+  wxString default_tag_text = response_.tag;
   tc_tag_name_ = new wxTextCtrl(this, wxID_ANY, default_tag_text);
   sz_text_entry_grid->Add(tc_tag_name_, 1, wxALL | wxEXPAND, 5);
   wxStaticText* st_hotkey = new wxStaticText(this, wxID_ANY, "Hotkey:");
   sz_text_entry_grid->Add(st_hotkey, 0, wxALL, 5);
-  std::string default_hotkey_text;
+  wxString default_hotkey_text;
   if (response_.tag_properties.hotkey.has_value()) {
     default_hotkey_text = *response_.tag_properties.hotkey;
   }
