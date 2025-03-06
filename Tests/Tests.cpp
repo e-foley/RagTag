@@ -126,6 +126,7 @@ namespace ragtag {
     CHECK(tag_map_in.registerTag(L"Apple", default_yes));
     CHECK(tag_map_in.deleteTag(L"Durian"));  // Testing that deletion leaves no lingering artifacts
     CHECK(tag_map_in.registerTag(L"Dragonfruit"));
+    CHECK(tag_map_in.registerTag(L"ÀÈÌÒÙ"));  // Non-ASCII tag
 
     // Registering files...
     ragtag::path_t path = "test1.madeup";
@@ -137,7 +138,8 @@ namespace ragtag {
     CHECK(tag_map_in.setTag(path, L"Dragonfruit", TagSetting::YES));
     CHECK(tag_map_in.setTag(path, L"Cantaloupe", TagSetting::NO));
     CHECK(tag_map_in.setTag(path, L"Banana", TagSetting::UNCOMMITTED));
-    // Leave "Apple" unspecified in test2.
+    CHECK(tag_map_in.setTag(path, L"ÀÈÌÒÙ", TagSetting::NO));
+    // Leave "Apple" tag unspecified in test2.
 
     path = "test3.madeup";
     CHECK(tag_map_in.addFile(path));
@@ -146,6 +148,7 @@ namespace ragtag {
     CHECK(tag_map_in.setTag(path, L"Cantaloupe", TagSetting::YES));
     CHECK(tag_map_in.setTag(path, L"Dragonfruit", TagSetting::NO));
     CHECK(tag_map_in.setTag(path, L"Apple", TagSetting::YES));
+    CHECK(tag_map_in.setTag(path, L"ÀÈÌÒÙ", TagSetting::YES));
 
     path = "test4.madeup";
     CHECK(tag_map_in.addFile(path));
@@ -153,9 +156,15 @@ namespace ragtag {
     CHECK(tag_map_in.setTag(path, L"Apple", TagSetting::NO));
     // Testing that deletion leaves no lingering artifacts
     CHECK(tag_map_in.removeFile(L"test4.madeup"));
+
+    path = "test5_ö.madeup";  // Non-ASCII filename
+    CHECK(tag_map_in.addFile(path));
+    CHECK(tag_map_in.setRating(path, -123.4f));
+    CHECK(tag_map_in.setTag(path, L"Apple", TagSetting::YES));
+    CHECK(tag_map_in.setTag(path, L"ÀÈÌÒÙ", TagSetting::NO));  // Non-ASCII tag in non-ASCII file
     
     // Convert to JSON
-    nlohmann::json j = tag_map_in.toJson();
+    const nlohmann::json j = tag_map_in.toJson();
 
     SECTION("JSON read/write") {
       auto from_json_ret = TagMap::fromJson(j);
@@ -163,7 +172,7 @@ namespace ragtag {
       CHECK(*from_json_ret == tag_map_in);
 
       // Sanity checks to make sure we didn't write/read empty stream or something.
-      CHECK(from_json_ret->numTags() == 4);
+      CHECK(from_json_ret->numTags() == 5);
       const auto test2_rating_ret = from_json_ret->getRating(L"test2.madeup");
       REQUIRE(test2_rating_ret.has_value());
       CHECK(*test2_rating_ret == 3.1f);
@@ -185,7 +194,7 @@ namespace ragtag {
       CHECK(*constructed_from_file == tag_map_in);
 
       // Sanity checks to make sure we didn't write/read empty file or something.
-      CHECK(constructed_from_file->numTags() == 4);
+      CHECK(constructed_from_file->numTags() == 5);
       const auto test3_rating_ret = constructed_from_file->getRating(L"test3.madeup");
       CHECK_FALSE(test3_rating_ret.has_value());
       const auto test3_tag_ret = constructed_from_file->getTagSetting(L"test3.madeup", L"Banana");
@@ -193,27 +202,6 @@ namespace ragtag {
       CHECK(*test3_tag_ret == TagSetting::NO);
 
       std::remove("io.json");
-    }
-
-    SECTION("Read/write file describing file with non-UTF-8 character") {
-      // Add one extra file to the existing ones...
-      path = L"test5_ö.madeup";
-      CHECK(tag_map_in.addFile(path));
-      CHECK(tag_map_in.setRating(path, 5.0f));
-      CHECK(tag_map_in.setTag(path, L"Apple", TagSetting::YES));
-      j = tag_map_in.toJson();  // Need to regenerate the JSON since the TagMap has changed.
-
-      std::ofstream o("io.json");
-      o << std::setw(2) << j << std::endl;
-      o.close();
-
-      std::ifstream i("io.json");
-      nlohmann::json parsed = nlohmann::json::parse(i);
-      i.close();
-      auto constructed_from_file = TagMap::fromJson(parsed);
-      REQUIRE(constructed_from_file.has_value());
-      CHECK(*constructed_from_file == tag_map_in);
-      //std::remove("io.json");
     }
   }
 
