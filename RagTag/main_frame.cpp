@@ -1357,6 +1357,9 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
     // was just clicked on. This makes it rather annoying to navigate project files.
     refreshSummary();
   }
+
+  Refresh();
+
   SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
   return true;
 }
@@ -1376,6 +1379,7 @@ void MainFrame::resetActiveFile()
   user_initiated_stop_media_ = true;
   stopMedia();
   mc_media_display_->Load(wxEmptyString);  // Loading empty path resets the media display to black.
+  Refresh();
 }
 
 bool MainFrame::openProject(const ragtag::path_t& path)
