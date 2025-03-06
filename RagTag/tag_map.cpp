@@ -528,11 +528,13 @@ namespace ragtag {
       temp_stream << tag_map_as_json;  // This can throw, e.g., with non-UTF-8 chars.
 
       if (!temp_stream.good()) {
+        std::cerr << "Temporary string buffer is not good() after writing to it.\n";
         return false;
       }
 
       std::ofstream output_file(path);
       if (!output_file.good()) {
+        std::cerr << "Output file buffer is not good() after opening it.\n";
         return false;
       }
 
@@ -541,6 +543,7 @@ namespace ragtag {
 
       if (!output_file.good()) {
         // This is a bad situation since we may have already modified the file on disk...
+        std::cerr << "Output file buffer is not good() after writing to it.\n";
         return false;
       }
 
