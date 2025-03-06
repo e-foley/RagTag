@@ -440,7 +440,7 @@ namespace ragtag {
         std::cerr << "File lacks \"path\" attribute.\n";
         continue;
       }
-      std::filesystem::path path = *path_json;
+      std::filesystem::path path = toWString(*path_json);
 
       bool add_file_success = tag_map.addFile(path);
       if (!add_file_success) {
@@ -585,6 +585,7 @@ namespace ragtag {
   }
 
   std::wstring TagMap::toWString(const std::string& string) {
-    return std::wstring(string.begin(), string.end());
+    static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    return utf8_conv.from_bytes(string);
   }
 }  // namespace ragtag
