@@ -513,19 +513,42 @@ namespace ragtag {
   }
 
   bool TagMap::toFile(const path_t& path) {
-    const nlohmann::json tag_map_as_json = toJson();
-    std::ofstream output_file(path);
-    if (!output_file.good()) {
+    // Strategy for this function is to write to a temporary string buffer at first instead of the
+    // file on disk. The reason to double-buffer like this is because some exceptions are only
+    // thrown during the writing process, and when this happens to a file, it corrupts the file with
+    // potentially serious data loss.
+    //
+    // (Yes, I learned this the hard way.)
+
+    try {
+      const nlohmann::json tag_map_as_json = toJson();
+
+      // Start by writing JSON to the temporary string buffer...
+      std::stringstream temp_stream;
+      temp_stream << tag_map_as_json;  // This can throw, e.g., with non-UTF-8 chars.
+
+      if (!temp_stream.good()) {
+        return false;
+      }
+
+      std::ofstream output_file(path);
+      if (!output_file.good()) {
+        return false;
+      }
+
+      // ...Now, since things seem to be in order, actually write to the file.
+      output_file << temp_stream.rdbuf();
+
+      if (!output_file.good()) {
+        return false;
+      }
+
+      return true;
+    }
+    catch (...) {
+      // Exception happened. Don't try to write the file at all since it could get corrupted.
       return false;
     }
-
-    output_file << tag_map_as_json;
-
-    if (!output_file.good()) {
-      return false;
-    }
-
-    return true;
   }
 
   std::optional<ragtag::TagMap> TagMap::fromFile(const path_t& path) {

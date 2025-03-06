@@ -122,6 +122,7 @@ private:
   std::optional<ragtag::path_t> promptLoadFile();
   bool promptConfirmTagDeletion(ragtag::tag_t tag);
   bool promptConfirmFileDeletion(const ragtag::path_t& path);
+  void notifyCouldNotSaveProject(const ragtag::path_t& path);
   // Fundamental project commands
   void newProject();
   bool saveProject();

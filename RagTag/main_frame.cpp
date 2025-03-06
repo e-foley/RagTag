@@ -443,8 +443,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
     case UserIntention::SAVE:
       if (project_path_.has_value()) {
         if (!saveProject()) {
-          // TODO: Report error.
-          SetStatusText(L"Could not save project '" + project_path_->generic_wstring() + L"'.");
+          notifyCouldNotSaveProject(*project_path_);
           return;
         }
       } else {
@@ -454,9 +453,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
           return;
         }
         if (!saveProjectAs(*path)) {
-          // Failed to save.
-          // TODO: Report error.
-          SetStatusText(L"Could not save project '" + path->generic_wstring() + L"'.");
+          notifyCouldNotSaveProject(*path);
           return;
         }
       }
@@ -490,8 +487,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
     case UserIntention::SAVE:
       if (project_path_.has_value()) {
         if (!saveProject()) {
-          // TODO: Report error.
-          SetStatusText(L"Could not save project '" + project_path_->generic_wstring() + L"'.");
+          notifyCouldNotSaveProject(*project_path_);
           return;
         }
       } else {
@@ -501,9 +497,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
           return;
         }
         if (!saveProjectAs(*path)) {
-          // Failed to save.
-          // TODO: Report error.
-          SetStatusText(L"Could not save project '" + path->generic_wstring() + L"'.");
+          notifyCouldNotSaveProject(*path);
           return;
         }
       }
@@ -540,13 +534,12 @@ void MainFrame::OnSaveProject(wxCommandEvent& event) {
       return;
     }
     if (!saveProjectAs(*path)) {
-      // Failed to save.
-      // TODO: Report error.
+      notifyCouldNotSaveProject(*path);
       return;
     }
     project_path_ = path;
   } else if (!saveProject()) {
-    // TODO: Report error
+    notifyCouldNotSaveProject(*project_path_);
     return;
   }
 
@@ -561,8 +554,7 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
     return;
   }
   if (!saveProjectAs(*path)) {
-    // Failed to save.
-    // TODO: Report error.
+    notifyCouldNotSaveProject(*path);
     return;
   }
   project_path_ = path;
@@ -639,7 +631,7 @@ void MainFrame::OnExit(wxCommandEvent& event) {
     case UserIntention::SAVE:
       if (project_path_.has_value()) {
         if (!saveProject()) {
-          // TODO: Report error.
+          notifyCouldNotSaveProject(*project_path_);
           return;
         }
       }
@@ -650,8 +642,7 @@ void MainFrame::OnExit(wxCommandEvent& event) {
           return;
         }
         if (!saveProjectAs(*path)) {
-          // Failed to save.
-          // TODO: Report error.
+          notifyCouldNotSaveProject(*path);
           return;
         }
       }
@@ -681,7 +672,7 @@ void MainFrame::OnClose(wxCloseEvent& event) {
   case UserIntention::SAVE:
     if (project_path_.has_value()) {
       if (!saveProject()) {
-        // TODO: Report error.
+        notifyCouldNotSaveProject(*project_path_);
         event.Veto();
         return;
       }
@@ -696,8 +687,7 @@ void MainFrame::OnClose(wxCloseEvent& event) {
         return;
       }
       if (!saveProjectAs(*path)) {
-        // Failed to save.
-        // TODO: Report error.
+        notifyCouldNotSaveProject(*path);
         event.Veto();
         return;
       }
@@ -1234,6 +1224,14 @@ bool MainFrame::promptConfirmFileDeletion(const ragtag::path_t& path)
     "Confirm File Deletion", wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
   dialog.SetOKCancelLabels("Delete file", "Cancel");
   return dialog.ShowModal() == wxID_OK;
+}
+
+void MainFrame::notifyCouldNotSaveProject(const ragtag::path_t& path)
+{
+  SetStatusText(L"Could not save project '" + path.generic_wstring() + L"'.");
+  wxMessageDialog dialog(this, L"Failed to save project '" + path.generic_wstring() + L"'.",
+    "Failed to Save Project", wxICON_ERROR);
+  dialog.ShowModal();
 }
 
 void MainFrame::newProject() {
