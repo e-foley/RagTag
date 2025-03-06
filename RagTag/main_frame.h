@@ -131,6 +131,7 @@ private:
   bool saveProject();
   bool saveProjectAs(const ragtag::path_t& path);
   bool loadFileAndSetAsActive(const ragtag::path_t& path);
+  void resetActiveFile();
   bool openProject(const ragtag::path_t& path);
   bool displayMediaFile(const ragtag::path_t& path);
   bool playMedia();

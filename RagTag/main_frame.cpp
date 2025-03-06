@@ -491,13 +491,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
 
   // If we've made it this far, we have permission to create a new project.
   newProject();
-  active_file_ = {};
-  refreshTagToggles();
-  refreshFileView();
-  refreshRatingButtons();
-  refreshSummary();
-  user_initiated_stop_media_ = true;
-  stopMedia();
+  resetActiveFile();
   SetStatusText("Created new project.");
 }
 
@@ -1102,11 +1096,13 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
         ++removed_file_count;
         if (active_file_.has_value() && path == *active_file_) {
           // The file we're removing from the project is the actively loaded one. Reset active_file_.
-          active_file_ = {};
+          resetActiveFile();
         }
       }
     }
 
+    // Note that some of these already get invoked in the case that we resetActiveFile(). We can
+    // optimize these redundant calls out later if we really want to.
     refreshFileView();
     refreshRatingButtons();
     refreshSummary();
@@ -1153,10 +1149,7 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
       }
       else {
         // User might have deleted last file in its directory.
-        active_file_ = {};
-        refreshFileView();
-        refreshRatingButtons();
-        refreshSummary();
+        resetActiveFile();
       }
     }
   }
@@ -1346,6 +1339,18 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
   return true;
 }
 
+void MainFrame::resetActiveFile()
+{
+  active_file_ = {};
+  refreshTagToggles();
+  refreshFileView();
+  refreshRatingButtons();
+  refreshSummary();
+  user_initiated_stop_media_ = true;
+  stopMedia();
+  // TODO: Find a way to either reset the wxMediaCtrl or disable playing until a file is loaded.
+}
+
 bool MainFrame::openProject(const ragtag::path_t& path)
 {
   std::optional<ragtag::TagMap> tag_map_pending = ragtag::TagMap::fromFile(path);
@@ -1356,14 +1361,7 @@ bool MainFrame::openProject(const ragtag::path_t& path)
   // Opened successfully!
   tag_map_ = *tag_map_pending;
   project_path_ = path;
-  active_file_ = {};
-  refreshTagToggles();
-  refreshFileView();
-  refreshRatingButtons();
-  refreshSummary();
-  user_initiated_stop_media_ = true;
-  stopMedia();
-  // TODO: Find a way to either reset the wxMediaCtrl or disable playing until a file is loaded.
+  resetActiveFile();
   is_dirty_ = false;
   SetStatusText(L"Opened project '" + project_path_->generic_wstring() + L"'.");
   return true;
