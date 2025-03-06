@@ -123,13 +123,13 @@ private:
   bool promptConfirmTagDeletion(ragtag::tag_t tag);
   bool promptConfirmFileDeletion(const ragtag::path_t& path);
   void notifyCouldNotSaveProject(const ragtag::path_t& path);
-  void notifyCouldNotLoadProject(const ragtag::path_t& path);
+  void notifyCouldNotOpenProject(const ragtag::path_t& path);
   // Fundamental project commands
   void newProject();
   bool saveProject();
   bool saveProjectAs(const ragtag::path_t& path);
   bool loadFileAndSetAsActive(const ragtag::path_t& path);
-  bool loadProject(const ragtag::path_t& path);
+  bool openProject(const ragtag::path_t& path);
   bool displayMediaFile(const ragtag::path_t& path);
   bool playMedia();
   bool pauseMedia();

@@ -230,7 +230,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   //displayMediaFile(std::wstring(debug_media_dir) + L"videomp4.mp4");
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagejpg.jpg");
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagepng.png");
-  //loadProject(std::wstring(debug_project_dir) + L"beachcoolrainbow.tagdef");
+  //openProject(std::wstring(debug_project_dir) + L"beachcoolrainbow.tagdef");
 }
 
 void MainFrame::refreshTagToggles() {
@@ -519,8 +519,8 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
     return;
   }
 
-  if (!loadProject(*path_pending)) {
-    notifyCouldNotLoadProject(*path_pending);
+  if (!openProject(*path_pending)) {
+    notifyCouldNotOpenProject(*path_pending);
     return;
   }
 }
@@ -1233,11 +1233,11 @@ void MainFrame::notifyCouldNotSaveProject(const ragtag::path_t& path)
   dialog.ShowModal();
 }
 
-void MainFrame::notifyCouldNotLoadProject(const ragtag::path_t& path)
+void MainFrame::notifyCouldNotOpenProject(const ragtag::path_t& path)
 {
-  SetStatusText(L"Could not load project '" + path.generic_wstring() + L"'.");
-  wxMessageDialog dialog(this, L"Failed to load project '" + path.generic_wstring() + L"'.",
-    "Failed to Load Project", wxICON_ERROR);
+  SetStatusText(L"Could not open project '" + path.generic_wstring() + L"'.");
+  wxMessageDialog dialog(this, L"Failed to open project '" + path.generic_wstring() + L"'.",
+    "Failed to Open Project", wxICON_ERROR);
   dialog.ShowModal();
 }
 
@@ -1311,14 +1311,14 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
   return true;
 }
 
-bool MainFrame::loadProject(const ragtag::path_t& path)
+bool MainFrame::openProject(const ragtag::path_t& path)
 {
   std::optional<ragtag::TagMap> tag_map_pending = ragtag::TagMap::fromFile(path);
   if (!tag_map_pending.has_value()) {
     return false;
   }
 
-  // Loaded successfully!
+  // Opened successfully!
   tag_map_ = *tag_map_pending;
   project_path_ = path;
   active_file_ = {};
