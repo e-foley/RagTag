@@ -1375,6 +1375,7 @@ void MainFrame::resetActiveFile()
   b_set_tags_to_defaults_->Disable();
   user_initiated_stop_media_ = true;
   stopMedia();
+  mc_media_display_->Load(wxEmptyString);  // Loading empty path resets the media display to black.
   // TODO: Find a way to either reset the wxMediaCtrl or disable playing until a file is loaded.
 }
 
