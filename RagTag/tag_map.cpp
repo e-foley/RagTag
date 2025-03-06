@@ -540,6 +540,7 @@ namespace ragtag {
       output_file << temp_stream.rdbuf();
 
       if (!output_file.good()) {
+        // This is a bad situation since we may have already modified the file on disk...
         return false;
       }
 
