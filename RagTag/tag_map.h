@@ -11,7 +11,7 @@
 #include <nlohmann/json.hpp>
 
 namespace ragtag {
-  typedef std::string tag_t;
+  typedef std::wstring tag_t;
   typedef std::filesystem::path path_t;
   typedef float rating_t;
   typedef wchar_t rtchar_t;
@@ -95,6 +95,9 @@ namespace ragtag {
 
     static std::optional<int> tagSettingToNumber(TagSetting setting);
     static std::optional<TagSetting> numberToTagSetting(int number);
+    static std::string toUtf8(const std::wstring& wide_string);
+    static std::wstring toWString(const std::string& string);
+
     std::map<tag_t, TagProperties> tag_registry_{};
     std::map<std::filesystem::path, FileProperties> file_map_{};
   };

@@ -1,5 +1,6 @@
 #include "tag_map.h"
 #include <algorithm>
+#include <codecvt>
 #include <fstream>
 #include <iostream>
 
@@ -37,8 +38,8 @@ namespace ragtag {
     bool was_tag_cleared_from_all_files = true;
     for (const auto& file_it : file_map_) {
       if (!clearTag(file_it.first, tag)) {
-        std::cerr << "Couldn't clear tag '" << tag << "' from file '"
-          << file_it.first.generic_string() << "'.\n";
+        std::wcerr << L"Couldn't clear tag '" << tag << L"' from file '"
+          << file_it.first.generic_wstring() << L"'.\n";
         was_tag_cleared_from_all_files = false;
       }
     }
@@ -65,8 +66,8 @@ namespace ragtag {
       const auto setting = getTagSetting(file_entry.first, tag);
       if (setting.has_value() && *setting != TagSetting::UNCOMMITTED) {
         if (!setTag(file_entry.first, copy_name, *setting)) {
-          std::cerr << "Could not set tag '" << copy_name << "' on file '"
-            << file_entry.first.generic_string() << "' during tag copy operation.\n";
+          std::wcerr << "Could not set tag '" << copy_name << L"' on file '"
+            << file_entry.first.generic_wstring() << L"' during tag copy operation.\n";
         }
       }
     }
@@ -289,7 +290,7 @@ namespace ragtag {
       tag_to_id.try_emplace(tag_it.first, id);
       nlohmann::json adding;
       adding["id"] = id;
-      adding["tag"] = tag_it.first;
+      adding["tag"] = toUtf8(tag_it.first);
       // TODO: Another place that needs error handling attention.
       auto default_setting_num = tagSettingToNumber(tag_it.second.default_setting);
       if (default_setting_num.has_value()) {
@@ -307,7 +308,7 @@ namespace ragtag {
     nlohmann::json file_array_json;
     for (auto file_it : file_map_) {
       nlohmann::json adding;
-      adding["path"] = file_it.first;
+      adding["path"] = toUtf8(file_it.first);
       if (file_it.second.rating.has_value()) {
         adding["rating"] = *file_it.second.rating;
       }
@@ -318,7 +319,7 @@ namespace ragtag {
         auto tag_id_it = tag_to_id.find(tag_it.first);
         if (tag_id_it == tag_to_id.end()) {
           // TODO: Invoke global log here.
-          std::cerr << "Tag " << tag_it.first << " does not appear in internal tag-to-id map.\n";
+          std::wcerr << L"Tag " << tag_it.first << L" does not appear in internal tag-to-id map.\n";
           continue;
         }
 
@@ -408,7 +409,7 @@ namespace ragtag {
       }
 
       bool insertion_successful =
-        id_to_tag_map.try_emplace(*id_json, *tag_json).second;
+        id_to_tag_map.try_emplace(*id_json, toWString(*tag_json)).second;
       if (!insertion_successful) {
         // Memory allocation issue? We generally shouldn't see this.
         std::cerr << "Couldn't insert tag ID " << std::string(*id_json) << " into internal map.\n";
@@ -416,7 +417,7 @@ namespace ragtag {
       }
 
       // All is good! Add the tag to our fledgling TagMap.
-      bool register_tag_success = tag_map.registerTag(*tag_json, properties_pending);
+      bool register_tag_success = tag_map.registerTag(toWString(*tag_json), properties_pending);
       if (!register_tag_success) {
         // Unclear what would cause this error.
         std::cerr << "Failed to register tag " << std::string(*tag_json) << " with TagMap object.\n";
@@ -478,8 +479,8 @@ namespace ragtag {
           continue;
         }
         if (!tag_map.setTag(path, yes_tag_it->second, TagSetting::YES)) {
-          std::cerr << "Couldn't set tag '" << yes_tag_it->second << "' to YES for file '"
-            << path.generic_string() << "'.\n";
+          std::wcerr << L"Couldn't set tag '" << yes_tag_it->second << L"' to YES for file '"
+            << path.generic_wstring() << L"'.\n";
           continue;
         }
       }
@@ -495,13 +496,13 @@ namespace ragtag {
         const int no_tag_id = no_tag_id_json;
         const auto no_tag_it = id_to_tag_map.find(no_tag_id);
         if (no_tag_it == id_to_tag_map.end()) {
-          std::cerr << "Couldn't find no-tag ID " << no_tag_id
-            << " within internal map for file '" << path.generic_string() << "'.\n";
+          std::wcerr << "Couldn't find no-tag ID " << no_tag_id
+            << " within internal map for file '" << path.generic_wstring() << "'.\n";
           continue;
         }
         if (!tag_map.setTag(path, no_tag_it->second, TagSetting::NO)) {
-          std::cerr << "Couldn't set tag '" << no_tag_it->second << "' to NO for file '"
-            << path.generic_string() << "'.\n";
+          std::wcerr << L"Couldn't set tag '" << no_tag_it->second << L"' to NO for file '"
+            << path.generic_wstring() << L"'.\n";
           continue;
         }
       }
@@ -574,5 +575,16 @@ namespace ragtag {
     default:
       return {};
     }
+  }
+
+  // Implementation copied from from https://json.nlohmann.me/home/faq/#wide-string-handling.
+  std::string TagMap::toUtf8(const std::wstring& wide_string)
+  {
+    static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    return utf8_conv.to_bytes(wide_string);
+  }
+
+  std::wstring TagMap::toWString(const std::string& string) {
+    return std::wstring(string.begin(), string.end());
   }
 }  // namespace ragtag
