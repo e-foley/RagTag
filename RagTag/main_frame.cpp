@@ -520,8 +520,7 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
   }
 
   if (!loadProject(*path_pending)) {
-    // TODO: Report error.
-    SetStatusText(L"Could not load project '" + path_pending->generic_wstring() + L"'.");
+    notifyCouldNotLoadProject(*path_pending);
     return;
   }
 }
@@ -1231,6 +1230,14 @@ void MainFrame::notifyCouldNotSaveProject(const ragtag::path_t& path)
   SetStatusText(L"Could not save project '" + path.generic_wstring() + L"'.");
   wxMessageDialog dialog(this, L"Failed to save project '" + path.generic_wstring() + L"'.",
     "Failed to Save Project", wxICON_ERROR);
+  dialog.ShowModal();
+}
+
+void MainFrame::notifyCouldNotLoadProject(const ragtag::path_t& path)
+{
+  SetStatusText(L"Could not load project '" + path.generic_wstring() + L"'.");
+  wxMessageDialog dialog(this, L"Failed to load project '" + path.generic_wstring() + L"'.",
+    "Failed to Load Project", wxICON_ERROR);
   dialog.ShowModal();
 }
 

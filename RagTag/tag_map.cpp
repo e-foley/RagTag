@@ -551,6 +551,7 @@ namespace ragtag {
     }
     catch (...) {
       // Exception happened. Don't try to write the file at all since it could get corrupted.
+      std::cerr << "Exception thrown when writing JSON to file.\n";
       return false;
     }
   }
@@ -562,18 +563,25 @@ namespace ragtag {
     }
 
     nlohmann::json tag_map_as_json;
-    input_file >> tag_map_as_json;
 
-    if (!input_file.good()) {
+    try {
+      input_file >> tag_map_as_json;
+
+      if (!input_file.good()) {
+        return {};
+      }
+
+      const auto tag_map_result = fromJson(tag_map_as_json);
+      if (!tag_map_result) {
+        return {};
+      }
+
+      return *tag_map_result;
+    }
+    catch (...) {
+      std::cerr << "Exception thrown when converting file to JSON.\n";
       return {};
     }
-
-    const auto tag_map_result = fromJson(tag_map_as_json);
-    if (!tag_map_result) {
-      return {};
-    }
-
-    return *tag_map_result;
   }
 
   // These numbers don't have to match the enumerator mapping so long as they form a one-to-one
