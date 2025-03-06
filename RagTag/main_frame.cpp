@@ -34,7 +34,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   m_tags->Append(ID_SET_TAGS_TO_DEFAULTS, "&Default Tags on Active File\tCtrl-D");
 
   wxMenu* m_window = new wxMenu;
-  m_window->AppendCheckItem(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-P");
+  m_window->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-P");
   m_window->AppendSeparator();
   m_window->Append(ID_REFRESH_FILE_VIEW, "&Refresh Directory View\tF5");
 
