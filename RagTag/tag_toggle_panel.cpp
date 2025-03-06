@@ -6,7 +6,7 @@
 
 wxDEFINE_EVENT(TAG_TOGGLE_BUTTON_EVENT, TagToggleEvent);
 
-TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, std::string label,
+TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, wxString label,
   std::optional<ragtag::rtchar_t> hotkey) 
   : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_RAISED | wxWANTS_CHARS), tag_(tag),
   hotkey_(hotkey) {
