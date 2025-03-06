@@ -249,7 +249,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   //displayMediaFile(std::wstring(debug_media_dir) + L"videomp4.mp4");
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagejpg.jpg");
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagepng.png");
-  //openProject(std::wstring(debug_project_dir) + L"beachcoolrainbow.tagdef");
+  openProject(std::wstring(debug_project_dir) + L"beachcoolgradient.tagdef");
 }
 
 void MainFrame::refreshTagToggles() {
@@ -1026,9 +1026,14 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
 
 void MainFrame::OnMediaLoaded(wxMediaEvent& event)
 {
+  if (!active_file_.has_value()) {
+    // Shouldn't happen, but let's avoid a segfault just in case.
+    return;
+  }
+
   // NOTE: SetVolume() returns an undocumented bool.
   mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
-  if (cb_autoplay_->IsChecked()) {
+  if (cb_autoplay_->IsChecked() && !RagTagUtil::isStaticMedia(*active_file_)) {
     // Unused bool.
     playMedia();
   }

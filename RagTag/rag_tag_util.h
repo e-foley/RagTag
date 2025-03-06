@@ -1,6 +1,7 @@
 #ifndef INCLUDE_RAG_TAG_UTIL_H
 #define INCLUDE_RAG_TAG_UTIL_H
 
+#include "tag_map.h"
 #include <wx/string.h>
 
 namespace RagTagUtil {
@@ -12,6 +13,7 @@ extern const wxString GLYPH_RATING_HALF_STAR;
 extern const int MAX_STARS;
 
 wxString getStarTextForRating(float rating);
+bool isStaticMedia(const ragtag::path_t& path);
 }  // namespace RagTagUtil
 
 #endif  // INCLUDE_RAG_TAG_UTIL_H

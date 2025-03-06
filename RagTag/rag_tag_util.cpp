@@ -1,4 +1,5 @@
 #include "rag_tag_util.h"
+#include <string>
 
 // The font used by wxWidgets does not display half-star characters as of writing.
 // #define HALF_STAR_GLYPH_SUPPORTED
@@ -28,3 +29,24 @@ wxString RagTagUtil::getStarTextForRating(float rating)
 
   return returning;
 }
+
+bool RagTagUtil::isStaticMedia(const ragtag::path_t& path)
+{
+  // Trusting that the 2009 list from this link is still accurate:
+  // https://answers.microsoft.com/en-us/windows/forum/all/windows-media-player-cant-display-pictures/a73834b3-bc70-4fdf-85ea-74b83d5f9c01
+  static std::vector<std::wstring> static_types = {
+    L".bmp", L".gif", L".jpg", L".jpeg", L".png", L".tif", L".tiff", L".wmf"
+  };
+  std::wstring extension = path.extension().generic_wstring();
+  // Lowercase conversion from https://stackoverflow.com/a/313990
+  std::transform(extension.begin(), extension.end(), extension.begin(),
+    [](wchar_t c) { return std::tolower(c); });
+  for (const auto& ext_it : static_types) {
+    if (extension == ext_it) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
