@@ -1,6 +1,7 @@
 #include "rag_tag_util.h"
 #include "summary_frame.h"
 #include <filesystem>
+#include <wx/dcclient.h>
 #include <wx/dirdlg.h> 
 #include <wx/msgdlg.h>
 #include <wx/panel.h>
@@ -12,6 +13,7 @@ wxDEFINE_EVENT(SUMMARY_FRAME_EVENT, SummaryFrameEvent);
 const int SummaryFrame::PATH_COLUMN_INDEX = 0;
 const int SummaryFrame::RATING_COLUMN_INDEX = 1;
 const int SummaryFrame::FIRST_TAG_COLUMN_INDEX = 2;
+const int SummaryFrame::PATH_EXTENT_MARGIN_PX = 30;
 
 SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Project Summary",
   wxDefaultPosition, wxSize(1280, 768))
@@ -125,6 +127,7 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   lc_summary_->Bind(wxEVT_LIST_ITEM_CHECKED, &SummaryFrame::OnFileChecked, this);
   lc_summary_->Bind(wxEVT_LIST_ITEM_UNCHECKED, &SummaryFrame::OnFileUnchecked, this);
   lc_summary_->Bind(wxEVT_LIST_ITEM_FOCUSED, &SummaryFrame::OnFileFocused, this);
+  lc_summary_->Bind(wxEVT_LIST_COL_DRAGGING, &SummaryFrame::OnResizeColumn, this);
   sz_main->Add(lc_summary_, 1, wxEXPAND | wxALL, 5);
 
   wxPanel* p_summary_buttons = new wxPanel(p_main, wxID_ANY);
@@ -225,12 +228,8 @@ void SummaryFrame::refreshFileList()
   lc_summary_->DeleteAllItems();
   file_paths_ = tag_map_.selectFiles(getOverallRuleFromFilterUi());
   for (int i = 0; i < file_paths_.size(); ++i) {
-    std::wstring path_displayed = file_paths_[i].generic_wstring();
-    if (!std::filesystem::exists(file_paths_[i])) {
-      path_displayed.append(L" [???]");
-    }
-
-    lc_summary_->InsertItem(i, path_displayed);
+    lc_summary_->InsertItem(i, wxEmptyString);
+    populateAndEllipsizePathColumn();
      
     // Associate user data with the wxListCtrl item by giving it a pointer--in this case, to the
     // path we've cached within file_paths_. (It's not ideal, but we play along.)
@@ -478,6 +477,11 @@ void SummaryFrame::OnClickHeading(wxListEvent& event)
   lc_summary_->ShowSortIndicator(column, ascending);
 }
 
+void SummaryFrame::OnResizeColumn(wxListEvent& event)
+{
+  populateAndEllipsizePathColumn();
+}
+
 void SummaryFrame::OnFileChecked(wxListEvent& event)
 {
   updateCopyButtonTextForSelections();
@@ -597,6 +601,20 @@ void SummaryFrame::resetFilters()
   cb_show_uncommitted_->SetValue(wxCHK_UNCHECKED);
   cb_show_present_->SetValue(wxCHK_CHECKED);
   cb_show_missing_->SetValue(wxCHK_CHECKED);
+}
+
+void SummaryFrame::populateAndEllipsizePathColumn()
+{
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    std::wstring path_displayed = file_paths_[i].generic_wstring();
+    if (!std::filesystem::exists(file_paths_[i])) {
+      path_displayed.append(L" [???]");
+    }
+
+    const auto ellipsized = lc_summary_->Ellipsize(path_displayed, wxWindowDC(lc_summary_),
+      wxELLIPSIZE_START, lc_summary_->GetColumnWidth(PATH_COLUMN_INDEX) - PATH_EXTENT_MARGIN_PX);
+    lc_summary_->SetItem(i, PATH_COLUMN_INDEX, ellipsized);
+  }
 }
 
 std::vector<ragtag::path_t> SummaryFrame::getPathsOfSelectedFiles() const

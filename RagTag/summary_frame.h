@@ -25,6 +25,7 @@ private:
   static const int PATH_COLUMN_INDEX;
   static const int RATING_COLUMN_INDEX;
   static const int FIRST_TAG_COLUMN_INDEX;
+  static const int PATH_EXTENT_MARGIN_PX;
 
   struct SortHelper {
     ragtag::TagMap* p_tag_map{ nullptr };
@@ -38,6 +39,7 @@ private:
   ragtag::TagMap::file_qualifier_t getOverallRuleFromFilterUi();
 
   void OnClickHeading(wxListEvent& event);
+  void OnResizeColumn(wxListEvent& event);
   void OnFileChecked(wxListEvent& event);
   void OnFileUnchecked(wxListEvent& event);
   void OnFileFocused(wxListEvent& event);
@@ -57,6 +59,7 @@ private:
   void updateRatingFilterEnabledState();
   void updateCopyButtonTextForSelections();
   void resetFilters();
+  void populateAndEllipsizePathColumn();
   std::vector<ragtag::path_t> getPathsOfSelectedFiles() const;
 
   static int wxCALLBACK pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
