@@ -28,9 +28,6 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxSizer* sz_filters = new wxBoxSizer(wxHORIZONTAL);
   p_filters->SetSizer(sz_filters);
   wxPanel* p_rating_filter = new wxPanel(p_filters, wxID_ANY);
-  // Note: When using StaticBoxSizer, items added to the panel actually need the sizer's StaticBox
-  // to be their parent instead of the panel like other sizers would have. I don't know exactly why
-  // this is, but wxWidgets is consistent at advising us to do this, and who are we to question it?
   wxStaticBoxSizer* sz_rating_filter = new wxStaticBoxSizer(wxVERTICAL, p_rating_filter,
     "Rating Filter");
   p_rating_filter->SetSizer(sz_rating_filter);
