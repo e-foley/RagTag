@@ -74,6 +74,8 @@ private:
   static const wxColour BACKGROUND_COLOR_FULLY_TAGGED;
   static const wxColour BACKGROUND_COLOR_PARTLY_TAGGED;
   static const wxColour BACKGROUND_COLOR_FULLY_UNTAGGED;
+  static const double LEFT_PANE_DEFAULT_HORIZONTAL_PROPORTION;
+  static const double LEFT_PANE_MINIMUM_HORIZONTAL_PROPORTION;
 
   // Functions updating view to match model
   void refreshTagToggles();

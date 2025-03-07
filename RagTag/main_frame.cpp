@@ -3,12 +3,15 @@
 #include "tag_entry_dialog.h"
 #include "tag_toggle_panel.h"
 #include <wx/filedlg.h>
+#include <wx/splitter.h>
 #include <wx/statusbr.h>
 #include <wx/stdpaths.h>
 
 const wxColour MainFrame::BACKGROUND_COLOR_FULLY_TAGGED = wxColour(200, 255, 200);
 const wxColour MainFrame::BACKGROUND_COLOR_PARTLY_TAGGED = wxColour(255, 255, 200);
 const wxColour MainFrame::BACKGROUND_COLOR_FULLY_UNTAGGED = wxColour(255, 255, 255);
+const double MainFrame::LEFT_PANE_DEFAULT_HORIZONTAL_PROPORTION = 0.6;
+const double MainFrame::LEFT_PANE_MINIMUM_HORIZONTAL_PROPORTION = 0.4;
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition,
   wxSize(900, 720)) {
@@ -57,10 +60,21 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_main = new wxBoxSizer(wxHORIZONTAL);
   p_main->SetSizer(sz_main);
 
-  wxPanel* p_left = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+  wxSplitterWindow* sw_main = new wxSplitterWindow(p_main, wxID_ANY, wxDefaultPosition,
+    wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
+  wxPanel* p_left = new wxPanel(sw_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
     wxBORDER_NONE);
   wxBoxSizer* sz_left = new wxBoxSizer(wxVERTICAL);
   p_left->SetSizer(sz_left);
+  wxPanel* p_right = new wxPanel(sw_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    wxBORDER_NONE);
+  wxBoxSizer* sz_right = new wxBoxSizer(wxVERTICAL);
+  p_right->SetSizer(sz_right);
+  sw_main->SetSashGravity(LEFT_PANE_DEFAULT_HORIZONTAL_PROPORTION);
+  sw_main->SetSize(wxSize(GetSize().x * LEFT_PANE_DEFAULT_HORIZONTAL_PROPORTION, -1));
+  sw_main->SplitVertically(p_left, p_right, GetSize().x * LEFT_PANE_DEFAULT_HORIZONTAL_PROPORTION);
+  //sw_main->SplitVertically(p_left, p_right, 0);
+  sw_main->SetMinimumPaneSize(GetSize().x * LEFT_PANE_MINIMUM_HORIZONTAL_PROPORTION);
 
   wxPanel* p_media = new wxPanel(p_left);
   // Note: When using StaticBoxSizer, items added to the panel actually need the sizer's StaticBox
@@ -166,12 +180,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_directory->Add(p_file_navigation, 0, wxEXPAND | wxALL, 0);
 
   sz_left->Add(p_directory, 0, wxEXPAND | wxALL, 5);
-  sz_main->Add(p_left, 3, wxEXPAND | wxALL, 0);
-
-  wxPanel* p_right = new wxPanel(p_main, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxBORDER_NONE);
-  wxBoxSizer* sz_right = new wxBoxSizer(wxVERTICAL);
-  p_right->SetSizer(sz_right);
 
   wxPanel* p_rating = new wxPanel(p_right);
   wxStaticBoxSizer* sz_rating = new wxStaticBoxSizer(wxVERTICAL, p_rating, "Rating");
@@ -182,17 +190,17 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxBoxSizer* sz_rating_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_rating_buttons->SetSizer(sz_rating_buttons);
   sz_rating_buttons->AddStretchSpacer(1);
-  b_no_rating_ = new wxToggleButton(p_rating_buttons, ID_NO_RATING, "No Rating",
-    wxDefaultPosition, wxDefaultSize, 0 * wxBU_EXACTFIT);
+  b_no_rating_ = new wxToggleButton(p_rating_buttons, ID_NO_RATING, " None ",
+    wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
   b_no_rating_->Bind(wxEVT_TOGGLEBUTTON, &MainFrame::OnClickRatingButton, this);
-  sz_rating_buttons->Add(b_no_rating_, 0, wxEXPAND | wxALL, 5);
+  sz_rating_buttons->Add(b_no_rating_, 0, wxEXPAND | wxALL, 2);
   for (int r = 0; r <= 5; ++r) {
     wxToggleButton* b_rating = new wxToggleButton(p_rating_buttons, ID_RATING_0 + r,
       " " + std::to_string(r) + RagTagUtil::GLYPH_RATING_FULL_STAR + " ", wxDefaultPosition,
       wxDefaultSize, wxBU_EXACTFIT);
     b_rating->Bind(wxEVT_TOGGLEBUTTON, &MainFrame::OnClickRatingButton, this);
     b_ratings_[r] = b_rating;
-    sz_rating_buttons->Add(b_rating, 0, wxEXPAND | wxALL, 5);
+    sz_rating_buttons->Add(b_rating, 0, wxEXPAND | wxALL, 2);
   }
   sz_rating_buttons->AddStretchSpacer(1);
   refreshRatingButtons();
@@ -233,7 +241,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_tags->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 0);
 
   sz_right->Add(p_tags, 1, wxEXPAND | wxALL, 5);
-  sz_main->Add(p_right, 2, wxEXPAND | wxALL, 0);
+  sz_main->Add(sw_main, 2, wxEXPAND | wxALL, 0);
 
   f_summary_ = new SummaryFrame(this);
   refreshSummary();
