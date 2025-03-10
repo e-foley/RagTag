@@ -500,35 +500,8 @@ void MainFrame::refreshSummary()
 }
 
 void MainFrame::OnNewProject(wxCommandEvent& event) {
-  if (is_dirty_) {
-    const UserIntention intention = promptUnsavedChanges();
-    switch (intention) {
-    case UserIntention::SAVE:
-      if (project_path_.has_value()) {
-        if (!saveProject()) {
-          notifyCouldNotSaveProject(*project_path_);
-          return;
-        }
-      } else {
-        const std::optional<ragtag::path_t> path = promptSaveProjectAs();
-        if (!path.has_value()) {
-          // User canceled dialog.
-          return;
-        }
-        if (!saveProjectAs(*path)) {
-          notifyCouldNotSaveProject(*path);
-          return;
-        }
-      }
-      break;
-    case UserIntention::DONT_SAVE:
-      break;
-    case UserIntention::CANCEL:
-      return;
-    default:
-      // TODO: Log error
-      return;
-    }
+  if (!promptSaveOpportunityIfDirty()) {
+    return;
   }
 
   // If we've made it this far, we have permission to create a new project.
@@ -538,35 +511,8 @@ void MainFrame::OnNewProject(wxCommandEvent& event) {
 }
 
 void MainFrame::OnOpenProject(wxCommandEvent& event) {
-  if (is_dirty_) {
-    const UserIntention intention = promptUnsavedChanges();
-    switch (intention) {
-    case UserIntention::SAVE:
-      if (project_path_.has_value()) {
-        if (!saveProject()) {
-          notifyCouldNotSaveProject(*project_path_);
-          return;
-        }
-      } else {
-        const std::optional<ragtag::path_t> path = promptSaveProjectAs();
-        if (!path.has_value()) {
-          // User canceled dialog.
-          return;
-        }
-        if (!saveProjectAs(*path)) {
-          notifyCouldNotSaveProject(*path);
-          return;
-        }
-      }
-      break;
-    case UserIntention::DONT_SAVE:
-      break;
-    case UserIntention::CANCEL:
-      return;
-    default:
-      // TODO: Log error
-      return;
-    }
+  if (!promptSaveOpportunityIfDirty()) {
+    return;
   }
 
   // If we've gotten this far, we have permission to open a file.
@@ -681,86 +627,20 @@ void MainFrame::OnPreviousFile(wxCommandEvent& event)
 }
 
 void MainFrame::OnExit(wxCommandEvent& event) {
-  if (is_dirty_) {
-    const UserIntention intention = promptUnsavedChanges();
-    switch (intention) {
-    case UserIntention::SAVE:
-      if (project_path_.has_value()) {
-        if (!saveProject()) {
-          notifyCouldNotSaveProject(*project_path_);
-          return;
-        }
-      }
-      else {
-        const std::optional<ragtag::path_t> path = promptSaveProjectAs();
-        if (!path.has_value()) {
-          // User canceled dialog.
-          return;
-        }
-        if (!saveProjectAs(*path)) {
-          notifyCouldNotSaveProject(*path);
-          return;
-        }
-      }
-      break;
-    case UserIntention::DONT_SAVE:
-      break;
-    case UserIntention::CANCEL:
-      return;
-    default:
-      // TODO: Log error
-      return;
-    }
-  }
-
-  // If we've gotten this far, we have permission to close.
-  Close(true);
+  Close(false);  // `false` allows action to be vetoed in OnClose event handler.
 }
 
 void MainFrame::OnClose(wxCloseEvent& event) {
-  if (!event.CanVeto() || !is_dirty_) {
+  if (!event.CanVeto()) {
     Destroy();
     return;
   }
 
-  auto intention = promptUnsavedChanges();
-  switch (intention) {
-  case UserIntention::SAVE:
-    if (project_path_.has_value()) {
-      if (!saveProject()) {
-        notifyCouldNotSaveProject(*project_path_);
-        event.Veto();
-        return;
-      }
-
-      Destroy();
-    }
-    else {
-      const std::optional<ragtag::path_t> path = promptSaveProjectAs();
-      if (!path.has_value()) {
-        // User canceled dialog.
-        event.Veto();
-        return;
-      }
-      if (!saveProjectAs(*path)) {
-        notifyCouldNotSaveProject(*path);
-        event.Veto();
-        return;
-      }
-
-      Destroy();
-    }
-    break;
-  case UserIntention::DONT_SAVE:
+  if (promptSaveOpportunityIfDirty()) {
     Destroy();
-    return;
-  case UserIntention::CANCEL:
+  }
+  else {
     event.Veto();
-    return;
-  default:
-    // TODO: Log error.
-    event.Veto();
-    return;
   }
 }
 
@@ -1285,6 +1165,44 @@ bool MainFrame::promptConfirmFileDeletion(const ragtag::path_t& path)
     "Confirm File Deletion", wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
   dialog.SetOKCancelLabels("Delete file", "Cancel");
   return dialog.ShowModal() == wxID_OK;
+}
+
+bool MainFrame::promptSaveOpportunityIfDirty()
+{
+  if (is_dirty_) {
+    const UserIntention intention = promptUnsavedChanges();
+    switch (intention) {
+    case UserIntention::SAVE:
+      if (project_path_.has_value()) {
+        if (!saveProject()) {
+          notifyCouldNotSaveProject(*project_path_);
+          return false;
+        }
+      }
+      else {
+        const std::optional<ragtag::path_t> path = promptSaveProjectAs();
+        if (!path.has_value()) {
+          // User canceled dialog.
+          return false;
+        }
+        if (!saveProjectAs(*path)) {
+          notifyCouldNotSaveProject(*path);
+          return false;
+        }
+      }
+      break;
+    case UserIntention::DONT_SAVE:
+      return true;
+    case UserIntention::CANCEL:
+      return false;
+    default:
+      // TODO: Log error
+      return false;
+    }
+  }
+
+  // If we've gotten this far, we have permission to close.
+  return true;
 }
 
 void MainFrame::notifyCouldNotSaveProject(const ragtag::path_t& path)
