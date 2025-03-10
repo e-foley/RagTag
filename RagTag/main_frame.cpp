@@ -1212,8 +1212,9 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
     // We provide this option because shift+numpad navigates controls by default.
     clearRatingOfActiveFile();
   }
-
-  event.Skip();
+  else {
+    event.Skip();
+  }
 }
 
 MainFrame::UserIntention MainFrame::promptUnsavedChanges() {

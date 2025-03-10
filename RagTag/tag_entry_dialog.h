@@ -20,6 +20,7 @@ public:
   TagEntryDialog(wxWindow* parent);
   TagEntryDialog(wxWindow* parent, ragtag::tag_t tag, const ragtag::TagProperties& tag_properties);
   std::optional<Response> promptTagEntry();
+  void OnKeyDown(wxKeyEvent& event);
 
 private:
   void OnOk(wxCommandEvent& event);

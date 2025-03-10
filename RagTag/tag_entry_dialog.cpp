@@ -10,7 +10,7 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent)
 
 TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
   const ragtag::TagProperties& tag_properties) : wxDialog(parent, wxID_ANY, "Create/Modify Tag",
-    wxDefaultPosition, wxSize(320, 320)), parent_(parent) {
+    wxDefaultPosition, wxSize(320, 320), wxDEFAULT_DIALOG_STYLE | wxWANTS_CHARS), parent_(parent) {
   response_.tag = tag;
   response_.tag_properties = tag_properties;
 
@@ -74,6 +74,8 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
   b_ok->SetDefault();
   sz_button_row->Add(b_ok, 0);
   sz_rows->Add(sz_button_row, 0, wxEXPAND | wxALL, 10);
+
+  Bind(wxEVT_CHAR_HOOK, &TagEntryDialog::OnKeyDown, this);
 }
 
 std::optional<TagEntryDialog::Response> TagEntryDialog::promptTagEntry() {
@@ -84,6 +86,18 @@ std::optional<TagEntryDialog::Response> TagEntryDialog::promptTagEntry() {
   }
   else {
     return {};
+  }
+}
+
+void TagEntryDialog::OnKeyDown(wxKeyEvent& event)
+{
+  if (event.GetKeyCode() == WXK_ESCAPE
+    || event.GetUnicodeKey() == 'W' && event.GetModifiers() == wxMOD_CONTROL) {
+    response_confirmed_ = false;
+    EndModal(wxID_CANCEL);
+  }
+  else {
+    event.Skip();
   }
 }
 
