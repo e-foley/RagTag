@@ -15,7 +15,7 @@ const double MainFrame::LEFT_PANE_MINIMUM_HORIZONTAL_PROPORTION = 0.4;
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition,
   wxSize(900, 720)) {
-  SetMinSize(wxSize(800, 600));
+  SetMinSize(wxSize(800, 540));
 
   wxMenu* m_file = new wxMenu;
   m_file->Append(ID_NEW_PROJECT, "&New Project...\tCtrl-N");
