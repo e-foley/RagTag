@@ -1092,6 +1092,9 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
     // We provide this option because shift+numpad navigates controls by default.
     clearRatingOfActiveFile();
   }
+  else if (key_code == 'W' && modifiers == wxMOD_CONTROL) {
+    Close(false);  // `false` allows action to be vetoed in OnClose event handler.
+  }
   else {
     event.Skip();
   }
