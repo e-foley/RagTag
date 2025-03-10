@@ -426,9 +426,11 @@ void SummaryFrame::OnKeyPressed(wxKeyEvent& event)
   if (event.GetKeyCode() == WXK_F5) {
     refreshTagFilter();
     refreshFileList();
+  } else if (event.GetUnicodeKey() == 'W' && event.GetModifiers() == wxMOD_CONTROL) {
+    Close();
+  } else {
+    event.Skip();
   }
-
-  event.Skip();
 }
 
 void SummaryFrame::OnClickHeading(wxListEvent& event)
