@@ -10,8 +10,12 @@
 const wxColour MainFrame::BACKGROUND_COLOR_FULLY_TAGGED = wxColour(200, 255, 200);
 const wxColour MainFrame::BACKGROUND_COLOR_PARTLY_TAGGED = wxColour(255, 255, 200);
 const wxColour MainFrame::BACKGROUND_COLOR_FULLY_UNTAGGED = wxColour(255, 255, 255);
-const double MainFrame::LEFT_PANE_DEFAULT_HORIZONTAL_PROPORTION = 0.6;
-const double MainFrame::LEFT_PANE_MINIMUM_HORIZONTAL_PROPORTION = 0.4;
+const double MainFrame::LEFT_PANE_STARTING_PROPORTION = 0.5;
+const double MainFrame::LEFT_PANE_MINIMUM_PROPORTION = 0.4;
+const double MainFrame::LEFT_PANE_GRAVITY = 0.75;
+const double MainFrame::MEDIA_PANE_STARTING_PROPORTION = 0.55;
+const double MainFrame::MEDIA_PANE_MINIMUM_PROPORTION = 0.25;
+const double MainFrame::MEDIA_PANE_GRAVITY = 0.75;
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition,
   wxSize(900, 720)) {
@@ -72,13 +76,17 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     wxBORDER_NONE);
   wxBoxSizer* sz_right = new wxBoxSizer(wxVERTICAL);
   p_right->SetSizer(sz_right);
-  sw_main->SetSashGravity(LEFT_PANE_DEFAULT_HORIZONTAL_PROPORTION);
-  sw_main->SetSize(wxSize(GetSize().x * LEFT_PANE_DEFAULT_HORIZONTAL_PROPORTION, -1));
-  sw_main->SplitVertically(p_left, p_right, GetSize().x * LEFT_PANE_DEFAULT_HORIZONTAL_PROPORTION);
-  //sw_main->SplitVertically(p_left, p_right, 0);
-  sw_main->SetMinimumPaneSize(GetSize().x * LEFT_PANE_MINIMUM_HORIZONTAL_PROPORTION);
 
-  wxPanel* p_media = new wxPanel(p_left);
+  sw_main->SplitVertically(p_left, p_right, GetSize().x * LEFT_PANE_STARTING_PROPORTION);
+  sw_main->SetSize(wxSize(GetSize().x * LEFT_PANE_STARTING_PROPORTION, -1));
+  sw_main->SetSashGravity(LEFT_PANE_GRAVITY);
+  sw_main->SetMinimumPaneSize(GetSize().x * LEFT_PANE_MINIMUM_PROPORTION);
+
+  wxSplitterWindow* sw_left = new wxSplitterWindow(p_left, wxID_ANY, wxDefaultPosition,
+    wxDefaultSize, wxSP_BORDER | wxSP_LIVE_UPDATE);
+
+  wxPanel* p_media = new wxPanel(sw_left);
+
   // Note: When using StaticBoxSizer, items added to the panel actually need the sizer's StaticBox
   // to be their parent instead of the panel like other sizers would have. I don't know exactly why
   // this is, but wxWidgets is consistent at advising us to do this, and who are we to question it?
@@ -132,9 +140,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_media_options->Add(cb_mute_, 1, wxALL, 5);
   sz_media->Add(p_media_options, 0, wxEXPAND | wxALL, 0);
 
-  sz_left->Add(p_media, 1, wxEXPAND | wxALL, 5);
-
-  wxPanel* p_directory = new wxPanel(p_left);
+  wxPanel* p_directory = new wxPanel(sw_left);
   wxStaticBoxSizer* sz_directory = new wxStaticBoxSizer(wxVERTICAL, p_directory, "Directory");
   p_directory->SetSizer(sz_directory);
 
@@ -157,7 +163,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
   lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
   refreshFileView();
-  sz_directory->Add(lc_files_in_directory_, 0, wxEXPAND | wxALL, 5);
+  sz_directory->Add(lc_files_in_directory_, 1, wxEXPAND | wxALL, 5);
 
   wxPanel* p_file_navigation = new wxPanel(sz_directory->GetStaticBox(), wxID_ANY,
     wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
@@ -181,7 +187,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_file_navigation->Add(b_next_file_, 1, wxEXPAND | wxALL, 5);
   sz_directory->Add(p_file_navigation, 0, wxEXPAND | wxALL, 0);
 
-  sz_left->Add(p_directory, 0, wxEXPAND | wxALL, 5);
+  sw_left->SplitHorizontally(p_media, p_directory, GetSize().y * MEDIA_PANE_STARTING_PROPORTION);
+  sw_left->SetSize(wxSize(-1, GetSize().y * MEDIA_PANE_STARTING_PROPORTION));
+  sw_left->SetMinimumPaneSize(GetSize().y * MEDIA_PANE_MINIMUM_PROPORTION);
+  sw_left->SetSashGravity(MEDIA_PANE_GRAVITY);
+  sz_left->Add(sw_left, 1, wxEXPAND | wxALL, 5);
 
   wxPanel* p_rating = new wxPanel(p_right);
   wxStaticBoxSizer* sz_rating = new wxStaticBoxSizer(wxVERTICAL, p_rating, "Rating");
@@ -243,7 +253,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_tags->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 0);
 
   sz_right->Add(p_tags, 1, wxEXPAND | wxALL, 5);
-  sz_main->Add(sw_main, 2, wxEXPAND | wxALL, 0);
+  sz_main->Add(sw_main, 1, wxEXPAND | wxALL, 0);
 
   f_summary_ = new SummaryFrame(this);
   refreshSummary();

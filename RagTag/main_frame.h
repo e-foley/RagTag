@@ -74,8 +74,12 @@ private:
   static const wxColour BACKGROUND_COLOR_FULLY_TAGGED;
   static const wxColour BACKGROUND_COLOR_PARTLY_TAGGED;
   static const wxColour BACKGROUND_COLOR_FULLY_UNTAGGED;
-  static const double LEFT_PANE_DEFAULT_HORIZONTAL_PROPORTION;
-  static const double LEFT_PANE_MINIMUM_HORIZONTAL_PROPORTION;
+  static const double LEFT_PANE_STARTING_PROPORTION;
+  static const double LEFT_PANE_MINIMUM_PROPORTION;
+  static const double LEFT_PANE_GRAVITY;
+  static const double MEDIA_PANE_STARTING_PROPORTION;
+  static const double MEDIA_PANE_MINIMUM_PROPORTION;
+  static const double MEDIA_PANE_GRAVITY;
 
   // Functions updating view to match model
   void refreshTagToggles();
