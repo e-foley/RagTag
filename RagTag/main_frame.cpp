@@ -354,10 +354,13 @@ void MainFrame::refreshTagToggles() {
 
 void MainFrame::refreshFileView()
 {
+  Freeze();
+
   if (!active_file_.has_value()) {
     lc_files_in_directory_->DeleteAllItems();
     file_paths_.clear();
     st_current_directory_->SetLabelText("(None)");
+    Thaw();
     return;
   }
 
@@ -465,6 +468,7 @@ void MainFrame::refreshFileView()
   // Without a refresh, old text can linger visually even though we've updated the data the control
   // displays.
   lc_files_in_directory_->Refresh();
+  Thaw();
 
   file_view_modification_in_progress_ = false;
 }
