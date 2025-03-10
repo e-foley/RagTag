@@ -10,12 +10,11 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent)
 
 TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
   const ragtag::TagProperties& tag_properties) : wxDialog(parent, wxID_ANY, "Create/Modify Tag",
-    wxDefaultPosition, wxSize(320, 320), wxDEFAULT_DIALOG_STYLE | wxWANTS_CHARS), parent_(parent) {
+    wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxWANTS_CHARS), parent_(parent) {
   response_.tag = tag;
   response_.tag_properties = tag_properties;
 
   wxBoxSizer* sz_rows = new wxBoxSizer(wxVERTICAL);
-  this->SetSizer(sz_rows);
 
   wxFlexGridSizer* sz_text_entry_grid = new wxFlexGridSizer(2, 5, 5);  // cols, vgap, hgap
   sz_text_entry_grid->AddGrowableCol(1, 1);
@@ -74,6 +73,8 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
   b_ok->SetDefault();
   sz_button_row->Add(b_ok, 0);
   sz_rows->Add(sz_button_row, 0, wxEXPAND | wxALL, 10);
+
+  this->SetSizerAndFit(sz_rows);  // Auto-fits window to sizer requirements.
 
   Bind(wxEVT_CHAR_HOOK, &TagEntryDialog::OnKeyDown, this);
 }
