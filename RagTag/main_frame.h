@@ -153,7 +153,6 @@ private:
   TagCoverage getFileTagCoverage(const ragtag::path_t& file) const;
   std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
 
-  wxPanel* p_main_{ nullptr };
   wxScrolledWindow* p_tag_toggles_{ nullptr };
   wxBoxSizer* sz_tag_toggles_{ nullptr };
   wxMediaCtrl* mc_media_display_{ nullptr };
