@@ -1265,6 +1265,11 @@ bool MainFrame::saveProjectAs(const ragtag::path_t& path) {
 
 bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
 {
+  if (active_file_ == path) {
+    // File is already loaded.
+    return true;
+  }
+
   if (!std::filesystem::exists(path)) {
     // TODO: Report error.
     SetStatusText(L"File '" + path.generic_wstring() + L"' does not exist.");
