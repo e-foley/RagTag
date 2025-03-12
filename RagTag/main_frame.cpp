@@ -1,7 +1,6 @@
 #include "main_frame.h"
 #include "rag_tag_util.h"
 #include "tag_entry_dialog.h"
-#include "tag_toggle_panel.h"
 #include <wx/filedlg.h>
 #include <wx/splitter.h>
 #include <wx/statusbr.h>
@@ -61,7 +60,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
 
   CreateStatusBar();
 
-  // Temporary: Build a panel as a proof of concept...
   wxPanel* p_main = new wxPanel(this, wxID_ANY);
   wxBoxSizer* sz_main = new wxBoxSizer(wxHORIZONTAL);
   p_main->SetSizer(sz_main);
@@ -304,6 +302,9 @@ void MainFrame::refreshTagToggles() {
   // Clear out existing UI entries.
   sz_tag_toggles_->Clear(true);
 
+  // Clear out cache of toggle panels.
+  tag_toggle_panels_.clear();
+
   bool is_file_active = active_file_.has_value();  // Shorthand
 
   auto registered_tags = tag_map_.getAllTags();
@@ -338,6 +339,7 @@ void MainFrame::refreshTagToggles() {
 
     TagTogglePanel* p_tag_toggle = new TagTogglePanel(p_tag_toggles_, tag_element.first,
       tag_element.first, tag_element.second.hotkey);
+    tag_toggle_panels_.push_back(p_tag_toggle);
     sz_tag_toggles_->Add(p_tag_toggle, 0, wxEXPAND | wxALL, 0);
     p_tag_toggle->setCheckBoxState(*tag_setting);
     if (is_file_active) {
@@ -1099,6 +1101,16 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
       }
     }
   }
+  else if (key_code == 'W' && modifiers == wxMOD_CONTROL) {
+    Close(false);  // `false` allows action to be vetoed in OnClose event handler.
+  }
+  else if (key_code == WXK_ESCAPE) {
+    p_tag_toggles_->SetFocus();  // Focus away from elements that might otherwise intercept keys.
+  }
+  else if (lc_files_in_directory_->HasFocus()) {
+    // Don't preempt directory navigation keystrokes.
+    event.Skip();
+  }
   else if (key_code >= '0' && key_code <= '5') {
     if ((modifiers & wxMOD_SHIFT) != 0) {
       clearRatingOfActiveFile();
@@ -1116,11 +1128,20 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
     // We provide this option because shift+numpad navigates controls by default.
     clearRatingOfActiveFile();
   }
-  else if (key_code == 'W' && modifiers == wxMOD_CONTROL) {
-    Close(false);  // `false` allows action to be vetoed in OnClose event handler.
-  }
   else {
-    event.Skip();
+    // Test against all the tag toggle hotkeys.
+    bool key_processed = false;
+    for (const auto& tag_toggle_panel : tag_toggle_panels_) {
+      if (tag_toggle_panel->processKeyEvent(event)) {
+        key_processed = true;
+        // Could `break` here, but this would break the situation where multiple tags share a
+        // hotkey. I don't think we should support this use case, but the enforcement mechanism to
+        // prevent it definitely shouldn't be placed at *this* spot.
+      }
+    }
+    if (!key_processed) {
+      event.Skip();
+    }
   }
 }
 

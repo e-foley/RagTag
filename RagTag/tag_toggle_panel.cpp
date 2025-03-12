@@ -31,8 +31,6 @@ TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, wxString lab
   sz_tag_toggle->Add(b_tag_delete, 0, wxALIGN_CENTER, 5);
 
   disableCheckboxAndHotkey();
-
-  parent->Bind(wxEVT_CHAR_HOOK, &TagTogglePanel::OnKeyDown, this);
 }
 
 TagTogglePanel::~TagTogglePanel() {}
@@ -79,6 +77,29 @@ void TagTogglePanel::enableCheckboxAndHotkey()
   cb_tag_toggle_->Enable();
 }
 
+bool TagTogglePanel::processKeyEvent(wxKeyEvent& event)
+{
+  if (hotkey_enabled_ && hotkey_.has_value() && event.GetUnicodeKey() == *hotkey_) {
+    TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::UPDATE_TAG_STATE);
+    const wxCheckBoxState current_checked_state = cb_tag_toggle_->Get3StateValue();
+    switch (event.GetModifiers()) {
+    case wxMOD_NONE:
+      sending.setDesiredState(current_checked_state == wxCHK_CHECKED ?
+        ragtag::TagSetting::UNCOMMITTED : ragtag::TagSetting::YES);
+      wxPostEvent(GetParent(), sending);
+      return true;
+    case wxMOD_SHIFT:
+      sending.setDesiredState(current_checked_state == wxCHK_UNCHECKED ?
+        ragtag::TagSetting::UNCOMMITTED : ragtag::TagSetting::NO);
+      wxPostEvent(GetParent(), sending);
+      return true;
+    default:
+      break;
+    }
+  }
+  return false;
+}
+
 void TagTogglePanel::OnClickEdit(wxCommandEvent& event) {
   TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::EDIT_TAG);
   wxPostEvent(GetParent(), sending);
@@ -107,25 +128,3 @@ void TagTogglePanel::OnCheckboxChange(wxCommandEvent& event) {
   wxPostEvent(GetParent(), sending);
 }
 
-void TagTogglePanel::OnKeyDown(wxKeyEvent& event)
-{
-  if (hotkey_enabled_ && hotkey_.has_value() && event.GetUnicodeKey() == *hotkey_) {
-    TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::UPDATE_TAG_STATE);
-    const wxCheckBoxState current_checked_state = cb_tag_toggle_->Get3StateValue();
-    switch (event.GetModifiers()) {
-    case wxMOD_NONE:
-      sending.setDesiredState(current_checked_state == wxCHK_CHECKED ?
-        ragtag::TagSetting::UNCOMMITTED : ragtag::TagSetting::YES);
-      wxPostEvent(GetParent(), sending);
-      break;
-    case wxMOD_SHIFT:
-      sending.setDesiredState(current_checked_state == wxCHK_UNCHECKED ?
-        ragtag::TagSetting::UNCOMMITTED : ragtag::TagSetting::NO);
-      wxPostEvent(GetParent(), sending);
-      break;
-    default:
-      break;
-    }
-  }
-  event.Skip();
-}
