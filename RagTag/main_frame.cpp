@@ -353,6 +353,11 @@ void MainFrame::refreshTagToggles() {
   // Invoking Layout() on the p_tag_toggles_ grandparent redraws the scrollbar if needed, whereas
   // invoking it on p_tag_toggles_ itself crunches entries into the existing unscrollable area.
   p_tag_toggles_->GetGrandParent()->Layout();
+
+  // Invoking Update() here fixes an odd issue where toggling the box while the main frame is in
+  // front of the summary frame can cause the checkbox event to fire but no visual update of the
+  // checkbox to occur until the user mouses off the box.
+  p_tag_toggles_->Update();
 }
 
 void MainFrame::refreshFileView()
