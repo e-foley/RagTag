@@ -1325,6 +1325,8 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
     refreshSummary();
   }
 
+  f_summary_->highlightFileIfPresent(path);
+
   Refresh();
 
   SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");

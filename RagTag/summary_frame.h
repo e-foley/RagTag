@@ -20,6 +20,7 @@ public:
   void setTagMap(const ragtag::TagMap& tag_map);
   void refreshFileList();
   void refreshTagFilter();
+  void highlightFileIfPresent(const ragtag::path_t& path_to_highlight);
 
 private:
   static const int PATH_COLUMN_INDEX;
@@ -61,6 +62,7 @@ private:
   void resetFilters();
   void populateAndEllipsizePathColumn();
   std::vector<ragtag::path_t> getPathsOfSelectedFiles() const;
+  std::optional<ragtag::path_t> getPathForItemIndex(int index) const;
 
   static int wxCALLBACK pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);
   static int wxCALLBACK tagSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data);

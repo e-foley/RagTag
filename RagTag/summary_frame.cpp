@@ -165,7 +165,10 @@ void SummaryFrame::refreshFileList()
   std::vector<ragtag::path_t> previously_checked_items;
   for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
     if (lc_summary_->IsItemChecked(i)) {
-      previously_checked_items.push_back(file_paths_[i]);
+      const auto path = getPathForItemIndex(i);
+      if (path.has_value()) {
+        previously_checked_items.push_back(*path);
+      }
     }
   }
 
@@ -223,8 +226,8 @@ void SummaryFrame::refreshFileList()
   lc_summary_->DeleteAllItems();
   file_paths_ = tag_map_.selectFiles(getOverallRuleFromFilterUi());
   for (int i = 0; i < file_paths_.size(); ++i) {
+    // Supply empty string, which will be replaced later by populateAndEllipsizePathColumn().
     lc_summary_->InsertItem(i, wxEmptyString);
-    populateAndEllipsizePathColumn();
      
     // Associate user data with the wxListCtrl item by giving it a pointer--in this case, to the
     // path we've cached within file_paths_. (It's not ideal, but we play along.)
@@ -262,6 +265,8 @@ void SummaryFrame::refreshFileList()
     }
   }
 
+  populateAndEllipsizePathColumn();
+
   st_filtered_file_count_->SetLabel("Current filters: " + std::to_string(file_paths_.size()) + "/" +
     std::to_string(tag_map_.numFiles()) + " project files");
   updateCopyButtonTextForSelections();
@@ -296,6 +301,19 @@ void SummaryFrame::refreshTagFilter()
     }
   }
   dd_tag_selection_->SetSelection(current_tag_selection_index);
+}
+
+void SummaryFrame::highlightFileIfPresent(const ragtag::path_t& path_to_highlight)
+{
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    const auto path_at_entry = getPathForItemIndex(i);
+    if (path_at_entry.has_value() && *path_at_entry == path_to_highlight) {
+      lc_summary_->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+    }
+    else {
+      lc_summary_->SetItemState(i, 0, wxLIST_STATE_SELECTED);
+    }
+  }
 }
 
 ragtag::TagMap::file_qualifier_t SummaryFrame::getRuleFromRatingFilterUi()
@@ -491,7 +509,11 @@ void SummaryFrame::OnFileUnchecked(wxListEvent& event)
 
 void SummaryFrame::OnFileFocused(wxListEvent& event)
 {
-  std::vector<ragtag::path_t> path_container(1, file_paths_[event.GetIndex()]);
+  const auto path = getPathForItemIndex(event.GetIndex());
+  if (!path.has_value()) {
+    return;
+  }
+  std::vector<ragtag::path_t> path_container(1, *path);
   SummaryFrameEvent sending(path_container, SummaryFrameEvent::Action::SELECT_FILE);
   wxPostEvent(GetParent(), sending);
   event.Skip();
@@ -603,8 +625,14 @@ void SummaryFrame::resetFilters()
 void SummaryFrame::populateAndEllipsizePathColumn()
 {
   for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
-    std::wstring path_displayed = file_paths_[i].generic_wstring();
-    if (!std::filesystem::exists(file_paths_[i])) {
+    const auto path = getPathForItemIndex(i);
+    if (!path.has_value()) {
+      // Really shouldn't happen.
+      continue;
+    }
+
+    std::wstring path_displayed = path->generic_wstring();
+    if (!std::filesystem::exists(*path)) {
       path_displayed.append(L" [???]");
     }
 
@@ -619,10 +647,26 @@ std::vector<ragtag::path_t> SummaryFrame::getPathsOfSelectedFiles() const
   std::vector<ragtag::path_t> returning;
   for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
     if (lc_summary_->IsItemChecked(i)) {
-      returning.push_back(file_paths_[i]);
+      const auto path = getPathForItemIndex(i);
+      if (path.has_value()) {
+        returning.push_back(*path);
+      }
     }
   }
   return returning;
+}
+
+std::optional<ragtag::path_t> SummaryFrame::getPathForItemIndex(int index) const
+{
+  // This isn't as simple as invoking file_paths_[i], since list control indices shift around during
+  // sorting operations. Thankfully, the item data (where we placed a pointer to the actual path)
+  // moves along with the item.
+  wxUIntPtr p_data_nominal = lc_summary_->GetItemData(index);
+  if (p_data_nominal == 0) {
+    return {};
+  }
+  
+  return *reinterpret_cast<ragtag::path_t*>(p_data_nominal);
 }
 
 int wxCALLBACK SummaryFrame::pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data)
