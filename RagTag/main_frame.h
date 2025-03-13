@@ -33,6 +33,7 @@ private:
     ID_SAVE_PROJECT,
     ID_SAVE_PROJECT_AS,
     ID_LOAD_FILE,
+    ID_FOCUS_DIRECTORY_VIEW,
     ID_REFRESH_FILE_VIEW,
     ID_NEXT_FILE,
     ID_PREVIOUS_FILE,
@@ -45,7 +46,9 @@ private:
     ID_MEDIA_CTRL,
     ID_STOP_MEDIA,
     ID_PLAY_PAUSE_MEDIA,
-    ID_MUTE_BOX,
+    ID_TOGGLE_AUTOPLAY,
+    ID_TOGGLE_LOOPING,
+    ID_TOGGLE_MUTE,
     ID_NO_RATING,
     ID_RATING_0,
     ID_RATING_MAX = ID_RATING_0 + 5  // Implied ratings 1-5
@@ -91,6 +94,7 @@ private:
   void OnOpenProject(wxCommandEvent& event);
   void OnSaveProject(wxCommandEvent& event);
   void OnSaveProjectAs(wxCommandEvent& event);
+  void OnFocusDirectoryView(wxCommandEvent& event);
   void OnShowSummary(wxCommandEvent& event);
   void OnLoadFile(wxCommandEvent& event);
   void OnRefreshFileView(wxCommandEvent& event);
@@ -110,7 +114,10 @@ private:
   void OnNextUntaggedFile(wxCommandEvent& event);
   void OnClickRatingButton(wxCommandEvent& event);
   // Checkbox events
-  void OnMuteBoxToggle(wxCommandEvent& event);
+  void OnToggleAutoplay(wxCommandEvent& event);
+  void OnToggleLooping(wxCommandEvent& event);
+  void OnToggleMuteBox(wxCommandEvent& event);
+  void OnToggleMuteMenu(wxCommandEvent& event);
   // List control events
   void OnFocusFile(wxListEvent& event);
   // Media events

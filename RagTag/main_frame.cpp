@@ -31,10 +31,18 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxMenu* m_project = new wxMenu;
   m_project->Append(ID_LOAD_FILE, "&Load File...\tCtrl-O");
   m_project->AppendSeparator();
-  m_project->Append(ID_NEXT_FILE, "Next File in Directory\t.");
-  m_project->Append(ID_PREVIOUS_FILE, "Previous File in Directory\t,");
+  m_project->Append(ID_NEXT_FILE, "Next File in Directory\tCtrl-.");
+  m_project->Append(ID_PREVIOUS_FILE, "Previous File in Directory\tCtrl-,");
   m_project->Append(ID_NEXT_UNTAGGED_FILE, "Next Untagged File in Directory\tSpace");
   m_project->Append(ID_PREVIOUS_UNTAGGED_FILE, "Previous Untagged File in Directory\tShift-Space");
+
+  wxMenu* m_media = new wxMenu;
+  m_media->Append(ID_PLAY_PAUSE_MEDIA, "&Play/Pause Media\tCtrl-P");
+  m_media->Append(ID_STOP_MEDIA, "&Stop Media\tCtrl-K");
+  m_media->AppendSeparator();
+  m_media->Append(ID_TOGGLE_AUTOPLAY, "Toggle &Autoplay\tCtrl-A");
+  m_media->Append(ID_TOGGLE_LOOPING, "Toggle &Looping\tCtrl-L");
+  m_media->Append(ID_TOGGLE_MUTE, "Toggle &Mute\tCtrl-M");
 
   wxMenu* m_tags = new wxMenu;
   m_tags->Append(ID_DEFINE_NEW_TAG, "Define New &Tag...\tCtrl-T");
@@ -42,8 +50,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   m_tags->Append(ID_SET_TAGS_TO_DEFAULTS, "&Default Tags on Active File\tCtrl-D");
 
   wxMenu* m_window = new wxMenu;
-  m_window->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-P");
+  m_window->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-Y");
   m_window->AppendSeparator();
+  m_window->Append(ID_FOCUS_DIRECTORY_VIEW, "&Focus Directory View\tCtrl-F");
   m_window->Append(ID_REFRESH_FILE_VIEW, "&Refresh Directory View\tF5");
 
   wxMenu* m_help = new wxMenu;
@@ -52,6 +61,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxMenuBar* mb_menu_bar = new wxMenuBar;
   mb_menu_bar->Append(m_file, "&File");
   mb_menu_bar->Append(m_project, "&Project");
+  mb_menu_bar->Append(m_media, "&Media");
   mb_menu_bar->Append(m_tags, "&Tags");
   mb_menu_bar->Append(m_window, "&Window");
   mb_menu_bar->Append(m_help, "&Help");
@@ -126,14 +136,14 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
     wxDefaultSize, wxBORDER_NONE);
   wxBoxSizer* sz_media_options = new wxBoxSizer(wxHORIZONTAL);
   p_media_options->SetSizer(sz_media_options);
-  cb_autoplay_ = new wxCheckBox(p_media_options, wxID_ANY, "Autoplay");
+  cb_autoplay_ = new wxCheckBox(p_media_options, ID_TOGGLE_AUTOPLAY, "Autoplay");
   cb_autoplay_->SetValue(true);  // True == checked
   sz_media_options->Add(cb_autoplay_, 1, wxALL, 5);
-  cb_loop_ = new wxCheckBox(p_media_options, wxID_ANY, "Loop");
+  cb_loop_ = new wxCheckBox(p_media_options, ID_TOGGLE_LOOPING, "Loop");
   cb_loop_->SetValue(true);  // True == checked
   sz_media_options->Add(cb_loop_, 1, wxALL, 5);
-  cb_mute_ = new wxCheckBox(p_media_options, ID_MUTE_BOX, "Mute");
-  cb_mute_->Bind(wxEVT_CHECKBOX, &MainFrame::OnMuteBoxToggle, this);
+  cb_mute_ = new wxCheckBox(p_media_options, ID_TOGGLE_MUTE, "Mute");
+  cb_mute_->Bind(wxEVT_CHECKBOX, &MainFrame::OnToggleMuteBox, this);
   cb_mute_->SetValue(true);  // True == checked
   sz_media_options->Add(cb_mute_, 1, wxALL, 5);
   sz_media->Add(p_media_options, 0, wxEXPAND | wxALL, 0);
@@ -268,11 +278,17 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   Bind(wxEVT_MENU, &MainFrame::OnSaveProjectAs, this, ID_SAVE_PROJECT_AS);
   Bind(wxEVT_MENU, &MainFrame::OnShowSummary, this, ID_SHOW_SUMMARY);
   Bind(wxEVT_MENU, &MainFrame::OnLoadFile, this, ID_LOAD_FILE);
+  Bind(wxEVT_MENU, &MainFrame::OnFocusDirectoryView, this, ID_FOCUS_DIRECTORY_VIEW);
   Bind(wxEVT_MENU, &MainFrame::OnRefreshFileView, this, ID_REFRESH_FILE_VIEW);
   Bind(wxEVT_MENU, &MainFrame::OnNextFile, this, ID_NEXT_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnPreviousFile, this, ID_PREVIOUS_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnNextUntaggedFile, this, ID_NEXT_UNTAGGED_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnPreviousUntaggedFile, this, ID_PREVIOUS_UNTAGGED_FILE);
+  Bind(wxEVT_MENU, &MainFrame::OnStopMedia, this, ID_STOP_MEDIA);
+  Bind(wxEVT_MENU, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
+  Bind(wxEVT_MENU, &MainFrame::OnToggleAutoplay, this, ID_TOGGLE_AUTOPLAY);
+  Bind(wxEVT_MENU, &MainFrame::OnToggleLooping, this, ID_TOGGLE_LOOPING);
+  Bind(wxEVT_MENU, &MainFrame::OnToggleMuteMenu, this, ID_TOGGLE_MUTE);
   Bind(wxEVT_MENU, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
   Bind(wxEVT_MENU, &MainFrame::OnClearTagsFromFile, this, ID_CLEAR_TAGS_FROM_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnSetTagsToDefaults, this, ID_SET_TAGS_TO_DEFAULTS);
@@ -591,6 +607,11 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
   SetStatusText(L"Saved project '" + project_path_->generic_wstring() + L"'.");
 }
 
+void MainFrame::OnFocusDirectoryView(wxCommandEvent& event)
+{
+  lc_files_in_directory_->SetFocus();
+}
+
 void MainFrame::OnShowSummary(wxCommandEvent& event)
 {
   if (f_summary_->IsShown()) {
@@ -800,9 +821,25 @@ void MainFrame::OnClickRatingButton(wxCommandEvent& event)
   }
 }
 
-void MainFrame::OnMuteBoxToggle(wxCommandEvent& event)
+void MainFrame::OnToggleAutoplay(wxCommandEvent& event)
+{
+  cb_autoplay_->SetValue(!cb_autoplay_->IsChecked());
+}
+
+void MainFrame::OnToggleLooping(wxCommandEvent& event)
+{
+  cb_loop_->SetValue(!cb_loop_->IsChecked());
+}
+
+void MainFrame::OnToggleMuteBox(wxCommandEvent& event)
 {
   mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
+}
+
+void MainFrame::OnToggleMuteMenu(wxCommandEvent& event)
+{
+  cb_mute_->SetValue(!cb_mute_->IsChecked());
+  OnToggleMuteBox(event);
 }
 
 void MainFrame::OnFocusFile(wxListEvent& event)
