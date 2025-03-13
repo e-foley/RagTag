@@ -139,15 +139,10 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_media->Add(p_media_options, 0, wxEXPAND | wxALL, 0);
 
   wxPanel* p_directory = new wxPanel(sw_left);
-  // Note: wxWidgets issue 25238 causes list control to flicker when placed within a static box
-  // sizer. Until a fix is implemented, use a regular box sizer.
-  // (See https://github.com/wxWidgets/wxWidgets/issues/25238.)
-  // 
-  // wxStaticBoxSizer* sz_directory = new wxStaticBoxSizer(wxVERTICAL, p_directory, "Directory");
-  wxBoxSizer* sz_directory = new wxBoxSizer(wxVERTICAL);
+  wxStaticBoxSizer* sz_directory = new wxStaticBoxSizer(wxVERTICAL, p_directory, "Directory");
   p_directory->SetSizer(sz_directory);
 
-  wxPanel* p_current_directory_line = new wxPanel(p_directory);
+  wxPanel* p_current_directory_line = new wxPanel(sz_directory->GetStaticBox());
   wxBoxSizer* sz_current_directory_line = new wxBoxSizer(wxHORIZONTAL);
   p_current_directory_line->SetSizer(sz_current_directory_line);
   wxStaticText* st_current_directory_label = new wxStaticText(p_current_directory_line, wxID_ANY,
@@ -158,8 +153,14 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   sz_current_directory_line->Add(st_current_directory_, 1, wxALL, 5);
   sz_directory->Add(p_current_directory_line, 0, wxEXPAND | wxALL, 0);
 
-  lc_files_in_directory_ = new wxListCtrl(p_directory, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-    wxLC_REPORT | wxLC_SINGLE_SEL);
+  lc_files_in_directory_ = new wxListCtrl(sz_directory->GetStaticBox(), wxID_ANY, wxDefaultPosition,
+    wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
+  // Workaround to wxWidgets issue 25238 that causes list control to flicker when placed within
+  // a static box sizer. (See https://github.com/wxWidgets/wxWidgets/issues/25238. Thank you, GitHub
+  // user PBfordev.)
+  //
+  // TODO: Remove this line if/when issue 25238 is fixed.
+  lc_files_in_directory_->MSWDisableComposited();
   lc_files_in_directory_->InsertColumn(COLUMN_FILENAME, "File", wxLIST_FORMAT_LEFT, 250);
   lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
   lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
@@ -167,7 +168,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   refreshFileView();
   sz_directory->Add(lc_files_in_directory_, 1, wxEXPAND | wxALL, 5);
 
-  wxPanel* p_file_navigation = new wxPanel(p_directory);
+  wxPanel* p_file_navigation = new wxPanel(sz_directory->GetStaticBox());
   wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
   p_file_navigation->SetSizer(sz_file_navigation);
   wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
