@@ -1,4 +1,5 @@
 #include "rag_tag_util.h"
+#include <format>
 #include <wx/wx.h>
 
 // The font used by wxWidgets does not display half-star characters as of writing.
@@ -16,6 +17,9 @@ const wxString RagTagUtil::GLYPH_RATING_HALF_STAR = L"\U000000BD";  // U+00BD is
 const int RagTagUtil::MAX_STARS = 5;
 const ragtag::path_t RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION = L".tagdef";
 const ragtag::path_t RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION = L".tagdefbk";
+const int RagTagUtil::RAGTAG_APP_VERSION_MAJOR = 0;
+const int RagTagUtil::RAGTAG_APP_VERSION_MINOR = 1;
+const int RagTagUtil::RAGTAG_APP_VERSION_PATCH = 0;
 
 wxString RagTagUtil::getStarTextForRating(float rating)
 {
@@ -84,4 +88,10 @@ bool RagTagUtil::deleteFile(const ragtag::path_t& path)
   else {
     return true;
   }
+}
+
+std::wstring RagTagUtil::getRagTagAppVersionString()
+{
+  return std::vformat(L"v{}.{}.{}", std::make_wformat_args(RAGTAG_APP_VERSION_MAJOR,
+    RAGTAG_APP_VERSION_MINOR, RAGTAG_APP_VERSION_PATCH));
 }

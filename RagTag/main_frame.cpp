@@ -17,7 +17,7 @@ const double MainFrame::MEDIA_PANE_STARTING_PROPORTION = 0.55;
 const double MainFrame::MEDIA_PANE_MINIMUM_PROPORTION = 0.25;
 const double MainFrame::MEDIA_PANE_GRAVITY = 0.75;
 
-MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.1.0", wxDefaultPosition,
+MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosition,
   wxSize(900, 720)) {
   SetMinSize(wxSize(800, 540));
 
@@ -321,6 +321,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.1.0", wxDefaultPo
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagejpg.jpg");
   //displayMediaFile(std::wstring(debug_media_dir) + L"imagepng.png");
   openProject(std::wstring(debug_project_dir) + L"beachcoolgradient.tagdef");
+
+  refreshTitleBar();
 }
 
 void MainFrame::refreshTagToggles() {
@@ -553,6 +555,22 @@ void MainFrame::refreshSummary()
   f_summary_->refreshFileList();
 }
 
+void MainFrame::refreshTitleBar()
+{
+  wxString title = L"RagTag " + RagTagUtil::getRagTagAppVersionString() + L" - ";
+  if (is_dirty_) {
+    title += "***";
+  }
+  if (!project_path_.has_value()) {
+    title += "New Project";
+  }
+  else {
+    title += project_path_->wstring();
+  }
+
+  SetTitle(title);
+}
+
 void MainFrame::OnNewProject(wxCommandEvent& event) {
   if (!promptSaveOpportunityIfDirty()) {
     return;
@@ -600,7 +618,7 @@ void MainFrame::OnSaveProject(wxCommandEvent& event) {
     return;
   }
 
-  is_dirty_ = false;
+  markClean();
   SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
 }
 
@@ -615,7 +633,7 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
     return;
   }
   project_path_ = path;
-  is_dirty_ = false;
+  markClean();
   SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
 }
 
@@ -922,7 +940,7 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
   }
 
   // Looks like everything was successful. Refresh the panel to show our new tag.
-  is_dirty_ = true;
+  markDirty();
   refreshTagToggles();
   refreshFileView();
   refreshSummary();
@@ -955,7 +973,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
     const ragtag::tag_t& new_tag = tag_entry_result->tag;  // Alias for convenience
 
     // TODO: Don't assume that changes have been made.
-    is_dirty_ = true;
+    markDirty();
 
     // If the name is different from before, the tag has been renamed.
     if (new_tag != old_tag) {
@@ -985,7 +1003,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
   case TagToggleEvent::DesiredAction::DELETE_TAG: {
     if (promptConfirmTagDeletion(event.getTag())) {
       // TODO: Don't assume that changes have been made.
-      is_dirty_ = true;
+      markDirty();
 
       if (tag_map_.deleteTag(event.getTag())) {
         SetStatusText(L"Deleted tag '" + event.getTag() + L"'.");
@@ -1000,7 +1018,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
   case TagToggleEvent::DesiredAction::UPDATE_TAG_STATE: {
     if (active_file_.has_value()) {
       // TODO: Don't assume that changes have been made.
-      is_dirty_ = true;
+      markDirty();
 
       if (!tag_map_.setTag(*active_file_, event.getTag(), event.getDesiredState())) {
         // TODO: Report error.
@@ -1094,7 +1112,7 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
     for (const auto& path : event.getPaths()) {
       // TODO: Use this bool for extra error reporting.
       if (tag_map_.removeFile(path)) {
-        is_dirty_ = true;
+        markDirty();
         ++removed_file_count;
         if (active_file_.has_value() && path == *active_file_) {
           // The file we're removing from the project is the actively loaded one. Reset active_file_.
@@ -1129,7 +1147,7 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
       // files that don't exist anymore.
       // TODO: Use this bool for extra error reporting.
       if (tag_map_.removeFile(path)) {
-        is_dirty_ = true;
+        markDirty();
         if (active_file_.has_value() && path == *active_file_) {
           // The file we're removing from the project is the actively loaded one. Reset active_file_.
           resetActiveFile();
@@ -1371,10 +1389,22 @@ void MainFrame::notifyCouldNotOpenProject(const ragtag::path_t& path)
   dialog.ShowModal();
 }
 
+void MainFrame::markDirty()
+{
+  is_dirty_ = true;
+  refreshTitleBar();
+}
+
+void MainFrame::markClean()
+{
+  is_dirty_ = false;
+  refreshTitleBar();
+}
+
 void MainFrame::newProject() {
   tag_map_ = ragtag::TagMap();
   project_path_.reset();
-  is_dirty_ = true;
+  markDirty();
 }
 
 bool MainFrame::saveProject() {
@@ -1435,7 +1465,7 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
 
   const bool is_newly_added_file = !tag_map_.hasFile(*active_file_);
   if (is_newly_added_file) {
-    is_dirty_ = true;
+    markDirty();
 
     // Declare file to our tag map.
     if (!tag_map_.addFile(*active_file_)) {
@@ -1525,7 +1555,8 @@ bool MainFrame::openProject(const ragtag::path_t& path)
   tag_map_ = *tag_map_pending;
   project_path_ = path;
   resetActiveFile();
-  is_dirty_ = false;
+  markClean();
+  refreshTitleBar();
   SetStatusText(L"Opened project '" + project_path_->wstring() + L"'.");
   return true;
 }
@@ -1568,7 +1599,7 @@ bool MainFrame::clearRatingOfActiveFile()
     return false;
   }
 
-  is_dirty_ = true;
+  markDirty();
   refreshFileView();
   refreshRatingButtons();
   refreshSummary();
@@ -1587,7 +1618,7 @@ bool MainFrame::setRatingOfActiveFile(ragtag::rating_t rating)
     return false;
   }
 
-  is_dirty_ = true;
+  markDirty();
   refreshFileView();
   refreshRatingButtons();
   refreshSummary();

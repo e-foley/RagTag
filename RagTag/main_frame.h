@@ -89,6 +89,7 @@ private:
   void refreshFileView();
   void refreshRatingButtons();
   void refreshSummary();
+  void refreshTitleBar();
   // Menu events
   void OnNewProject(wxCommandEvent& event);
   void OnOpenProject(wxCommandEvent& event);
@@ -141,6 +142,8 @@ private:
   void notifyCouldNotSaveProject(const ragtag::path_t& path);
   void notifyCouldNotOpenProject(const ragtag::path_t& path);
   // Fundamental project commands
+  void markDirty();
+  void markClean();
   void newProject();
   bool saveProject();
   bool saveProjectAs(const ragtag::path_t& path);
