@@ -889,7 +889,9 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
 
   if (tag_map_.isTagRegistered(tag_entry_result->tag)) {
     // The "newly created" tag has a name that's already registered.
-    // TODO: Report error.
+    wxMessageDialog dialog(this, L"Could not create tag.\n\nTag '" + tag_entry_result->tag
+      + L"' is already registered.", "Could Not Create Tag", wxOK | wxICON_WARNING);
+    dialog.ShowModal();
     SetStatusText(L"Tag '" + tag_entry_result->tag + L"' is already registered.");
     return;
   }
