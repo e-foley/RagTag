@@ -20,51 +20,60 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   wxSize(900, 720)) {
   SetMinSize(wxSize(800, 540));
 
-  wxMenu* m_file = new wxMenu;
-  m_file->Append(ID_NEW_PROJECT, "&New Project...\tCtrl-N");
-  m_file->Append(ID_OPEN_PROJECT, "&Open Project...\tCtrl-Shift-O");
-  m_file->Append(ID_SAVE_PROJECT, "&Save Project...\tCtrl-S");
-  m_file->Append(ID_SAVE_PROJECT_AS, "Save Project &As...\tCtrl-Shift-S");
-  m_file->AppendSeparator();
-  m_file->Append(wxID_EXIT, "&Quit\tAlt-F4");
+  m_file_ = new wxMenu;
+  m_file_->Append(ID_NEW_PROJECT, "&New Project...\tCtrl-N");
+  m_file_->Append(ID_OPEN_PROJECT, "&Open Project...\tCtrl-Shift-O");
+  m_file_->Append(ID_SAVE_PROJECT, "&Save Project...\tCtrl-S");
+  m_file_->Append(ID_SAVE_PROJECT_AS, "Save Project &As...\tCtrl-Shift-S");
+  m_file_->AppendSeparator();
+  m_file_->Append(wxID_EXIT, "&Quit\tAlt-F4");
 
-  wxMenu* m_project = new wxMenu;
-  m_project->Append(ID_LOAD_FILE, "&Load File...\tCtrl-O");
-  m_project->AppendSeparator();
-  m_project->Append(ID_NEXT_FILE, "Next File in Directory\tCtrl-.");
-  m_project->Append(ID_PREVIOUS_FILE, "Previous File in Directory\tCtrl-,");
-  m_project->Append(ID_NEXT_UNTAGGED_FILE, "Next Untagged File in Directory\tSpace");
-  m_project->Append(ID_PREVIOUS_UNTAGGED_FILE, "Previous Untagged File in Directory\tShift-Space");
+  m_project_ = new wxMenu;
+  m_project_->Append(ID_LOAD_FILE, "&Load File...\tCtrl-O");
+  m_project_->AppendSeparator();
+  m_project_->Append(ID_NEXT_FILE, "Next File in Directory\tCtrl-.");
+  m_project_->Enable(ID_NEXT_FILE, false);
+  m_project_->Append(ID_PREVIOUS_FILE, "Previous File in Directory\tCtrl-,");
+  m_project_->Enable(ID_PREVIOUS_FILE, false);
+  m_project_->Append(ID_NEXT_UNTAGGED_FILE, "Next Untagged File in Directory\tSpace");
+  m_project_->Enable(ID_NEXT_UNTAGGED_FILE, false);
+  m_project_->Append(ID_PREVIOUS_UNTAGGED_FILE, "Previous Untagged File in Directory\tShift-Space");
+  m_project_->Enable(ID_PREVIOUS_UNTAGGED_FILE, false);
 
-  wxMenu* m_media = new wxMenu;
-  m_media->Append(ID_PLAY_PAUSE_MEDIA, "&Play/Pause Media\tCtrl-P");
-  m_media->Append(ID_STOP_MEDIA, "&Stop Media\tCtrl-K");
-  m_media->AppendSeparator();
-  m_media->Append(ID_TOGGLE_AUTOPLAY, "Toggle &Autoplay\tCtrl-A");
-  m_media->Append(ID_TOGGLE_LOOPING, "Toggle &Looping\tCtrl-L");
-  m_media->Append(ID_TOGGLE_MUTE, "Toggle &Mute\tCtrl-M");
+  m_media_ = new wxMenu;
+  m_media_->Append(ID_PLAY_PAUSE_MEDIA, "&Play/Pause Media\tCtrl-P");
+  m_media_->Enable(ID_PLAY_PAUSE_MEDIA, false);
+  m_media_->Append(ID_STOP_MEDIA, "&Stop Media\tCtrl-K");
+  m_media_->Enable(ID_STOP_MEDIA, false);
+  m_media_->AppendSeparator();
+  m_media_->Append(ID_TOGGLE_AUTOPLAY, "Toggle &Autoplay\tCtrl-A");
+  m_media_->Append(ID_TOGGLE_LOOPING, "Toggle &Looping\tCtrl-L");
+  m_media_->Append(ID_TOGGLE_MUTE, "Toggle &Mute\tCtrl-M");
 
-  wxMenu* m_tags = new wxMenu;
-  m_tags->Append(ID_DEFINE_NEW_TAG, "Define New &Tag...\tCtrl-T");
-  m_tags->Append(ID_CLEAR_TAGS_FROM_FILE, "&Clear Tags from Active File\tCtrl-C");
-  m_tags->Append(ID_SET_TAGS_TO_DEFAULTS, "&Default Tags on Active File\tCtrl-D");
+  m_tags_ = new wxMenu;
+  m_tags_->Append(ID_DEFINE_NEW_TAG, "Define New &Tag...\tCtrl-T");
+  m_tags_->Append(ID_CLEAR_TAGS_FROM_FILE, "&Clear Tags from Active File\tCtrl-C");
+  m_tags_->Enable(ID_CLEAR_TAGS_FROM_FILE, false);
+  m_tags_->Append(ID_SET_TAGS_TO_DEFAULTS, "&Default Tags on Active File\tCtrl-D");
+  m_tags_->Enable(ID_SET_TAGS_TO_DEFAULTS, false);
 
-  wxMenu* m_window = new wxMenu;
-  m_window->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-Y");
-  m_window->AppendSeparator();
-  m_window->Append(ID_FOCUS_DIRECTORY_VIEW, "&Focus Directory View\tCtrl-F");
-  m_window->Append(ID_REFRESH_FILE_VIEW, "&Refresh Directory View\tF5");
+  m_window_ = new wxMenu;
+  m_window_->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-Y");
+  m_window_->AppendSeparator();
+  m_window_->Append(ID_FOCUS_DIRECTORY_VIEW, "&Focus Directory View\tCtrl-F");
+  m_window_->Append(ID_REFRESH_FILE_VIEW, "&Refresh Directory View\tF5");
+  m_window_->Enable(ID_REFRESH_FILE_VIEW, false);
 
-  wxMenu* m_help = new wxMenu;
-  m_help->Append(wxID_ABOUT);
+  m_help_ = new wxMenu;
+  m_help_->Append(wxID_ABOUT);
 
   wxMenuBar* mb_menu_bar = new wxMenuBar;
-  mb_menu_bar->Append(m_file, "&File");
-  mb_menu_bar->Append(m_project, "&Project");
-  mb_menu_bar->Append(m_media, "&Media");
-  mb_menu_bar->Append(m_tags, "&Tags");
-  mb_menu_bar->Append(m_window, "&Window");
-  mb_menu_bar->Append(m_help, "&Help");
+  mb_menu_bar->Append(m_file_, "&File");
+  mb_menu_bar->Append(m_project_, "&Project");
+  mb_menu_bar->Append(m_media_, "&Media");
+  mb_menu_bar->Append(m_tags_, "&Tags");
+  mb_menu_bar->Append(m_window_, "&Window");
+  mb_menu_bar->Append(m_help_, "&Help");
 
   SetMenuBar(mb_menu_bar);
 
@@ -188,15 +197,15 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPo
   b_refresh_file_view_->Disable();
   b_refresh_file_view_->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
   sz_file_navigation->Add(b_refresh_file_view_, 1, wxEXPAND | wxALL, 5);
-  b_previous_file_ = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
+  b_previous_untagged_file_ = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
     "Previous\nUntagged");
-  b_previous_file_->Disable();
-  b_previous_file_->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
-  sz_file_navigation->Add(b_previous_file_, 1, wxEXPAND | wxALL, 5);
-  b_next_file_ = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next\nUntagged");
-  b_next_file_->Disable();
-  b_next_file_->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
-  sz_file_navigation->Add(b_next_file_, 1, wxEXPAND | wxALL, 5);
+  b_previous_untagged_file_->Disable();
+  b_previous_untagged_file_->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
+  sz_file_navigation->Add(b_previous_untagged_file_, 1, wxEXPAND | wxALL, 5);
+  b_next_untagged_file_ = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next\nUntagged");
+  b_next_untagged_file_->Disable();
+  b_next_untagged_file_->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
+  sz_file_navigation->Add(b_next_untagged_file_, 1, wxEXPAND | wxALL, 5);
   sz_directory->Add(p_file_navigation, 0, wxEXPAND | wxALL, 0);
 
   sw_left->SplitHorizontally(p_media, p_directory, GetSize().y * MEDIA_PANE_STARTING_PROPORTION);
@@ -1351,10 +1360,14 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
   if (RagTagUtil::isStaticMedia(*active_file_)) {
     b_stop_media_->Disable();
     b_play_pause_media_->Disable();
+    m_media_->Enable(ID_STOP_MEDIA, false);
+    m_media_->Enable(ID_PLAY_PAUSE_MEDIA, false);
   }
   else {
     b_stop_media_->Enable();
     b_play_pause_media_->Enable();
+    m_media_->Enable(ID_STOP_MEDIA, true);
+    m_media_->Enable(ID_PLAY_PAUSE_MEDIA, true);
   }
 
   const bool is_newly_added_file = !tag_map_.hasFile(*active_file_);
@@ -1379,10 +1392,17 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
   }
 
   b_refresh_file_view_->Enable();
-  b_previous_file_->Enable();
-  b_next_file_->Enable();
+  b_previous_untagged_file_->Enable();
+  b_next_untagged_file_->Enable();
   b_clear_tags_from_file_->Enable();
   b_set_tags_to_defaults_->Enable();
+  m_window_->Enable(ID_REFRESH_FILE_VIEW, true);
+  m_project_->Enable(ID_PREVIOUS_FILE, true);
+  m_project_->Enable(ID_NEXT_FILE, true);
+  m_project_->Enable(ID_PREVIOUS_UNTAGGED_FILE, true);
+  m_project_->Enable(ID_NEXT_UNTAGGED_FILE, true);
+  m_tags_->Enable(ID_CLEAR_TAGS_FROM_FILE, true);
+  m_tags_->Enable(ID_SET_TAGS_TO_DEFAULTS, true);
 
   refreshTagToggles();
   refreshFileView();
@@ -1409,11 +1429,22 @@ void MainFrame::resetActiveFile()
   refreshFileView();
   refreshRatingButtons();
   refreshSummary();
+  b_stop_media_->Disable();
+  b_play_pause_media_->Disable();
   b_refresh_file_view_->Disable();
-  b_previous_file_->Disable();
-  b_next_file_->Disable();
+  b_previous_untagged_file_->Disable();
+  b_next_untagged_file_->Disable();
   b_clear_tags_from_file_->Disable();
   b_set_tags_to_defaults_->Disable();
+  m_window_->Enable(ID_REFRESH_FILE_VIEW, false);
+  m_project_->Enable(ID_PREVIOUS_FILE, false);
+  m_project_->Enable(ID_NEXT_FILE, false);
+  m_project_->Enable(ID_PREVIOUS_UNTAGGED_FILE, false);
+  m_project_->Enable(ID_NEXT_UNTAGGED_FILE, false);
+  m_media_->Enable(ID_PLAY_PAUSE_MEDIA, false);
+  m_media_->Enable(ID_STOP_MEDIA, false);
+  m_tags_->Enable(ID_CLEAR_TAGS_FROM_FILE, false);
+  m_tags_->Enable(ID_SET_TAGS_TO_DEFAULTS, false);
   user_initiated_stop_media_ = true;
   stopMedia();
   mc_media_display_->Load(wxEmptyString);  // Loading empty path resets the media display to black.
