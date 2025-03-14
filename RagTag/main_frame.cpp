@@ -17,7 +17,7 @@ const double MainFrame::MEDIA_PANE_STARTING_PROPORTION = 0.55;
 const double MainFrame::MEDIA_PANE_MINIMUM_PROPORTION = 0.25;
 const double MainFrame::MEDIA_PANE_GRAVITY = 0.75;
 
-MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.0.1", wxDefaultPosition,
+MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.1.0", wxDefaultPosition,
   wxSize(900, 720)) {
   SetMinSize(wxSize(800, 540));
 
