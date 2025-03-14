@@ -104,6 +104,7 @@ public:
     NONE,
     SELECT_FILE,
     REMOVE_FILES,
+    DELETE_FILES
   };
 
   // NOTE: wxCommandEvent ctrl allows communication of a specific ID. Until we have use for that, we
