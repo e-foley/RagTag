@@ -1180,7 +1180,7 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
           L"' from the project.");
       }
 
-      if (next_file.has_value()) {
+      if (next_file.has_value() && *next_file != path_cache) {
         loadFileAndSetAsActive(*next_file);
       }
       else {
