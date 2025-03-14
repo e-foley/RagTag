@@ -262,15 +262,15 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.1.0", wxDefaultPo
   wxBoxSizer* sz_tag_toggles_button_bar = new wxBoxSizer(wxHORIZONTAL);
   p_tag_toggles_button_bar->SetSizer(sz_tag_toggles_button_bar);
   wxButton* b_define_new_tag = new wxButton(p_tag_toggles_button_bar, ID_DEFINE_NEW_TAG,
-    "Define\nNew Tag...");
+    "Create Tag...");
   b_define_new_tag->Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this);
   sz_tag_toggles_button_bar->Add(b_define_new_tag, 1, wxEXPAND | wxALL, 5);
   b_clear_tags_from_file_ = new wxButton(p_tag_toggles_button_bar, ID_CLEAR_TAGS_FROM_FILE,
-    "Clear Tags\nfrom File");
+    "Clear File Tags");
   b_clear_tags_from_file_->Bind(wxEVT_BUTTON, &MainFrame::OnClearTagsFromFile, this);
   sz_tag_toggles_button_bar->Add(b_clear_tags_from_file_, 1, wxEXPAND | wxALL, 5);
   b_set_tags_to_defaults_ = new wxButton(p_tag_toggles_button_bar, ID_SET_TAGS_TO_DEFAULTS,
-    "Set Tags\nto Defaults");
+    "Default File Tags");
   b_set_tags_to_defaults_->Bind(wxEVT_BUTTON, &MainFrame::OnSetTagsToDefaults, this);
   sz_tag_toggles_button_bar->Add(b_set_tags_to_defaults_, 1, wxEXPAND | wxALL, 5);
   sz_tags->Add(p_tag_toggles_button_bar, 0, wxEXPAND | wxALL, 0);
