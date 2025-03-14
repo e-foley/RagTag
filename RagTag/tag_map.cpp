@@ -39,7 +39,7 @@ namespace ragtag {
     for (const auto& file_it : file_map_) {
       if (!clearTag(file_it.first, tag)) {
         std::wcerr << L"Couldn't clear tag '" << tag << L"' from file '"
-          << file_it.first.generic_wstring() << L"'.\n";
+          << file_it.first.wstring() << L"'.\n";
         was_tag_cleared_from_all_files = false;
       }
     }
@@ -67,7 +67,7 @@ namespace ragtag {
       if (setting.has_value() && *setting != TagSetting::UNCOMMITTED) {
         if (!setTag(file_entry.first, copy_name, *setting)) {
           std::wcerr << "Could not set tag '" << copy_name << L"' on file '"
-            << file_entry.first.generic_wstring() << L"' during tag copy operation.\n";
+            << file_entry.first.wstring() << L"' during tag copy operation.\n";
         }
       }
     }
@@ -445,7 +445,7 @@ namespace ragtag {
 
       bool add_file_success = tag_map.addFile(path);
       if (!add_file_success) {
-        std::wcerr << "Failed to add file '" << path.generic_wstring() << "' to TagMap object.\n";
+        std::wcerr << "Failed to add file '" << path.wstring() << "' to TagMap object.\n";
         continue;
       }
 
@@ -453,7 +453,7 @@ namespace ragtag {
       if (rating_json == file_it.end()) {
         // Not an issue, since "rating" is optional.
         if (!tag_map.clearRating(path)) {
-          std::wcerr << "Couldn't clear rating for file '" << path.generic_wstring() << "'\n";
+          std::wcerr << "Couldn't clear rating for file '" << path.wstring() << "'\n";
           continue;
         }
       }
@@ -467,7 +467,7 @@ namespace ragtag {
       const auto yes_tags_json_it = file_it.find("yes_tags");
       if (yes_tags_json_it == file_it.end()) {
         // Can't find "yes_tags" definition.
-        std::wcerr << "File '" << path.generic_wstring() << "' lacks 'yes_tags' definition.\n";
+        std::wcerr << "File '" << path.wstring() << "' lacks 'yes_tags' definition.\n";
         continue;
       }
       nlohmann::json yes_tags_json = *yes_tags_json_it;
@@ -476,12 +476,12 @@ namespace ragtag {
         const auto yes_tag_it = id_to_tag_map.find(yes_tag_id);
         if (yes_tag_it == id_to_tag_map.end()) {
           std::wcerr << "Couldn't find yes-tag ID " << yes_tag_id
-            << " within internal map for file '" << path.generic_wstring() << "'.\n";
+            << " within internal map for file '" << path.wstring() << "'.\n";
           continue;
         }
         if (!tag_map.setTag(path, yes_tag_it->second, TagSetting::YES)) {
           std::wcerr << L"Couldn't set tag '" << yes_tag_it->second << L"' to YES for file '"
-            << path.generic_wstring() << L"'.\n";
+            << path.wstring() << L"'.\n";
           continue;
         }
       }
@@ -489,7 +489,7 @@ namespace ragtag {
       const auto no_tags_json_it = file_it.find("no_tags");
       if (no_tags_json_it == file_it.end()) {
         // Can't find "no_tags" definition.
-        std::wcerr << "File '" << path.generic_wstring() << "' lacks 'no_tags' definition.\n";
+        std::wcerr << "File '" << path.wstring() << "' lacks 'no_tags' definition.\n";
         continue;
       }
       nlohmann::json no_tags_json = *no_tags_json_it;
@@ -498,12 +498,12 @@ namespace ragtag {
         const auto no_tag_it = id_to_tag_map.find(no_tag_id);
         if (no_tag_it == id_to_tag_map.end()) {
           std::wcerr << "Couldn't find no-tag ID " << no_tag_id
-            << " within internal map for file '" << path.generic_wstring() << "'.\n";
+            << " within internal map for file '" << path.wstring() << "'.\n";
           continue;
         }
         if (!tag_map.setTag(path, no_tag_it->second, TagSetting::NO)) {
           std::wcerr << L"Couldn't set tag '" << no_tag_it->second << L"' to NO for file '"
-            << path.generic_wstring() << L"'.\n";
+            << path.wstring() << L"'.\n";
           continue;
         }
       }

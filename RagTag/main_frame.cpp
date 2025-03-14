@@ -338,7 +338,7 @@ void MainFrame::refreshTagToggles() {
   auto registered_tags = tag_map_.getAllTags();
 
   if (is_file_active && !tag_map_.hasFile(*active_file_)) {
-    std::wcerr << "Active file '" << active_file_->generic_wstring()
+    std::wcerr << "Active file '" << active_file_->wstring()
       << "' isn't known to tag map in refreshTagToggles().\n";
     p_tag_toggles_->Thaw();
     return;
@@ -361,7 +361,7 @@ void MainFrame::refreshTagToggles() {
 
     if (!tag_setting.has_value()) {
       std::wcerr << "Failed to establish tag setting for '" << tag_element.first
-        << "' within file '" << active_file_->generic_wstring() << "'.\n";
+        << "' within file '" << active_file_->wstring() << "'.\n";
       continue;
     }
 
@@ -413,7 +413,7 @@ void MainFrame::refreshFileView()
   const int num_list_view_entries_original = lc_files_in_directory_->GetItemCount();
 
   const ragtag::path_t parent_directory = active_file_->parent_path();
-  st_current_directory_->SetLabelText(parent_directory.generic_wstring());
+  st_current_directory_->SetLabelText(parent_directory.wstring());
 
   int i = 0;
   // Note: directory_iterator documentation explains that the end iterator is equal to the
@@ -427,11 +427,11 @@ void MainFrame::refreshFileView()
 
     if (i >= lc_files_in_directory_->GetItemCount()) {
       // We're expanding beyond the current capacity and need to insert a new item.
-      lc_files_in_directory_->InsertItem(i, file_it->path().filename().generic_wstring());
+      lc_files_in_directory_->InsertItem(i, file_it->path().filename().wstring());
     }
     else {
       // We're within the list's capacity and can simply edit existing data.
-      lc_files_in_directory_->SetItem(i, 0, file_it->path().filename().generic_wstring());
+      lc_files_in_directory_->SetItem(i, 0, file_it->path().filename().wstring());
     }
     
     file_paths_.push_back(file_it->path());
@@ -601,7 +601,7 @@ void MainFrame::OnSaveProject(wxCommandEvent& event) {
   }
 
   is_dirty_ = false;
-  SetStatusText(L"Saved project '" + project_path_->generic_wstring() + L"'.");
+  SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
 }
 
 void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
@@ -616,7 +616,7 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
   }
   project_path_ = path;
   is_dirty_ = false;
-  SetStatusText(L"Saved project '" + project_path_->generic_wstring() + L"'.");
+  SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
 }
 
 void MainFrame::OnFocusDirectoryView(wxCommandEvent& event)
@@ -1005,7 +1005,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
       if (!tag_map_.setTag(*active_file_, event.getTag(), event.getDesiredState())) {
         // TODO: Report error.
         SetStatusText(L"Could not assert tag '" + event.getTag() + L"' on file '"
-          + active_file_->generic_wstring() + L"'.");
+          + active_file_->wstring() + L"'.");
       }
     }
     break;
@@ -1084,7 +1084,7 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
 
     if (!loadFileAndSetAsActive(path_container[0])) {
       // TODO: Report error
-      SetStatusText(L"Could not display file '" + path_container[0].generic_wstring() + L"'.");
+      SetStatusText(L"Could not display file '" + path_container[0].wstring() + L"'.");
     }
     break;
   }
@@ -1171,12 +1171,12 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
         *active_file_, [](const ragtag::path_t&) {return true; }, true);
       if (!RagTagUtil::deleteFile(path_cache)) {
         // TODO: Report error.
-        SetStatusText(L"Could not delete file '" + path_cache.generic_wstring() + L"'.");
+        SetStatusText(L"Could not delete file '" + path_cache.wstring() + L"'.");
       }
 
       // Remove the file from our project also.
       if (!tag_map_.removeFile(path_cache)) {
-        SetStatusText(L"Could not remove file '" + path_cache.generic_wstring() +
+        SetStatusText(L"Could not remove file '" + path_cache.wstring() +
           L"' from the project.");
       }
 
@@ -1253,10 +1253,10 @@ MainFrame::UserIntention MainFrame::promptUnsavedChanges() {
 
 std::optional<ragtag::path_t> MainFrame::promptSaveProjectAs() {
   const wxString default_project_name = L"project"
-    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.generic_wstring();
+    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.wstring();
   const wxString dropdown = L"RagTag project files (*"
-    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.generic_wstring() + L")|*"
-    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.generic_wstring();
+    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.wstring() + L")|*"
+    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.wstring();
 
   const wxString wx_path = wxFileSelector("Save Project As", wxEmptyString, default_project_name,
     RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.c_str(), dropdown, wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
@@ -1271,11 +1271,11 @@ std::optional<ragtag::path_t> MainFrame::promptSaveProjectAs() {
 
 std::optional<ragtag::path_t> MainFrame::promptOpenProject() {
   const wxString dropdown = L"RagTag project files (*"
-    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.generic_wstring() + L")|*"
-    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.generic_wstring()
+    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.wstring() + L")|*"
+    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.wstring()
     + L"|RagTag project file backups (*"
-    + RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION.generic_wstring() + L")|*"
-    + RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION.generic_wstring();
+    + RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION.wstring() + L")|*"
+    + RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION.wstring();
 
   const wxString wx_path = wxFileSelector("Open Project", wxEmptyString, wxEmptyString,
     wxEmptyString, dropdown, wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
@@ -1311,7 +1311,7 @@ bool MainFrame::promptConfirmTagDeletion(ragtag::tag_t tag)
 bool MainFrame::promptConfirmFileDeletion(const ragtag::path_t& path)
 {
   wxMessageDialog dialog(this, L"Are you sure you wish to delete file '"
-    + path.generic_wstring() + L"'?\n\nThis action will remove the file from your machine.",
+    + path.wstring() + L"'?\n\nThis action will remove the file from your machine.",
     "Confirm File Deletion", wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
   dialog.SetOKCancelLabels("Delete file", "Cancel");
   return dialog.ShowModal() == wxID_OK;
@@ -1357,16 +1357,16 @@ bool MainFrame::promptSaveOpportunityIfDirty()
 
 void MainFrame::notifyCouldNotSaveProject(const ragtag::path_t& path)
 {
-  SetStatusText(L"Could not save project '" + path.generic_wstring() + L"'.");
-  wxMessageDialog dialog(this, L"Failed to save project '" + path.generic_wstring() + L"'.",
+  SetStatusText(L"Could not save project '" + path.wstring() + L"'.");
+  wxMessageDialog dialog(this, L"Failed to save project '" + path.wstring() + L"'.",
     "Failed to Save Project", wxICON_ERROR);
   dialog.ShowModal();
 }
 
 void MainFrame::notifyCouldNotOpenProject(const ragtag::path_t& path)
 {
-  SetStatusText(L"Could not open project '" + path.generic_wstring() + L"'.");
-  wxMessageDialog dialog(this, L"Failed to open project '" + path.generic_wstring() + L"'.",
+  SetStatusText(L"Could not open project '" + path.wstring() + L"'.");
+  wxMessageDialog dialog(this, L"Failed to open project '" + path.wstring() + L"'.",
     "Failed to Open Project", wxICON_ERROR);
   dialog.ShowModal();
 }
@@ -1392,7 +1392,7 @@ bool MainFrame::saveProjectAs(const ragtag::path_t& path) {
   const ragtag::path_t backup_path = getBackupPath(path);
   if (success && !std::filesystem::copy_file(path, backup_path)) {
     // We think we wrote the primary file but couldn't write the backup file.
-    std::cerr << "Couldn't write backup file '" + backup_path.generic_string() + "'.\n";
+    std::wcerr << L"Couldn't write backup file '" + backup_path.wstring() + L"'.\n";
     return false;
   }
 
@@ -1408,7 +1408,7 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
 
   if (!std::filesystem::exists(path)) {
     // TODO: Report error.
-    SetStatusText(L"File '" + path.generic_wstring() + L"' does not exist.");
+    SetStatusText(L"File '" + path.wstring() + L"' does not exist.");
     return false;
   }
 
@@ -1417,7 +1417,7 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
   if (!displayMediaFile(*active_file_)) {
     // File is "loaded," it just can't be displayed.
     // TODO: Display placeholder text or something in the media preview when this happens.
-    SetStatusText(L"Couldn't display file '" + active_file_->generic_wstring() + L"'.");
+    SetStatusText(L"Couldn't display file '" + active_file_->wstring() + L"'.");
   }
 
   if (RagTagUtil::isStaticMedia(*active_file_)) {
@@ -1440,7 +1440,7 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
     // Declare file to our tag map.
     if (!tag_map_.addFile(*active_file_)) {
       // TODO: Report error.
-      SetStatusText(L"Couldn't add file '" + active_file_->generic_wstring() + L"' to tag map.");
+      SetStatusText(L"Couldn't add file '" + active_file_->wstring() + L"' to tag map.");
       return false;
     }
 
@@ -1448,7 +1448,7 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
     for (auto tag_it : tag_map_.getAllTags()) {
       if (!tag_map_.setTag(*active_file_, tag_it.first, tag_it.second.default_setting)) {
         // TODO: Report error.
-        SetStatusText(L"Couldn't set tag on file '" + active_file_->generic_wstring() + L"'.");
+        SetStatusText(L"Couldn't set tag on file '" + active_file_->wstring() + L"'.");
         return false;
       }
     }
@@ -1481,7 +1481,7 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
 
   Refresh();
 
-  SetStatusText(L"Loaded file '" + active_file_->generic_wstring() + L"'.");
+  SetStatusText(L"Loaded file '" + active_file_->wstring() + L"'.");
   return true;
 }
 
@@ -1526,13 +1526,13 @@ bool MainFrame::openProject(const ragtag::path_t& path)
   project_path_ = path;
   resetActiveFile();
   is_dirty_ = false;
-  SetStatusText(L"Opened project '" + project_path_->generic_wstring() + L"'.");
+  SetStatusText(L"Opened project '" + project_path_->wstring() + L"'.");
   return true;
 }
 
 bool MainFrame::displayMediaFile(const ragtag::path_t& path)
 {
-  bool load_result = mc_media_display_->Load(path.generic_wstring());
+  bool load_result = mc_media_display_->Load(path.wstring());
   // TODO: SetVolume() returns a bool that we can choose to use if we'd like.
   mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
   return load_result;
@@ -1564,7 +1564,7 @@ bool MainFrame::clearRatingOfActiveFile()
 
   if (!tag_map_.clearRating(*active_file_)) {
     // TODO: Log error.
-    SetStatusText(L"Could not clear rating on file '" + active_file_->generic_wstring() + L"'.");
+    SetStatusText(L"Could not clear rating on file '" + active_file_->wstring() + L"'.");
     return false;
   }
 
@@ -1583,7 +1583,7 @@ bool MainFrame::setRatingOfActiveFile(ragtag::rating_t rating)
 
   if (!tag_map_.setRating(*active_file_, rating)) {
     // TODO: Log error.
-    SetStatusText(L"Could not set rating on file '" + active_file_->generic_wstring() + L"'.");
+    SetStatusText(L"Could not set rating on file '" + active_file_->wstring() + L"'.");
     return false;
   }
 
@@ -1706,7 +1706,7 @@ ragtag::path_t MainFrame::getBackupPath(const ragtag::path_t& nominal_path)
 {
   // Take floor of seconds so that we aren't left with long decimals in the resulting filename.
   const auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());
-  const std::wstring filename = nominal_path.stem().generic_wstring()
+  const std::wstring filename = nominal_path.stem().wstring()
     + std::format(L"_{0:%Y%m%d%H%M%S}.tagdefbk", now);
   return nominal_path.parent_path() / ragtag::path_t(filename);
 }

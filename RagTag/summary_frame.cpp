@@ -658,7 +658,7 @@ void SummaryFrame::populateAndEllipsizePathColumn()
       continue;
     }
 
-    std::wstring path_displayed = path->generic_wstring();
+    std::wstring path_displayed = path->wstring();
     if (!std::filesystem::exists(*path)) {
       path_displayed.append(L" [???]");
     }

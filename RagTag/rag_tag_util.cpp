@@ -39,7 +39,7 @@ bool RagTagUtil::isStaticMedia(const ragtag::path_t& path)
   static std::vector<std::wstring> static_types = {
     L".bmp", L".gif", L".jpg", L".jpeg", L".png", L".tif", L".tiff", L".wmf"
   };
-  std::wstring extension = path.extension().generic_wstring();
+  std::wstring extension = path.extension().wstring();
   // Lowercase conversion from https://stackoverflow.com/a/313990
   std::transform(extension.begin(), extension.end(), extension.begin(),
     [](wchar_t c) { return std::tolower(c); });
@@ -59,7 +59,7 @@ std::wstring RagTagUtil::getPathsAsNewlineDelineatedString(const std::vector<rag
     if (i > 0) {
       building += L"\n";
     }
-    building += paths[i].generic_wstring();
+    building += paths[i].wstring();
   }
   return building;
 }
