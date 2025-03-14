@@ -19,6 +19,7 @@ const int SummaryFrame::PATH_EXTENT_MARGIN_PX = 30;
 SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Project Summary",
   wxDefaultPosition, wxSize(1280, 768))
 {
+  SetMinSize(wxSize(620, 360));
   wxPanel* p_main = new wxPanel(this, wxID_ANY);
   wxBoxSizer* sz_main = new wxBoxSizer(wxVERTICAL);
   p_main->SetSizer(sz_main);
