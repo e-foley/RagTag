@@ -528,13 +528,13 @@ namespace ragtag {
       temp_stream << tag_map_as_json;  // This can throw, e.g., with non-UTF-8 chars.
 
       if (!temp_stream.good()) {
-        std::cerr << "Temporary string buffer is not good() after writing to it.\n";
+        std::wcerr << L"Temporary string buffer is not good() after writing to it.\n";
         return false;
       }
 
       std::ofstream output_file(path);
       if (!output_file.good()) {
-        std::cerr << "Output file buffer is not good() after opening it.\n";
+        std::wcerr << L"Output file buffer is not good() after opening it.\n";
         return false;
       }
 
@@ -543,7 +543,7 @@ namespace ragtag {
 
       if (!output_file.good()) {
         // This is a bad situation since we may have already modified the file on disk...
-        std::cerr << "Output file buffer is not good() after writing to it.\n";
+        std::wcerr << L"Output file buffer is not good() after writing to it.\n";
         return false;
       }
 
@@ -551,7 +551,7 @@ namespace ragtag {
     }
     catch (...) {
       // Exception happened. Don't try to write the file at all since it could get corrupted.
-      std::cerr << "Exception thrown when writing JSON to file.\n";
+      std::wcerr << L"Exception thrown when writing JSON to file.\n";
       return false;
     }
   }
@@ -579,7 +579,7 @@ namespace ragtag {
       return *tag_map_result;
     }
     catch (...) {
-      std::cerr << "Exception thrown when converting file to JSON.\n";
+      std::wcerr << L"Exception thrown when converting file to JSON.\n";
       return {};
     }
   }
