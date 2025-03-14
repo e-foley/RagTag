@@ -25,7 +25,7 @@ TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, wxString lab
     wxDefaultSize, wxBU_EXACTFIT);
   b_tag_edit->Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickEdit, this);
   sz_tag_toggle->Add(b_tag_edit, 0, wxALIGN_CENTER, 5);
-  wxButton* b_tag_delete = new wxButton(this, wxID_ANY, "X", wxDefaultPosition,
+  wxButton* b_tag_delete = new wxButton(this, wxID_ANY, " X ", wxDefaultPosition,
     wxDefaultSize, wxBU_EXACTFIT);
   b_tag_delete->Bind(wxEVT_BUTTON, &TagTogglePanel::OnClickDelete, this);
   sz_tag_toggle->Add(b_tag_delete, 0, wxALIGN_CENTER, 5);
