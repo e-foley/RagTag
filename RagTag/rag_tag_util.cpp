@@ -14,6 +14,8 @@ const wxString RagTagUtil::GLYPH_RATING_HALF_STAR = L"\U00002BE8";  // U+2BE8 is
 const wxString RagTagUtil::GLYPH_RATING_HALF_STAR = L"\U000000BD";  // U+00BD is a half fraction.
 #endif
 const int RagTagUtil::MAX_STARS = 5;
+const ragtag::path_t RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION = L".tagdef";
+const ragtag::path_t RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION = L".tagdefbk";
 
 wxString RagTagUtil::getStarTextForRating(float rating)
 {

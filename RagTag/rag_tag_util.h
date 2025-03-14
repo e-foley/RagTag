@@ -11,6 +11,8 @@ extern const wxString GLYPH_UNCHECKED;
 extern const wxString GLYPH_RATING_FULL_STAR;
 extern const wxString GLYPH_RATING_HALF_STAR;
 extern const int MAX_STARS;
+extern const ragtag::path_t DEFAULT_TAG_MAP_FILE_EXTENSION;
+extern const ragtag::path_t BACKUP_TAG_MAP_FILE_EXTENSION;
 
 wxString getStarTextForRating(float rating);
 bool isStaticMedia(const ragtag::path_t& path);

@@ -1,6 +1,7 @@
 #include "main_frame.h"
 #include "rag_tag_util.h"
 #include "tag_entry_dialog.h"
+#include <chrono>
 #include <wx/filedlg.h>
 #include <wx/splitter.h>
 #include <wx/statusbr.h>
@@ -581,7 +582,8 @@ void MainFrame::OnOpenProject(wxCommandEvent& event) {
 }
 
 void MainFrame::OnSaveProject(wxCommandEvent& event) {
-  if (!project_path_.has_value()) {
+  if (!project_path_.has_value() || project_path_->extension() ==
+    RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION) {
     const std::optional<ragtag::path_t> path = promptSaveProjectAs();
     if (!path.has_value()) {
       // User canceled dialog.
@@ -1211,8 +1213,15 @@ MainFrame::UserIntention MainFrame::promptUnsavedChanges() {
 }
 
 std::optional<ragtag::path_t> MainFrame::promptSaveProjectAs() {
-  wxString wx_path = wxFileSelector("Save Project As", wxEmptyString, "project.tagdef", ".tagdef",
-    "RagTag project files (*.tagdef)|*.tagdef", wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
+  const wxString default_project_name = L"project"
+    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.generic_wstring();
+  const wxString dropdown = L"RagTag project files (*"
+    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.generic_wstring() + L")|*"
+    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.generic_wstring();
+
+  const wxString wx_path = wxFileSelector("Save Project As", wxEmptyString, default_project_name,
+    RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.c_str(), dropdown, wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
+    this);
   if (wx_path.empty()) {
     // User canceled the dialog.
     return {};
@@ -1222,8 +1231,15 @@ std::optional<ragtag::path_t> MainFrame::promptSaveProjectAs() {
 }
 
 std::optional<ragtag::path_t> MainFrame::promptOpenProject() {
-  wxString wx_path = wxFileSelector("Open Project", wxEmptyString, wxEmptyString, wxEmptyString,
-      "RagTag project files (*.tagdef)|*.tagdef", wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
+  const wxString dropdown = L"RagTag project files (*"
+    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.generic_wstring() + L")|*"
+    + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.generic_wstring()
+    + L"|RagTag project file backups (*"
+    + RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION.generic_wstring() + L")|*"
+    + RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION.generic_wstring();
+
+  const wxString wx_path = wxFileSelector("Open Project", wxEmptyString, wxEmptyString,
+    wxEmptyString, dropdown, wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
   if (wx_path.empty()) {
     // User canceled the dialog.
     return {};
@@ -1325,15 +1341,23 @@ void MainFrame::newProject() {
 bool MainFrame::saveProject() {
   if (!project_path_.has_value()) {
     // This shouldn't happen per the function's preconditions.
-    // TODO: Log error
+    // TODO: Log error.
     return false;
   }
 
-  return tag_map_.toFile(*project_path_);
+  return saveProjectAs(*project_path_);
 }
 
 bool MainFrame::saveProjectAs(const ragtag::path_t& path) {
-  return tag_map_.toFile(path);
+  bool success = tag_map_.toFile(path);
+  const ragtag::path_t backup_path = getBackupPath(path);
+  if (success && !std::filesystem::copy_file(path, backup_path)) {
+    // We think we wrote the primary file but couldn't write the backup file.
+    std::cerr << "Couldn't write backup file '" + backup_path.generic_string() + "'.\n";
+    return false;
+  }
+
+  return success;
 }
 
 bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
@@ -1660,3 +1684,13 @@ std::optional<long> MainFrame::getPathListCtrlIndex(const ragtag::path_t& path) 
 
   return {};
 }
+
+ragtag::path_t MainFrame::getBackupPath(const ragtag::path_t& nominal_path)
+{
+  // Take floor of seconds so that we aren't left with long decimals in the resulting filename.
+  const auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());
+  const std::wstring filename = nominal_path.stem().generic_wstring()
+    + std::format(L"_{0:%Y%m%d%H%M%S}.tagdefbk", now);
+  return nominal_path.parent_path() / ragtag::path_t(filename);
+}
+

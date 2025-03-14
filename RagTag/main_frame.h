@@ -159,6 +159,7 @@ private:
     const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);
   TagCoverage getFileTagCoverage(const ragtag::path_t& file) const;
   std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
+  static ragtag::path_t getBackupPath(const ragtag::path_t& nominal_path);
 
   wxMenu* m_file_{ nullptr };
   wxMenu* m_project_{ nullptr };
