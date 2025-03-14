@@ -1210,8 +1210,8 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
   else if (key_code == 'W' && modifiers == wxMOD_CONTROL) {
     Close(false);  // `false` allows action to be vetoed in OnClose event handler.
   }
-  else if (key_code == WXK_ESCAPE) {
-    p_tag_toggles_->SetFocus();  // Focus away from elements that might otherwise intercept keys.
+  else if (lc_files_in_directory_->HasFocus() && key_code == WXK_ESCAPE) {
+    p_tag_toggles_->SetFocus();  // Focus away from file list that might otherwise intercept keys.
   }
   else if (lc_files_in_directory_->HasFocus()) {
     // Don't preempt directory navigation keystrokes.
