@@ -1,6 +1,7 @@
 #include "rag_tag_util.h"
 #include "summary_frame.h"
 #include <filesystem>
+#include <functional>
 #include <wx/dcclient.h>
 #include <wx/dirdlg.h> 
 #include <wx/msgdlg.h>
@@ -135,6 +136,9 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   b_deselect_all_files->Bind(wxEVT_BUTTON, &SummaryFrame::OnDeselectAllFiles, this);
   sz_summary_buttons->Add(b_deselect_all_files, 0, wxALL, 5);
   sz_summary_buttons->AddStretchSpacer(1);  // Stretch spacer at center to separate button groups
+  b_delete_files_ = new wxButton(p_summary_buttons, wxID_ANY, "Delete Selected Files");
+  b_delete_files_->Bind(wxEVT_BUTTON, &SummaryFrame::OnDeleteFiles, this);
+  sz_summary_buttons->Add(b_delete_files_, 0, wxALL, 5);
   b_remove_from_project_ = new wxButton(p_summary_buttons, wxID_ANY,
     "Remove Selected Files from Project");
   b_remove_from_project_->Bind(wxEVT_BUTTON, &SummaryFrame::OnRemoveFromProject, this);
@@ -420,6 +424,26 @@ void SummaryFrame::OnCopySelections(wxCommandEvent& event)
   ShellExecute(NULL, L"open", directory->c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
+void SummaryFrame::OnDeleteFiles(wxCommandEvent& event)
+{
+  const std::vector<ragtag::path_t> paths_to_delete = getPathsOfSelectedFiles();
+  const std::string path_plural_1 = paths_to_delete.size() == 1 ? "" : "s";
+  const std::string path_plural_2 = paths_to_delete.size() == 1 ? "This file" : "These files";
+  wxMessageDialog dialog(this, "Are you sure you want to delete "
+    + std::to_string(paths_to_delete.size()) + " file" + path_plural_1 + " from your machine?\n\n"
+    + path_plural_2 + " will be deleted:\n"
+    + wxString(RagTagUtil::getPathsAsNewlineDelineatedString(paths_to_delete)),
+    "Confirm File Deletion", wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+
+  const SummaryFrameEvent sending(getPathsOfSelectedFiles(),
+    SummaryFrameEvent::Action::DELETE_FILES);
+  wxPostEvent(GetParent(), sending);
+  event.Skip();
+}
+
 void SummaryFrame::OnRemoveFromProject(wxCommandEvent& event)
 {
   const std::vector<ragtag::path_t> paths_to_remove = getPathsOfSelectedFiles();
@@ -427,8 +451,9 @@ void SummaryFrame::OnRemoveFromProject(wxCommandEvent& event)
   const std::string path_plural_2 = paths_to_remove.size() == 1 ? "this file" : "these files";
   wxMessageDialog dialog(this, "Are you sure you want to remove "
     + std::to_string(paths_to_remove.size()) + " file" + path_plural_1 + " from this project?\n\n"
-    "All tags will be removed from " + path_plural_2 + ".", "Confirm File Removal",
-    wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
+    + "All tags will be removed from " + path_plural_2 + ":\n"
+    + wxString(RagTagUtil::getPathsAsNewlineDelineatedString(paths_to_remove)),
+    "Confirm File Removal", wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
   if (dialog.ShowModal() != wxID_OK) {
     return;
   }
@@ -599,10 +624,12 @@ void SummaryFrame::updateCopyButtonTextForSelections()
 {
   const int selected_item_count = getPathsOfSelectedFiles().size();
   if (selected_item_count == 0) {
+    b_delete_files_->Disable();
     b_remove_from_project_->Disable();
     b_copy_selections_->Disable();
   }
   else {
+    b_delete_files_->Enable();
     b_remove_from_project_->Enable();
     b_copy_selections_->Enable();
   }

@@ -3,6 +3,8 @@
 
 #include "tag_map.h"
 #include <wx/string.h>
+#include <string>
+#include <vector>
 
 namespace RagTagUtil {
 extern const wxString GLYPH_CHECKED;
@@ -16,6 +18,8 @@ extern const ragtag::path_t BACKUP_TAG_MAP_FILE_EXTENSION;
 
 wxString getStarTextForRating(float rating);
 bool isStaticMedia(const ragtag::path_t& path);
+std::wstring getPathsAsNewlineDelineatedString(const std::vector<ragtag::path_t>& paths);
+bool deleteFile(const ragtag::path_t& path);
 }  // namespace RagTagUtil
 
 #endif  // INCLUDE_RAG_TAG_UTIL_H

@@ -1,5 +1,5 @@
 #include "rag_tag_util.h"
-#include <string>
+#include <wx/wx.h>
 
 // The font used by wxWidgets does not display half-star characters as of writing.
 // #define HALF_STAR_GLYPH_SUPPORTED
@@ -52,3 +52,36 @@ bool RagTagUtil::isStaticMedia(const ragtag::path_t& path)
   return false;
 }
 
+std::wstring RagTagUtil::getPathsAsNewlineDelineatedString(const std::vector<ragtag::path_t>& paths)
+{
+  std::wstring building;
+  for (int i = 0; i < paths.size(); ++i) {
+    if (i > 0) {
+      building += L"\n";
+    }
+    building += paths[i].generic_wstring();
+  }
+  return building;
+}
+
+// Approach from SO user Zeltrax: https://stackoverflow.com/a/70258061
+bool RagTagUtil::deleteFile(const ragtag::path_t& path)
+{
+  // `pFrom` argument needs to be double null-terminated.
+  std::wstring widestr = path.wstring() + L'\0';
+
+  SHFILEOPSTRUCT fileOp;
+  fileOp.hwnd = NULL;
+  fileOp.wFunc = FO_DELETE;
+  fileOp.pFrom = widestr.c_str();
+  fileOp.pTo = NULL;
+  fileOp.fFlags = FOF_ALLOWUNDO | FOF_NOERRORUI | FOF_NOCONFIRMATION | FOF_SILENT;
+  int result = SHFileOperation(&fileOp);
+
+  if (result != 0) {
+    return false;
+  }
+  else {
+    return true;
+  }
+}

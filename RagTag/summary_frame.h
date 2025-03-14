@@ -52,6 +52,7 @@ private:
   void OnSelectAllFiles(wxCommandEvent& event);
   void OnDeselectAllFiles(wxCommandEvent& event);
   void OnCopySelections(wxCommandEvent& event);
+  void OnDeleteFiles(wxCommandEvent& event);
   void OnRemoveFromProject(wxCommandEvent& event);
   void OnKeyPressed(wxKeyEvent& event);
   void OnClose(wxCloseEvent& event);
@@ -87,6 +88,7 @@ private:
   wxCheckBox* cb_show_missing_{};
   wxStaticText* st_filtered_file_count_{};
   wxListCtrl* lc_summary_{};
+  wxButton* b_delete_files_{};
   wxButton* b_remove_from_project_{};
   wxButton* b_copy_selections_{};
 };

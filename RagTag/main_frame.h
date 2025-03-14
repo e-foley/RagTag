@@ -151,7 +151,6 @@ private:
   bool playMedia();
   bool pauseMedia();
   bool stopMedia();
-  bool deleteFile(const ragtag::path_t& path);
   bool clearRatingOfActiveFile();
   bool setRatingOfActiveFile(ragtag::rating_t rating);
   // Helper functions

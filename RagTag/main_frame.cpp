@@ -1113,6 +1113,40 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
     }
     break;
   }
+  case SummaryFrameEvent::Action::DELETE_FILES: {
+    // Confirmation has already been granted if this event fires.
+    int deleted_file_count = 0;
+    for (const auto& path : event.getPaths()) {
+      if (RagTagUtil::deleteFile(path)) {
+        ++deleted_file_count;
+      }
+      // Deleted files should also be removed from the project lest we retain dangling references to
+      // files that don't exist anymore.
+      // TODO: Use this bool for extra error reporting.
+      if (tag_map_.removeFile(path)) {
+        is_dirty_ = true;
+        if (active_file_.has_value() && path == *active_file_) {
+          // The file we're removing from the project is the actively loaded one. Reset active_file_.
+          resetActiveFile();
+        }
+      }
+    }
+
+    // Note that some of these already get invoked in the case that we resetActiveFile(). We can
+    // optimize these redundant calls out later if we really want to.
+    refreshFileView();
+    refreshRatingButtons();
+    refreshSummary();
+
+    // This shouldn't be nullptr, but we still guard against it to be safe.
+    if (f_summary_ != nullptr) {
+      const std::string file_plural = deleted_file_count == 1 ? " was" : "s were";
+      wxMessageDialog dialog(f_summary_, std::to_string(deleted_file_count)
+        + " file" + file_plural + " deleted.", "Files Deleted");
+      dialog.ShowModal();
+    }
+    break;
+  }
   default:
     std::wcerr << "Unrecognized SummaryFrameEvent action.\n";
     break;
@@ -1130,7 +1164,7 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
       // Cache next file name so that we can switch to it if deletion is successful.
       const auto next_file = qualifiedFileNavigator(
         *active_file_, [](const ragtag::path_t&) {return true; }, true);
-      if (!deleteFile(path_cache)) {
+      if (!RagTagUtil::deleteFile(path_cache)) {
         // TODO: Report error.
         SetStatusText(L"Could not delete file '" + path_cache.generic_wstring() + L"'.");
       }
@@ -1515,28 +1549,6 @@ bool MainFrame::stopMedia()
 {
   // NOTE: Returns an undocumented bool.
   return mc_media_display_->Stop();
-}
-
-// Approach from SO user Zeltrax: https://stackoverflow.com/a/70258061
-bool MainFrame::deleteFile(const ragtag::path_t& path)
-{
-  // `pFrom` argument needs to be double null-terminated.
-  std::wstring widestr = path.wstring() + L'\0';
-
-  SHFILEOPSTRUCT fileOp;
-  fileOp.hwnd = NULL;
-  fileOp.wFunc = FO_DELETE;
-  fileOp.pFrom = widestr.c_str();
-  fileOp.pTo = NULL;
-  fileOp.fFlags = FOF_ALLOWUNDO | FOF_NOERRORUI | FOF_NOCONFIRMATION | FOF_SILENT;
-  int result = SHFileOperation(&fileOp);
-
-  if (result != 0) {
-    return false;
-  }
-  else {
-    return true;
-  }
 }
 
 bool MainFrame::clearRatingOfActiveFile()
