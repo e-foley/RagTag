@@ -62,6 +62,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   m_window_->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-Y");
   m_window_->AppendSeparator();
   m_window_->Append(ID_FOCUS_DIRECTORY_VIEW, "&Focus Directory View\tCtrl-F");
+  m_window_->Append(ID_FOCUS_TAGS, "Focus Ta&gs\tCtrl-G");
   m_window_->Append(ID_REFRESH_FILE_VIEW, "&Refresh Directory View\tF5");
   m_window_->Enable(ID_REFRESH_FILE_VIEW, false);
 
@@ -290,6 +291,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   Bind(wxEVT_MENU, &MainFrame::OnShowSummary, this, ID_SHOW_SUMMARY);
   Bind(wxEVT_MENU, &MainFrame::OnLoadFile, this, ID_LOAD_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnFocusDirectoryView, this, ID_FOCUS_DIRECTORY_VIEW);
+  Bind(wxEVT_MENU, &MainFrame::OnFocusTags, this, ID_FOCUS_TAGS);
   Bind(wxEVT_MENU, &MainFrame::OnRefreshFileView, this, ID_REFRESH_FILE_VIEW);
   Bind(wxEVT_MENU, &MainFrame::OnNextFile, this, ID_NEXT_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnPreviousFile, this, ID_PREVIOUS_FILE);
@@ -640,6 +642,11 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
 void MainFrame::OnFocusDirectoryView(wxCommandEvent& event)
 {
   lc_files_in_directory_->SetFocus();
+}
+
+void MainFrame::OnFocusTags(wxCommandEvent& event)
+{
+  p_tag_toggles_->SetFocus();
 }
 
 void MainFrame::OnShowSummary(wxCommandEvent& event)

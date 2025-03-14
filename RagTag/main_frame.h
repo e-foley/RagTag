@@ -34,6 +34,7 @@ private:
     ID_SAVE_PROJECT_AS,
     ID_LOAD_FILE,
     ID_FOCUS_DIRECTORY_VIEW,
+    ID_FOCUS_TAGS,
     ID_REFRESH_FILE_VIEW,
     ID_NEXT_FILE,
     ID_PREVIOUS_FILE,
@@ -96,6 +97,7 @@ private:
   void OnSaveProject(wxCommandEvent& event);
   void OnSaveProjectAs(wxCommandEvent& event);
   void OnFocusDirectoryView(wxCommandEvent& event);
+  void OnFocusTags(wxCommandEvent& event);
   void OnShowSummary(wxCommandEvent& event);
   void OnLoadFile(wxCommandEvent& event);
   void OnRefreshFileView(wxCommandEvent& event);
