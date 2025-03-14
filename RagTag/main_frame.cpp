@@ -198,12 +198,13 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "RagTag v0.1.0", wxDefaultPo
   b_refresh_file_view_->Disable();
   b_refresh_file_view_->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
   sz_file_navigation->Add(b_refresh_file_view_, 1, wxEXPAND | wxALL, 5);
-  b_previous_untagged_file_ = new wxButton(p_file_navigation, ID_PREVIOUS_FILE,
-    "Previous\nUntagged");
+  b_previous_untagged_file_ = new wxButton(p_file_navigation, ID_PREVIOUS_UNTAGGED_FILE,
+    L"\U00002191 Untagged");
   b_previous_untagged_file_->Disable();
   b_previous_untagged_file_->Bind(wxEVT_BUTTON, &MainFrame::OnPreviousUntaggedFile, this);
   sz_file_navigation->Add(b_previous_untagged_file_, 1, wxEXPAND | wxALL, 5);
-  b_next_untagged_file_ = new wxButton(p_file_navigation, ID_NEXT_FILE, "Next\nUntagged");
+  b_next_untagged_file_ = new wxButton(p_file_navigation, ID_NEXT_UNTAGGED_FILE,
+    L"\U00002193 Untagged");
   b_next_untagged_file_->Disable();
   b_next_untagged_file_->Bind(wxEVT_BUTTON, &MainFrame::OnNextUntaggedFile, this);
   sz_file_navigation->Add(b_next_untagged_file_, 1, wxEXPAND | wxALL, 5);
