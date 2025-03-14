@@ -65,13 +65,13 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
 
   wxBoxSizer* sz_button_row = new wxBoxSizer(wxHORIZONTAL);
   sz_button_row->AddStretchSpacer(1);
-  wxButton* b_cancel = new wxButton(this, wxID_ANY, "Cancel", wxDefaultPosition, wxDefaultSize);
-  b_cancel->Bind(wxEVT_BUTTON, &TagEntryDialog::OnCancel, this);
-  sz_button_row->Add(b_cancel, 0);
   wxButton* b_ok = new wxButton(this, wxID_ANY, "OK", wxDefaultPosition, wxDefaultSize);
   b_ok->Bind(wxEVT_BUTTON, &TagEntryDialog::OnOk, this);
   b_ok->SetDefault();
   sz_button_row->Add(b_ok, 0);
+  wxButton* b_cancel = new wxButton(this, wxID_ANY, "Cancel", wxDefaultPosition, wxDefaultSize);
+  b_cancel->Bind(wxEVT_BUTTON, &TagEntryDialog::OnCancel, this);
+  sz_button_row->Add(b_cancel, 0);
   sz_rows->Add(sz_button_row, 0, wxEXPAND | wxALL, 10);
 
   this->SetSizerAndFit(sz_rows);  // Auto-fits window to sizer requirements.
