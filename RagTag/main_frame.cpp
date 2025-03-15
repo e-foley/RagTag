@@ -61,6 +61,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   m_window_ = new wxMenu;
   m_window_->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-Y");
   m_window_->AppendSeparator();
+  m_window_->Append(ID_ENTER_COMMAND_MODE, "Enter &Command Mode\tEsc");
   m_window_->Append(ID_FOCUS_DIRECTORY_VIEW, "&Focus Directory View\tCtrl-F");
   m_window_->Append(ID_FOCUS_TAGS, "Focus Ta&gs\tCtrl-G");
   m_window_->Append(ID_REFRESH_FILE_VIEW, "&Refresh Directory View\tF5");
@@ -80,6 +81,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   SetMenuBar(mb_menu_bar);
 
   CreateStatusBar();
+  const int status_bar_widths[2] = { -1, 100 };
+  GetStatusBar()->SetFieldsCount(2, status_bar_widths);
+  refreshStatusBar();
 
   wxPanel* p_main = new wxPanel(this, wxID_ANY);
   wxBoxSizer* sz_main = new wxBoxSizer(wxHORIZONTAL);
@@ -291,6 +295,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   Bind(wxEVT_MENU, &MainFrame::OnShowSummary, this, ID_SHOW_SUMMARY);
   Bind(wxEVT_MENU, &MainFrame::OnLoadFile, this, ID_LOAD_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnFocusDirectoryView, this, ID_FOCUS_DIRECTORY_VIEW);
+  Bind(wxEVT_MENU, &MainFrame::OnEnterCommandMode, this, ID_ENTER_COMMAND_MODE);
   Bind(wxEVT_MENU, &MainFrame::OnFocusTags, this, ID_FOCUS_TAGS);
   Bind(wxEVT_MENU, &MainFrame::OnRefreshFileView, this, ID_REFRESH_FILE_VIEW);
   Bind(wxEVT_MENU, &MainFrame::OnNextFile, this, ID_NEXT_FILE);
@@ -307,6 +312,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   Bind(wxEVT_MENU, &MainFrame::OnSetTagsToDefaults, this, ID_SET_TAGS_TO_DEFAULTS);
   Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
+  Bind(wxEVT_KILL_FOCUS, &MainFrame::OnKillFocus, this);
   Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
   Bind(wxEVT_CHAR_HOOK, &MainFrame::OnKeyDown, this);
   // TODO: I only seem to be able to handle this custom event when it's bound to the frame and not
@@ -325,6 +331,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   openProject(std::wstring(debug_project_dir) + L"beachcoolgradient.tagdef");
 
   refreshTitleBar();
+  SetFocus();  // Perform same action as entering command mode.
 }
 
 void MainFrame::refreshTagToggles() {
@@ -573,6 +580,11 @@ void MainFrame::refreshTitleBar()
   SetTitle(title);
 }
 
+void MainFrame::refreshStatusBar()
+{
+  GetStatusBar()->SetStatusText(command_mode_active_ ? "CMD" : "", 1);
+}
+
 void MainFrame::OnNewProject(wxCommandEvent& event) {
   if (!promptSaveOpportunityIfDirty()) {
     return;
@@ -637,6 +649,13 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
   project_path_ = path;
   markClean();
   SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
+}
+
+void MainFrame::OnEnterCommandMode(wxCommandEvent& event)
+{
+  SetFocus();
+  command_mode_active_ = true;
+  refreshStatusBar();
 }
 
 void MainFrame::OnFocusDirectoryView(wxCommandEvent& event)
@@ -709,6 +728,12 @@ void MainFrame::OnPreviousFile(wxCommandEvent& event)
   }
 
   loadFileAndSetAsActive(*previous_file);
+}
+
+void MainFrame::OnKillFocus(wxFocusEvent& event)
+{
+  command_mode_active_ = false;
+  refreshStatusBar();
 }
 
 void MainFrame::OnExit(wxCommandEvent& event) {
@@ -1217,14 +1242,7 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
   else if (key_code == 'W' && modifiers == wxMOD_CONTROL) {
     Close(false);  // `false` allows action to be vetoed in OnClose event handler.
   }
-  else if (lc_files_in_directory_->HasFocus() && key_code == WXK_ESCAPE) {
-    p_tag_toggles_->SetFocus();  // Focus away from file list that might otherwise intercept keys.
-  }
-  else if (lc_files_in_directory_->HasFocus()) {
-    // Don't preempt directory navigation keystrokes.
-    event.Skip();
-  }
-  else if (key_code >= '0' && key_code <= '5') {
+  else if (command_mode_active_ && key_code >= '0' && key_code <= '5') {
     if ((modifiers & wxMOD_SHIFT) != 0) {
       clearRatingOfActiveFile();
     }
@@ -1233,15 +1251,15 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
       setRatingOfActiveFile(desired_rating);
     }
   }
-  else if (key_code >= WXK_NUMPAD0 && key_code <= WXK_NUMPAD5) {
+  else if (command_mode_active_ && key_code >= WXK_NUMPAD0 && key_code <= WXK_NUMPAD5) {
     const int desired_rating = key_code - WXK_NUMPAD0;
     setRatingOfActiveFile(desired_rating);
   }
-  else if (key_code == WXK_NUMPAD_DECIMAL) {
+  else if (command_mode_active_ && key_code == WXK_NUMPAD_DECIMAL) {
     // We provide this option because shift+numpad navigates controls by default.
     clearRatingOfActiveFile();
   }
-  else {
+  else if (command_mode_active_) {
     // Test against all the tag toggle hotkeys.
     bool key_processed = false;
     for (const auto& tag_toggle_panel : tag_toggle_panels_) {
@@ -1255,6 +1273,9 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
     if (!key_processed) {
       event.Skip();
     }
+  }
+  else {
+    event.Skip();
   }
 }
 

@@ -33,6 +33,7 @@ private:
     ID_SAVE_PROJECT,
     ID_SAVE_PROJECT_AS,
     ID_LOAD_FILE,
+    ID_ENTER_COMMAND_MODE,
     ID_FOCUS_DIRECTORY_VIEW,
     ID_FOCUS_TAGS,
     ID_REFRESH_FILE_VIEW,
@@ -91,11 +92,13 @@ private:
   void refreshRatingButtons();
   void refreshSummary();
   void refreshTitleBar();
+  void refreshStatusBar();
   // Menu events
   void OnNewProject(wxCommandEvent& event);
   void OnOpenProject(wxCommandEvent& event);
   void OnSaveProject(wxCommandEvent& event);
   void OnSaveProjectAs(wxCommandEvent& event);
+  void OnEnterCommandMode(wxCommandEvent& event);
   void OnFocusDirectoryView(wxCommandEvent& event);
   void OnFocusTags(wxCommandEvent& event);
   void OnShowSummary(wxCommandEvent& event);
@@ -103,6 +106,7 @@ private:
   void OnRefreshFileView(wxCommandEvent& event);
   void OnNextFile(wxCommandEvent& event);
   void OnPreviousFile(wxCommandEvent& event);
+  void OnKillFocus(wxFocusEvent& event);
   void OnExit(wxCommandEvent& event);
   void OnClose(wxCloseEvent& event);
   void OnAbout(wxCommandEvent& event);
@@ -200,6 +204,7 @@ private:
   bool is_dirty_{ false };
   bool user_initiated_stop_media_{ false };
   bool file_view_modification_in_progress_{ false };
+  bool command_mode_active_{ true };
 };
 
 #endif  // INCLUDE_MAIN_FRAME_H
