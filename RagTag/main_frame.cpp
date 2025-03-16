@@ -1174,16 +1174,19 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
       }
 
       // Remove the file from our project also.
-      if (!tag_map_.removeFile(path_cache)) {
-        SetStatusText(L"Could not remove file '" + path_cache.wstring() +
-          L"' from the project.");
+      const bool did_remove_file_from_tag_map = tag_map_.removeFile(path_cache);
+      if (did_remove_file_from_tag_map) {
+        markDirty();
+      } else {
+        SetStatusText(L"Could not remove file '" + path_cache.wstring() + L"' from the project.");
       }
 
+      // Compare next file against original file so that we don't attempt to reload a file that was
+      // just deleted in the case we deleted the last file in the directory.
       if (next_file.has_value() && *next_file != path_cache) {
         loadFileAndSetAsActive(*next_file);
       }
       else {
-        // User might have deleted last file in its directory.
         resetActiveFile();
       }
     }
