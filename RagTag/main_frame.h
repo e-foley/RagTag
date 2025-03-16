@@ -162,6 +162,10 @@ private:
   bool stopMedia();
   bool clearRatingOfActiveFile();
   bool setRatingOfActiveFile(ragtag::rating_t rating);
+  bool loadNextFile();
+  bool loadPreviousFile();
+  bool loadNextUntaggedFile();
+  bool loadPreviousUntaggedFile();
   // Helper functions
   static std::optional<ragtag::path_t> qualifiedFileNavigator(
     const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);

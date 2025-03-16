@@ -36,9 +36,10 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   m_project_->Enable(ID_NEXT_FILE, false);
   m_project_->Append(ID_PREVIOUS_FILE, "Previous File in Directory\tCtrl-,");
   m_project_->Enable(ID_PREVIOUS_FILE, false);
-  m_project_->Append(ID_NEXT_UNTAGGED_FILE, "Next Untagged File in Directory\tSpace");
+  m_project_->Append(ID_NEXT_UNTAGGED_FILE, L"Next Untagged File in Directory\tCtrl-Shift-.");
   m_project_->Enable(ID_NEXT_UNTAGGED_FILE, false);
-  m_project_->Append(ID_PREVIOUS_UNTAGGED_FILE, "Previous Untagged File in Directory\tShift-Space");
+  m_project_->Append(ID_PREVIOUS_UNTAGGED_FILE,
+    L"Previous Untagged File in Directory\tCtrl-Shift-,");
   m_project_->Enable(ID_PREVIOUS_UNTAGGED_FILE, false);
 
   m_media_ = new wxMenu;
@@ -696,38 +697,14 @@ void MainFrame::OnRefreshFileView(wxCommandEvent& event)
 
 void MainFrame::OnNextFile(wxCommandEvent& event)
 {
-  if (!active_file_.has_value()) {
-    // Can't find next file when there's no current file.
-    SetStatusText("No active file.");
-    return;
-  }
-
-  const auto next_file = qualifiedFileNavigator(
-    *active_file_, [](const ragtag::path_t&) {return true; }, true);
-  if (!next_file.has_value()) {
-    SetStatusText("Couldn't find next file.");
-    return;
-  }
-
-  loadFileAndSetAsActive(*next_file);
+  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
+  loadNextFile();
 }
 
 void MainFrame::OnPreviousFile(wxCommandEvent& event)
 {
-  if (!active_file_.has_value()) {
-    // Can't find previous file when there's no current file.
-    SetStatusText("No active file.");
-    return;
-  }
-
-  const auto previous_file = qualifiedFileNavigator(
-    *active_file_, [](const ragtag::path_t&) {return true; }, false);
-  if (!previous_file.has_value()) {
-    SetStatusText("Couldn't find previous file.");
-    return;
-  }
-
-  loadFileAndSetAsActive(*previous_file);
+  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
+  loadPreviousFile();
 }
 
 void MainFrame::OnKillFocus(wxFocusEvent& event)
@@ -820,44 +797,14 @@ void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
 
 void MainFrame::OnPreviousUntaggedFile(wxCommandEvent& event)
 {
-  if (!active_file_.has_value()) {
-    // Can't find previous untagged file when there's no current file.
-    SetStatusText("No active file.");
-    return;
-  }
-
-  const auto previous_untagged = qualifiedFileNavigator(*active_file_,
-    [this](const ragtag::path_t& path) {
-      const auto tag_coverage = getFileTagCoverage(path);
-      return tag_coverage == TagCoverage::NONE || tag_coverage == TagCoverage::SOME;
-    }, false);
-  if (!previous_untagged.has_value()) {
-    SetStatusText("Couldn't find previous untagged file.");
-    return;
-  }
-
-  loadFileAndSetAsActive(*previous_untagged);
+  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
+  loadPreviousUntaggedFile();
 }
 
 void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
 {
-  if (!active_file_.has_value()) {
-    // Can't find next untagged file when there's no current file.
-    SetStatusText("No active file.");
-    return;
-  }
-
-  const auto next_untagged_file = qualifiedFileNavigator(*active_file_,
-    [this](const ragtag::path_t& path) {
-      const auto tag_coverage = getFileTagCoverage(path);
-      return tag_coverage == TagCoverage::NONE || tag_coverage == TagCoverage::SOME;
-    }, true);
-  if (!next_untagged_file.has_value()) {
-    SetStatusText("Couldn't find next untagged file.");
-    return;
-  }
-
-  loadFileAndSetAsActive(*next_untagged_file);
+  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
+  loadNextUntaggedFile();
 }
 
 void MainFrame::OnClickRatingButton(wxCommandEvent& event)
@@ -1212,7 +1159,7 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
 {
   const int key_code = event.GetKeyCode();
   const int modifiers = event.GetModifiers();
-  if (key_code == WXK_DELETE) {
+  if (key_code == WXK_DELETE && modifiers == wxMOD_NONE) {
     // Attempt to delete the file with prompting.
     if (active_file_.has_value() && promptConfirmFileDeletion(*active_file_)) {
       ragtag::path_t path_cache = *active_file_;  // Copy for use in error dialog.
@@ -1242,20 +1189,48 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
   else if (key_code == 'W' && modifiers == wxMOD_CONTROL) {
     Close(false);  // `false` allows action to be vetoed in OnClose event handler.
   }
+  else if (command_mode_active_ && key_code == WXK_SPACE) {
+    if (modifiers == wxMOD_NONE) {
+      loadNextUntaggedFile();
+    }
+    else if (modifiers == wxMOD_SHIFT) {
+      loadPreviousUntaggedFile();
+    }
+  }
+  else if (command_mode_active_ && (key_code == WXK_DOWN || key_code == WXK_RIGHT)) {
+    if (modifiers == wxMOD_NONE) {
+      loadNextFile();
+    }
+    else if (modifiers == wxMOD_SHIFT) {
+      loadNextUntaggedFile();
+    }
+  }
+  else if (command_mode_active_ && (key_code == WXK_UP || key_code == WXK_LEFT)) {
+    if (modifiers == wxMOD_NONE) {
+      loadPreviousFile();
+    }
+    else if (modifiers == wxMOD_SHIFT) {
+      loadPreviousUntaggedFile();
+    }
+  }
+  else if (command_mode_active_ && key_code == '-' && modifiers == wxMOD_NONE) {
+    clearRatingOfActiveFile();
+  }
   else if (command_mode_active_ && key_code >= '0' && key_code <= '5') {
-    if ((modifiers & wxMOD_SHIFT) != 0) {
+    if (modifiers == wxMOD_SHIFT) {
       clearRatingOfActiveFile();
     }
-    else {
+    else if (modifiers == wxMOD_NONE) {
       const int desired_rating = key_code - '0';
       setRatingOfActiveFile(desired_rating);
     }
   }
-  else if (command_mode_active_ && key_code >= WXK_NUMPAD0 && key_code <= WXK_NUMPAD5) {
+  else if (command_mode_active_ && key_code >= WXK_NUMPAD0 && key_code <= WXK_NUMPAD5
+    && modifiers == wxMOD_NONE) {
     const int desired_rating = key_code - WXK_NUMPAD0;
     setRatingOfActiveFile(desired_rating);
   }
-  else if (command_mode_active_ && key_code == WXK_NUMPAD_DECIMAL) {
+  else if (command_mode_active_ && key_code == WXK_NUMPAD_DECIMAL && modifiers == wxMOD_NONE) {
     // We provide this option because shift+numpad navigates controls by default.
     clearRatingOfActiveFile();
   }
@@ -1651,6 +1626,84 @@ bool MainFrame::setRatingOfActiveFile(ragtag::rating_t rating)
   refreshRatingButtons();
   refreshSummary();
   return true;
+}
+
+bool MainFrame::loadNextFile()
+{
+  if (!active_file_.has_value()) {
+    // Can't find next file when there's no current file.
+    SetStatusText("No active file.");
+    return false;
+  }
+
+  const auto next_file = qualifiedFileNavigator(
+    *active_file_, [](const ragtag::path_t&) {return true; }, true);
+  if (!next_file.has_value()) {
+    SetStatusText("Couldn't find next file.");
+    return false;
+  }
+
+  return loadFileAndSetAsActive(*next_file);
+}
+
+bool MainFrame::loadPreviousFile()
+{
+  if (!active_file_.has_value()) {
+    // Can't find previous file when there's no current file.
+    SetStatusText("No active file.");
+    return false;
+  }
+
+  const auto previous_file = qualifiedFileNavigator(
+    *active_file_, [](const ragtag::path_t&) {return true; }, false);
+  if (!previous_file.has_value()) {
+    SetStatusText("Couldn't find previous file.");
+    return false;
+  }
+
+  return loadFileAndSetAsActive(*previous_file);
+}
+
+bool MainFrame::loadNextUntaggedFile()
+{
+  if (!active_file_.has_value()) {
+    // Can't find next untagged file when there's no current file.
+    SetStatusText("No active file.");
+    return false;
+  }
+
+  const auto next_untagged_file = qualifiedFileNavigator(*active_file_,
+    [this](const ragtag::path_t& path) {
+      const auto tag_coverage = getFileTagCoverage(path);
+      return tag_coverage == TagCoverage::NONE || tag_coverage == TagCoverage::SOME;
+    }, true);
+  if (!next_untagged_file.has_value()) {
+    SetStatusText("Couldn't find next untagged file.");
+    return false;
+  }
+
+  return loadFileAndSetAsActive(*next_untagged_file);
+}
+
+bool MainFrame::loadPreviousUntaggedFile()
+{
+  if (!active_file_.has_value()) {
+    // Can't find previous untagged file when there's no current file.
+    SetStatusText("No active file.");
+    return false;
+  }
+
+  const auto previous_untagged = qualifiedFileNavigator(*active_file_,
+    [this](const ragtag::path_t& path) {
+      const auto tag_coverage = getFileTagCoverage(path);
+      return tag_coverage == TagCoverage::NONE || tag_coverage == TagCoverage::SOME;
+    }, false);
+  if (!previous_untagged.has_value()) {
+    SetStatusText("Couldn't find previous untagged file.");
+    return false;
+  }
+
+  return loadFileAndSetAsActive(*previous_untagged);
 }
 
 std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigator(
