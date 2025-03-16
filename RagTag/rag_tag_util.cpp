@@ -41,7 +41,7 @@ bool RagTagUtil::isStaticMedia(const ragtag::path_t& path)
   // Trusting that the 2009 list from this link is still accurate:
   // https://answers.microsoft.com/en-us/windows/forum/all/windows-media-player-cant-display-pictures/a73834b3-bc70-4fdf-85ea-74b83d5f9c01
   static std::vector<std::wstring> static_types = {
-    L".bmp", L".gif", L".jpg", L".jpeg", L".png", L".tif", L".tiff", L".wmf"
+    L".bmp", L".gif", L".jpg", L".jpeg", L".jxr", L".png", L".tif", L".tiff", L".wmf"
   };
   std::wstring extension = path.extension().wstring();
   // Lowercase conversion from https://stackoverflow.com/a/313990
