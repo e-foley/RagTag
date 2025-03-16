@@ -60,14 +60,14 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   m_tags_->Enable(ID_SET_TAGS_TO_DEFAULTS, false);
 
   m_window_ = new wxMenu;
-  m_window_->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-Y");
-  m_window_->AppendSeparator();
   m_window_->Append(ID_ENTER_COMMAND_MODE, "Enter &Command Mode\tEsc");
   m_window_->Enable(ID_ENTER_COMMAND_MODE, false);
   m_window_->Append(ID_FOCUS_DIRECTORY_VIEW, "&Focus Directory View\tCtrl-F");
   m_window_->Append(ID_FOCUS_TAGS, "Focus Ta&gs\tCtrl-G");
   m_window_->Append(ID_REFRESH_FILE_VIEW, "&Refresh Directory View\tF5");
   m_window_->Enable(ID_REFRESH_FILE_VIEW, false);
+  m_window_->AppendSeparator();
+  m_window_->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-Y");
 
   m_help_ = new wxMenu;
   m_help_->Append(wxID_ABOUT);
