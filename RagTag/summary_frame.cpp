@@ -397,6 +397,7 @@ void SummaryFrame::OnCopySelections(wxCommandEvent& event)
   }
 
   int num_files_successfully_copied = 0;
+  std::vector<ragtag::path_t> uncopied_files;
   for (const auto& file : files_to_copy) {
     // TODO: Somehow prompt whether we'd like to overwrite files.
     bool success = std::filesystem::copy_file(file, *directory / file.filename(),
@@ -404,22 +405,31 @@ void SummaryFrame::OnCopySelections(wxCommandEvent& event)
     if (success) {
       ++num_files_successfully_copied;
     }
+    else {
+      uncopied_files.push_back(file);
+    }
   }
 
+  const std::wstring copied_plural1 = num_files_successfully_copied == 1 ? L"file" : L"files";
+  const std::wstring copied_plural2 = num_files_successfully_copied == 1 ? L"was" : L"were";
+  const std::wstring selected_plural = files_to_copy.size() == 1 ? L"file" : L"files";
   if (num_files_successfully_copied == files_to_copy.size()) {
     // TODO: Make custom dialog that allows user to choose whether to show the folder to which the
     // files were copied.
-    const std::string file_plural = num_files_successfully_copied == 1 ? "file was" : "files were";
-    wxMessageDialog dialog(this, std::to_string(num_files_successfully_copied) + " " + file_plural
-      + " copied successfully.", "Copy Success");
+    wxMessageDialog dialog(this, std::to_wstring(num_files_successfully_copied) + L" "
+      + copied_plural1 + L" " + copied_plural2 + L" copied successfully.", "Copy Success");
     dialog.ShowModal();
   }
   else {
     // TODO: Be more specific about which files were not copied.
-    wxMessageDialog dialog(this, "Not all files were copied successfully.\n\n"
-      "Perhaps a file is missing or the directory contains a file sharing the name of a file you"
-      " are attempting to copy." " Otherwise, there may be a permissions issue.", "Copy Incomplete",
-      wxOK | wxCENTER | wxICON_WARNING);
+    wxMessageDialog dialog(this, L"Not all files were copied successfully.\n\n"
+      + std::to_wstring(num_files_successfully_copied) + L" of "
+      + std::to_wstring(files_to_copy.size()) + L" " + selected_plural + L" " + copied_plural2
+      + L" copied successfully.\n\n"
+      + L"Perhaps a file is missing or the directory contains a file sharing the name of a file you"
+      + L" are attempting to copy. Otherwise, there may be a permissions issue.\n\n"
+      + L"Files not copied:\n" + RagTagUtil::getPathsAsNewlineDelineatedString(uncopied_files),
+      "Copy Incomplete", wxOK | wxCENTER | wxICON_WARNING);
     dialog.ShowModal();
   }
   ShellExecute(NULL, L"open", directory->c_str(), NULL, NULL, SW_SHOWNORMAL);
