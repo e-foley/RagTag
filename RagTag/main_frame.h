@@ -166,6 +166,7 @@ private:
   bool loadPreviousFile();
   bool loadNextUntaggedFile();
   bool loadPreviousUntaggedFile();
+  void enterCommandMode();
   // Helper functions
   static std::optional<ragtag::path_t> qualifiedFileNavigator(
     const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);

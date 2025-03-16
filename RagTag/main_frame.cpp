@@ -654,9 +654,7 @@ void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
 
 void MainFrame::OnEnterCommandMode(wxCommandEvent& event)
 {
-  SetFocus();
-  command_mode_active_ = true;
-  refreshStatusBar();
+  enterCommandMode();
 }
 
 void MainFrame::OnFocusDirectoryView(wxCommandEvent& event)
@@ -1160,6 +1158,10 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
   const int key_code = event.GetKeyCode();
   const int modifiers = event.GetModifiers();
   if (key_code == WXK_DELETE && modifiers == wxMOD_NONE) {
+    // Cache whether command mode is active now, because prompting to delete the file changes the
+    // window focus (thus exiting command mode), and we'd like to automatically return the user to
+    // command mode after if we can.
+    const bool command_mode_active_to_begin = command_mode_active_;
     // Attempt to delete the file with prompting.
     if (active_file_.has_value() && promptConfirmFileDeletion(*active_file_)) {
       ragtag::path_t path_cache = *active_file_;  // Copy for use in error dialog.
@@ -1184,6 +1186,10 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
         // User might have deleted last file in its directory.
         resetActiveFile();
       }
+    }
+
+    if (command_mode_active_to_begin && !command_mode_active_) {
+      enterCommandMode();
     }
   }
   else if (key_code == 'W' && modifiers == wxMOD_CONTROL) {
@@ -1706,6 +1712,13 @@ bool MainFrame::loadPreviousUntaggedFile()
   }
 
   return loadFileAndSetAsActive(*previous_untagged);
+}
+
+void MainFrame::enterCommandMode()
+{
+  SetFocus();
+  command_mode_active_ = true;
+  refreshStatusBar();
 }
 
 std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigator(
