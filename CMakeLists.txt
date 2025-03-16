@@ -21,3 +21,6 @@ add_subdirectory ("Tests")
 add_subdirectory ("libs/Catch2")
 add_subdirectory ("libs/json")
 add_subdirectory ("libs/wxWidgets")
+
+# Configure RagTag as the startup project in Visual Studio
+set_directory_properties(PROPERTIES VS_STARTUP_PROJECT RagTag)
