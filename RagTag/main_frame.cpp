@@ -63,6 +63,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   m_window_->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-Y");
   m_window_->AppendSeparator();
   m_window_->Append(ID_ENTER_COMMAND_MODE, "Enter &Command Mode\tEsc");
+  m_window_->Enable(ID_ENTER_COMMAND_MODE, false);
   m_window_->Append(ID_FOCUS_DIRECTORY_VIEW, "&Focus Directory View\tCtrl-F");
   m_window_->Append(ID_FOCUS_TAGS, "Focus Ta&gs\tCtrl-G");
   m_window_->Append(ID_REFRESH_FILE_VIEW, "&Refresh Directory View\tF5");
@@ -707,8 +708,7 @@ void MainFrame::OnPreviousFile(wxCommandEvent& event)
 
 void MainFrame::OnKillFocus(wxFocusEvent& event)
 {
-  command_mode_active_ = false;
-  refreshStatusBar();
+  exitCommandMode();
 }
 
 void MainFrame::OnExit(wxCommandEvent& event) {
@@ -875,7 +875,11 @@ void MainFrame::OnFocusFile(wxListEvent& event)
 
 void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
   TagEntryDialog* tag_entry_frame = new TagEntryDialog(this);
+  const bool command_mode_cache = command_mode_active_;
   auto tag_entry_result = tag_entry_frame->promptTagEntry();
+  if (command_mode_cache) {
+    enterCommandMode();
+  }
   if (!tag_entry_result.has_value()) {
     // Prompt was canceled. Don't do anything.
     // TODO: Remove this debug message.
@@ -888,6 +892,9 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
     wxMessageDialog dialog(this, L"Could not create tag.\n\nTag '" + tag_entry_result->tag
       + L"' is already registered.", "Could Not Create Tag", wxOK | wxICON_WARNING);
     dialog.ShowModal();
+    if (command_mode_cache) {
+      enterCommandMode();
+    }
     SetStatusText(L"Tag '" + tag_entry_result->tag + L"' is already registered.");
     return;
   }
@@ -1158,10 +1165,6 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
   const int key_code = event.GetKeyCode();
   const int modifiers = event.GetModifiers();
   if (key_code == WXK_DELETE && modifiers == wxMOD_NONE) {
-    // Cache whether command mode is active now, because prompting to delete the file changes the
-    // window focus (thus exiting command mode), and we'd like to automatically return the user to
-    // command mode after if we can.
-    const bool command_mode_active_to_begin = command_mode_active_;
     // Attempt to delete the file with prompting.
     if (active_file_.has_value() && promptConfirmFileDeletion(*active_file_)) {
       ragtag::path_t path_cache = *active_file_;  // Copy for use in error dialog.
@@ -1189,10 +1192,6 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
       else {
         resetActiveFile();
       }
-    }
-
-    if (command_mode_active_to_begin && !command_mode_active_) {
-      enterCommandMode();
     }
   }
   else if (key_code == 'W' && modifiers == wxMOD_CONTROL) {
@@ -1267,7 +1266,11 @@ MainFrame::UserIntention MainFrame::promptUnsavedChanges() {
   wxMessageDialog md_unsaved_changes(this, "You have unsaved changes.", "Unsaved Changes",
       wxYES_NO | wxCANCEL | wxICON_WARNING);
   md_unsaved_changes.SetYesNoCancelLabels("Save", "Don't Save", "Cancel");
+  const bool command_mode_cache = command_mode_active_;
   const int selection = md_unsaved_changes.ShowModal();
+  if (command_mode_cache) {
+    enterCommandMode();
+  }
   switch (selection) {
   case wxID_YES:
     return UserIntention::SAVE;
@@ -1288,9 +1291,13 @@ std::optional<ragtag::path_t> MainFrame::promptSaveProjectAs() {
     + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.wstring() + L")|*"
     + RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.wstring();
 
+  const bool command_mode_cache = command_mode_active_;
   const wxString wx_path = wxFileSelector("Save Project As", wxEmptyString, default_project_name,
     RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION.c_str(), dropdown, wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
     this);
+  if (command_mode_cache) {
+    enterCommandMode();
+  }
   if (wx_path.empty()) {
     // User canceled the dialog.
     return {};
@@ -1307,8 +1314,12 @@ std::optional<ragtag::path_t> MainFrame::promptOpenProject() {
     + RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION.wstring() + L")|*"
     + RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION.wstring();
 
+  const bool command_mode_cache = command_mode_active_;
   const wxString wx_path = wxFileSelector("Open Project", wxEmptyString, wxEmptyString,
     wxEmptyString, dropdown, wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
+  if (command_mode_cache) {
+    enterCommandMode();
+  }
   if (wx_path.empty()) {
     // User canceled the dialog.
     return {};
@@ -1318,9 +1329,13 @@ std::optional<ragtag::path_t> MainFrame::promptOpenProject() {
 }
 
 std::optional<ragtag::path_t> MainFrame::promptLoadFile() {
+  const bool command_mode_cache = command_mode_active_;
   // TODO: Enumerate all valid media files.
   wxString wx_path = wxFileSelector("Load File", wxEmptyString, wxEmptyString, wxEmptyString,
     "All files (*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
+  if (command_mode_cache) {
+    enterCommandMode();
+  }
   if (wx_path.empty()) {
     // User canceled the dialog.
     return {};
@@ -1335,7 +1350,12 @@ bool MainFrame::promptConfirmTagDeletion(ragtag::tag_t tag)
     + L"'?\n\nDeleting a tag will remove it from all files in this project.", L"Confirm Tag Deletion",
     wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
   dialog.SetOKCancelLabels("Delete tag", "Cancel");
-  return dialog.ShowModal() == wxID_OK;
+  const bool command_mode_cache = command_mode_active_;
+  const auto modal_response = dialog.ShowModal();
+  if (command_mode_cache) {
+    enterCommandMode();
+  }
+  return modal_response == wxID_OK;
 }
 
 bool MainFrame::promptConfirmFileDeletion(const ragtag::path_t& path)
@@ -1344,7 +1364,12 @@ bool MainFrame::promptConfirmFileDeletion(const ragtag::path_t& path)
     + path.wstring() + L"'?\n\nThis action will remove the file from your machine.",
     "Confirm File Deletion", wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
   dialog.SetOKCancelLabels("Delete file", "Cancel");
-  return dialog.ShowModal() == wxID_OK;
+  const bool command_mode_cache = command_mode_active_;
+  const auto modal_response = dialog.ShowModal();
+  if (command_mode_cache) {
+    enterCommandMode();
+  }
+  return modal_response == wxID_OK;
 }
 
 bool MainFrame::promptSaveOpportunityIfDirty()
@@ -1387,18 +1412,26 @@ bool MainFrame::promptSaveOpportunityIfDirty()
 
 void MainFrame::notifyCouldNotSaveProject(const ragtag::path_t& path)
 {
+  const bool command_mode_cache = command_mode_active_;
   SetStatusText(L"Could not save project '" + path.wstring() + L"'.");
   wxMessageDialog dialog(this, L"Failed to save project '" + path.wstring() + L"'.",
     "Failed to Save Project", wxICON_ERROR);
   dialog.ShowModal();
+  if (command_mode_cache) {
+    enterCommandMode();
+  }
 }
 
 void MainFrame::notifyCouldNotOpenProject(const ragtag::path_t& path)
 {
+  const bool command_mode_cache = command_mode_active_;
   SetStatusText(L"Could not open project '" + path.wstring() + L"'.");
   wxMessageDialog dialog(this, L"Failed to open project '" + path.wstring() + L"'.",
     "Failed to Open Project", wxICON_ERROR);
   dialog.ShowModal();
+  if (command_mode_cache) {
+    enterCommandMode();
+  }
 }
 
 void MainFrame::markDirty()
@@ -1721,6 +1754,14 @@ void MainFrame::enterCommandMode()
 {
   SetFocus();
   command_mode_active_ = true;
+  m_window_->Enable(ID_ENTER_COMMAND_MODE, false);
+  refreshStatusBar();
+}
+
+void MainFrame::exitCommandMode()
+{
+  command_mode_active_ = false;
+  m_window_->Enable(ID_ENTER_COMMAND_MODE, true);
   refreshStatusBar();
 }
 
