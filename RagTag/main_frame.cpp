@@ -82,8 +82,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   SetMenuBar(mb_menu_bar);
 
   CreateStatusBar();
-  const int status_bar_widths[2] = { -1, 100 };
-  GetStatusBar()->SetFieldsCount(2, status_bar_widths);
+  const int status_bar_widths[3] = { -1, 30, 50 };
+  GetStatusBar()->SetFieldsCount(3, status_bar_widths);
   refreshStatusBar();
 
   wxPanel* p_main = new wxPanel(this, wxID_ANY);
@@ -1395,12 +1395,14 @@ void MainFrame::notifyCouldNotOpenProject(const ragtag::path_t& path)
 void MainFrame::markDirty()
 {
   is_dirty_ = true;
+  SetStatusText("Modified", 2);
   refreshTitleBar();
 }
 
 void MainFrame::markClean()
 {
   is_dirty_ = false;
+  SetStatusText("", 2);
   refreshTitleBar();
 }
 
