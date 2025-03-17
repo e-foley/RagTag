@@ -27,6 +27,7 @@ target_link_libraries(RagTag wx::net wx::core wx::base)
 
 # Instead, link libraries one by one.
 set(VC_X64_DIR ${CMAKE_BINARY_DIR}/libs/wxWidgets/lib/vc_x64_lib)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 target_link_libraries(RagTag
                       ${VC_X64_DIR}/wxbase33ud_xml.lib
                       ${VC_X64_DIR}/wxexpatd.lib
@@ -43,6 +44,25 @@ target_link_libraries(RagTag
                       ${VC_X64_DIR}/wxmsw33ud_stc.lib
                       ${VC_X64_DIR}/wxmsw33ud_webview.lib
                       ${VC_X64_DIR}/wxmsw33ud_gl.lib)
+endif()
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+target_link_libraries(RagTag
+                      ${VC_X64_DIR}/wxbase33u_xml.lib
+                      ${VC_X64_DIR}/wxexpat.lib
+                      ${VC_X64_DIR}/wxscintilla.lib
+                      ${VC_X64_DIR}/wxlexilla.lib
+                      ${VC_X64_DIR}/wxmsw33u_html.lib
+                      ${VC_X64_DIR}/wxmsw33u_qa.lib
+                      ${VC_X64_DIR}/wxmsw33u_xrc.lib
+                      ${VC_X64_DIR}/wxmsw33u_aui.lib
+                      ${VC_X64_DIR}/wxmsw33u_propgrid.lib
+                      ${VC_X64_DIR}/wxmsw33u_ribbon.lib
+                      ${VC_X64_DIR}/wxmsw33u_richtext.lib
+                      ${VC_X64_DIR}/wxmsw33u_media.lib
+                      ${VC_X64_DIR}/wxmsw33u_stc.lib
+                      ${VC_X64_DIR}/wxmsw33u_webview.lib
+                      ${VC_X64_DIR}/wxmsw33u_gl.lib)
+endif()
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET RagTag PROPERTY CXX_STANDARD 20)
