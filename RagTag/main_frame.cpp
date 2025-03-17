@@ -1719,7 +1719,7 @@ bool MainFrame::loadNextUntaggedFile()
   const auto next_untagged_file = qualifiedFileNavigator(*active_file_,
     [this](const ragtag::path_t& path) {
       const auto tag_coverage = getFileTagCoverage(path);
-      return tag_coverage == TagCoverage::NONE || tag_coverage == TagCoverage::SOME;
+      return tag_coverage != TagCoverage::ALL;
     }, true);
   if (!next_untagged_file.has_value()) {
     SetStatusText("Couldn't find next untagged file.");
@@ -1740,7 +1740,7 @@ bool MainFrame::loadPreviousUntaggedFile()
   const auto previous_untagged = qualifiedFileNavigator(*active_file_,
     [this](const ragtag::path_t& path) {
       const auto tag_coverage = getFileTagCoverage(path);
-      return tag_coverage == TagCoverage::NONE || tag_coverage == TagCoverage::SOME;
+      return tag_coverage != TagCoverage::ALL;
     }, false);
   if (!previous_untagged.has_value()) {
     SetStatusText("Couldn't find previous untagged file.");
