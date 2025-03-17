@@ -324,14 +324,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
   Bind(SUMMARY_FRAME_EVENT, &MainFrame::OnSummaryFrameAction, this);
 
-  // TODO: Replace this temporary location with real paths once application is stable.
-  //const wxString debug_media_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
-  const wxString debug_project_dir = wxStandardPaths::Get().GetDocumentsDir() + "/ragtag-debug/";
-  //displayMediaFile(std::wstring(debug_media_dir) + L"videomp4.mp4");
-  //displayMediaFile(std::wstring(debug_media_dir) + L"imagejpg.jpg");
-  //displayMediaFile(std::wstring(debug_media_dir) + L"imagepng.png");
-  openProject(std::wstring(debug_project_dir) + L"beachcoolgradient.tagdef");
-
   refreshTitleBar();
   SetFocus();  // Perform same action as entering command mode.
 }
