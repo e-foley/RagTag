@@ -6,6 +6,7 @@
 #include <wx/dirdlg.h> 
 #include <wx/msgdlg.h>
 #include <wx/panel.h>
+#include <wx/progdlg.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
 
@@ -398,7 +399,21 @@ void SummaryFrame::OnCopySelections(wxCommandEvent& event)
 
   int num_files_successfully_copied = 0;
   std::vector<ragtag::path_t> uncopied_files;
-  for (const auto& file : files_to_copy) {
+  bool user_canceled = false;
+  // Carriage return after "copy..." prepare enough space for the filename during the primary loop.
+  // TODO: Even this isn't perfect, because long filenames with spaces can require additional lines.
+  // Figure out a way around this, perhaps by manually ellipsizing?
+  wxProgressDialog pd("Copying Selected Files", "Beginning copy...\r", files_to_copy.size(), this,
+    wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_CAN_ABORT);
+  for (int i = 0; i < files_to_copy.size(); ++i) {
+    const auto& file = files_to_copy[i];
+
+    if (!pd.Update(i, L"Copying\r'" + file.wstring() + L"'...")) {
+      // User canceled copy operation.
+      user_canceled = true;
+      break;
+    }
+
     // TODO: Somehow prompt whether we'd like to overwrite files.
     bool success = std::filesystem::copy_file(file, *directory / file.filename(),
       std::filesystem::copy_options::skip_existing);
@@ -408,6 +423,13 @@ void SummaryFrame::OnCopySelections(wxCommandEvent& event)
     else {
       uncopied_files.push_back(file);
     }
+  }
+
+  if (user_canceled) {
+    return;
+  }
+  else {
+    pd.Update(files_to_copy.size());
   }
 
   const std::wstring copied_plural1 = num_files_successfully_copied == 1 ? L"file" : L"files";
