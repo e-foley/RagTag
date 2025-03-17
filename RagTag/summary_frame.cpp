@@ -214,7 +214,7 @@ void SummaryFrame::refreshFileList()
     lc_summary_->DeleteAllColumns();
     lc_summary_->AppendColumn("Path", wxLIST_FORMAT_LEFT, 500);
     lc_summary_->AppendColumn("Rating", wxLIST_FORMAT_LEFT, 65);
-    Freeze();  // If we don't freeze here, we get flickering.
+    lc_summary_->Freeze();  // If we don't freeze here, we get flickering.
     for (const auto& tag : all_tags) {
       // This width is temporary. If we use wxLIST_AUTOSIZE_USEHEADER here, then the first column that
       // we add will get stretched to the remaining width of the list control. Instead, we temporarily
@@ -226,7 +226,7 @@ void SummaryFrame::refreshFileList()
       lc_summary_->SetColumnWidth(i, wxLIST_AUTOSIZE_USEHEADER);
     }
     lc_summary_->DeleteColumn(lc_summary_->GetColumnCount() - 1);  // Delete temporary column.
-    Thaw();
+    lc_summary_->Thaw();
   }
 
   lc_summary_->DeleteAllItems();
