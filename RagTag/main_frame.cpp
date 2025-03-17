@@ -725,7 +725,8 @@ void MainFrame::OnClose(wxCloseEvent& event) {
 
 void MainFrame::OnAbout(wxCommandEvent& event) {
   // (c) replacement technique from https://forums.wxwidgets.org/viewtopic.php?p=158583#p158583
-  wxString about_string("RagTag v0.0.1\n\n(c) 2025 by Ed Foley");
+  wxString about_string(L"RagTag " + RagTagUtil::getRagTagAppVersionString()
+    + L"\n\n(c) 2025 by Ed Foley");
 #if wxUSE_UNICODE
   const wxString copyright_symbol = wxString::FromUTF8("\xc2\xa9");
   about_string.Replace("(c)", copyright_symbol);
