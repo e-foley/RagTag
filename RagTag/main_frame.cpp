@@ -1642,8 +1642,8 @@ bool MainFrame::clearRatingOfActiveFile()
   }
 
   markDirty();
+  refreshRatingButtons();  // Prioritize drawing rating because it's the user's primary action.
   refreshFileView();
-  refreshRatingButtons();
   refreshSummary();
   return true;
 }
@@ -1661,8 +1661,8 @@ bool MainFrame::setRatingOfActiveFile(ragtag::rating_t rating)
   }
 
   markDirty();
+  refreshRatingButtons();  // Prioritize drawing rating because it's the user's primary action.
   refreshFileView();
-  refreshRatingButtons();
   refreshSummary();
   return true;
 }
