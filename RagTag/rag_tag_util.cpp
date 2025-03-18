@@ -95,3 +95,19 @@ std::wstring RagTagUtil::getRagTagAppVersionString()
   return std::vformat(L"v{}.{}.{}", std::make_wformat_args(RAGTAG_APP_VERSION_MAJOR,
     RAGTAG_APP_VERSION_MINOR, RAGTAG_APP_VERSION_PATCH));
 }
+
+void RagTagUtil::stamp(const std::string& label) {
+  // One-time inits
+  //static std::chrono::time_point first = std::chrono::system_clock::now();
+  static std::chrono::time_point last = std::chrono::system_clock::now();
+  static std::chrono::time_point now = std::chrono::system_clock::now();
+
+  // Real function here
+  now = std::chrono::system_clock::now();
+  auto time_since_last = now - last;
+
+  std::cout << std::chrono::duration_cast<std::chrono::microseconds>(time_since_last).count() << " us\n";
+  std::cout << label << "\t";
+  std::flush(std::cout);
+  last = now;
+}

@@ -24,6 +24,7 @@ bool isStaticMedia(const ragtag::path_t& path);
 std::wstring getPathsAsNewlineDelineatedString(const std::vector<ragtag::path_t>& paths);
 bool deleteFile(const ragtag::path_t& path);
 std::wstring getRagTagAppVersionString();
+void stamp(const std::string& label);
 }  // namespace RagTagUtil
 
 #endif  // INCLUDE_RAG_TAG_UTIL_H
