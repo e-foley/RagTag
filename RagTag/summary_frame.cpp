@@ -165,6 +165,10 @@ void SummaryFrame::refreshFileList()
 {
   lc_summary_->Freeze();
 
+
+  RagTagUtil::stamp("refreshFileList() start");
+  RagTagUtil::stamp("cache checked items");
+
   // Cache items that have checkboxes marked so that we can re-check the relevant items after
   // populating the list. We do this as a convenience for our users so that an innocent act like
   // changing one tag on a file doesn't deselect every single file in the project.
@@ -179,6 +183,8 @@ void SummaryFrame::refreshFileList()
       }
     }
   }
+
+  RagTagUtil::stamp("determine redraw column need");
 
   // Determine whether we need to redraw columns. We do this by seeing whether the tags in the tag
   // map we're tasked with displaying are different from the tags currently displayed in the table.
@@ -212,6 +218,8 @@ void SummaryFrame::refreshFileList()
     }
   }
 
+  RagTagUtil::stamp("redraw columns if needed");
+
   if (redraw_columns) {
     lc_summary_->DeleteAllColumns();
     lc_summary_->AppendColumn("Path", wxLIST_FORMAT_LEFT, 500);
@@ -231,8 +239,14 @@ void SummaryFrame::refreshFileList()
     lc_summary_->Thaw();
   }
 
+  RagTagUtil::stamp("delete all items");
+
   lc_summary_->DeleteAllItems();
+
+  RagTagUtil::stamp("select files");
   file_paths_ = tag_map_.selectFiles(getOverallRuleFromFilterUi());
+
+  RagTagUtil::stamp("begin adding items");
   for (int i = 0; i < file_paths_.size(); ++i) {
     // Supply empty string, which will be replaced later by populateAndEllipsizePathColumn().
     lc_summary_->InsertItem(i, wxEmptyString);
@@ -273,14 +287,18 @@ void SummaryFrame::refreshFileList()
     }
   }
 
+  RagTagUtil::stamp("set, ellipsize path column");
   populateAndEllipsizePathColumn();
 
+  RagTagUtil::stamp("update filter display");
   st_filtered_file_count_->SetLabel("Current filters: " + std::to_string(file_paths_.size()) + "/" +
     std::to_string(tag_map_.numFiles()) + " project files");
   updateCopyButtonTextForSelections();
 
+  RagTagUtil::stamp("Refresh()");
   lc_summary_->Thaw();
   Refresh();
+  RagTagUtil::stamp("[end refreshFileList()]");
 }
 
 void SummaryFrame::refreshTagFilter()
