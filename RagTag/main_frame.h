@@ -17,13 +17,19 @@
 #include <wx/stattext.h>
 #include <wx/tglbtn.h>
 
+//! Primary UI window for the RagTag application that provides the user essential controls for their
+//! project, such as viewing media, assigning ratings, and attaching tags.
 class MainFrame : public wxFrame {
 public:
+  //! Constructor.
   MainFrame();
 
 private:
+  //! Type of function that enforces criteria for including a file path within grouping contexts.
   typedef std::function<bool(const ragtag::path_t&)> file_qualifier_t;
 
+  //! Enumeration of IDs used to differentiate various in-window controls for the purposes of
+  //! assigning functions to them.
   // Implementation note: IDs of 0 and 1 are not allowed per wxWidgets documentation:
   // https://docs.wxwidgets.org/latest/overview_windowids.html
   enum {
@@ -56,6 +62,7 @@ private:
     ID_RATING_MAX = ID_RATING_0 + 5  // Implied ratings 1-5
   };
 
+  //! User's intended action based on their response to a dialog.
   enum class UserIntention {
     NONE = 0,
     SAVE,
@@ -63,36 +70,74 @@ private:
     CANCEL,
   };
 
+  //! Columns displayed within the directory viewer.
   enum FileViewColumn {
     COLUMN_FILENAME,
     COLUMN_TAG_COVERAGE,
     COLUMN_RATING
   };
 
+  //! Categories of "tag coverage," which simply describes the proportion of defined tags that have
+  //! been attached to a file.
   enum class TagCoverage {
-    NONE,
-    SOME,
-    ALL,
-    NO_TAGS_DEFINED
+    NONE,  //!< All tags defined in the project are unspecified for this file.
+    SOME,  //!< Some tags defined in the project are committed to yes or no; others are unspecified.
+    ALL,  //!< All tags defined in the project have been committed either yes or no for this file.
+    NO_TAGS_DEFINED  //!< No tags are defined in the project; coverage is indeterminate.
   };
 
+  //! Color used for the background of list items for files that have been fully tagged.
   static const wxColour BACKGROUND_COLOR_FULLY_TAGGED;
+
+  //! Color used for the background of list items for files that have been partly tagged (files that
+  //! have some tag coverage).
   static const wxColour BACKGROUND_COLOR_PARTLY_TAGGED;
+
+  //! Color used for the background of list items for files that are untagged (files that have no
+  //! tag coverage).
   static const wxColour BACKGROUND_COLOR_FULLY_UNTAGGED;
+
+  //! Starting position for the vertical divider as a proportion of the window width.
   static const double LEFT_PANE_STARTING_PROPORTION;
+
+  //! Minimum position for the vertical divider as a proportion of the window width.
   static const double LEFT_PANE_MINIMUM_PROPORTION;
+
+  //! Horizontal adjustment of the vertical divider as a proportion of window width changes.
   static const double LEFT_PANE_GRAVITY;
+
+  //! Starting position of the media/directory divider as a proportion of the window height.
   static const double MEDIA_PANE_STARTING_PROPORTION;
+
+  //! Minimum position of the media/directory divider as a proportion of the window height.
   static const double MEDIA_PANE_MINIMUM_PROPORTION;
+
+  //! Vertical adjustment of the media/directory divider as a proportion of window height changes.
   static const double MEDIA_PANE_GRAVITY;
 
-  // Functions updating view to match model
+  // FUNCTIONS UPDATING VIEW TO MATCH MODEL ========================================================
+  //! Immediately update the visual display of tag toggles to match the model, including adding or
+  //! removing entries and enabling or disabling checkboxes.
   void refreshTagToggles();
+
+  //! Immediately update the display of files within the directory to match the model.
   void refreshFileView();
+
+  //! Immediately update the display of buttons used for rating files to match the model,
+  //! potentially enabling or disabling them.
   void refreshRatingButtons();
+
+  //! Immediately update the project summary window to match the model.
   void refreshSummary();
+
+  //! Immediately update the window's title bar to display the path of the current project and
+  //! denote whether the file has been modified.
   void refreshTitleBar();
+
+  //! Immediately update the window's status bar to display active mode (e.g., command mode) and
+  //! whether the project has been modified.
   void refreshStatusBar();
+
   // Menu events
   void OnNewProject(wxCommandEvent& event);
   void OnOpenProject(wxCommandEvent& event);
