@@ -246,6 +246,35 @@ namespace ragtag {
     return file_vector;
   }
 
+  TagCoverage TagMap::getFileTagCoverage(const ragtag::path_t& file) const
+  {
+    if (tag_registry_.empty()) {
+      return TagCoverage::NO_TAGS_DEFINED;
+    }
+
+    const auto file_it = file_map_.find(file);
+    if (file_it == file_map_.end()) {
+      // File is not registered.
+      return TagCoverage::NONE;
+    }
+
+    const auto& file_tags = file_it->second.tags;
+    if (file_tags.empty()) {
+      // Since we explicitly store only YES and NO, any file that has no stored tag data is a file
+      // for which all defined tags are UNCOMMITTED.
+      return TagCoverage::NONE;
+    }
+
+    if (file_tags.size() == tag_registry_.size()) {
+      // ...By the same token, if this file has data stored for every tag, the file must be
+      // completely covered by YES and NO settings.
+      return TagCoverage::ALL;
+    }
+
+    // ...Otherwise, we must have partial coverage.
+    return TagCoverage::SOME;
+  }
+
   std::vector<path_t> TagMap::selectFiles(const file_qualifier_t& fn) const {
     std::vector<path_t> qualified_file_vector;
     for (const auto& file : file_map_) {
