@@ -246,16 +246,22 @@ void SummaryFrame::refreshFileList()
     lc_summary_->SetItem(i, 1, rating.has_value() ?
       RagTagUtil::getStarTextForRating(*rating) : wxString("--"));
     // Show state of tags...
+    const auto all_tags_on_file = tag_map_.getAllTagSettings(file_paths_[i]);
+    if (!all_tags_on_file.has_value()) {
+      std::wcerr << "Could not get all tag settings for file '" << file_paths_[i] << "'.\n";
+      continue;
+    }
     for (int j = 0; j < all_tags.size(); ++j) {  
       wxString tag_state_glyph = wxEmptyString;
-      auto tag_setting = tag_map_.getTagSetting(file_paths_[i], all_tags[j].first);
-      if (!tag_setting.has_value() || *tag_setting == ragtag::TagSetting::UNCOMMITTED) {
+      const auto tag_setting_it = all_tags_on_file->find(all_tags[j].first);
+      if (tag_setting_it == all_tags_on_file->end()
+        || tag_setting_it->second == ragtag::TagSetting::UNCOMMITTED) {
         tag_state_glyph = RagTagUtil::GLYPH_UNCOMMITTED;
       }
-      else if (*tag_setting == ragtag::TagSetting::YES) {
+      else if (tag_setting_it->second == ragtag::TagSetting::YES) {
         tag_state_glyph = RagTagUtil::GLYPH_CHECKED;
       }
-      else if (*tag_setting == ragtag::TagSetting::NO) {
+      else if (tag_setting_it->second == ragtag::TagSetting::NO) {
         tag_state_glyph = RagTagUtil::GLYPH_UNCHECKED;
       }
 
