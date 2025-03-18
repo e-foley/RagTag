@@ -19,7 +19,7 @@ const ragtag::path_t RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION = L".tagdef";
 const ragtag::path_t RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION = L".tagdefbk";
 const int RagTagUtil::RAGTAG_APP_VERSION_MAJOR = 0;
 const int RagTagUtil::RAGTAG_APP_VERSION_MINOR = 1;
-const int RagTagUtil::RAGTAG_APP_VERSION_PATCH = 0;
+const int RagTagUtil::RAGTAG_APP_VERSION_PATCH = 1;
 
 wxString RagTagUtil::getStarTextForRating(float rating)
 {
