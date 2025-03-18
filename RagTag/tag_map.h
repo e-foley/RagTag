@@ -22,6 +22,15 @@ namespace ragtag {
     UNCOMMITTED = 2
   };
 
+  //! Categories of "tag coverage," which simply describes the proportion of defined tags that have
+  //! been attached to a file.
+  enum class TagCoverage {
+    NONE,  //!< All tags defined in the project are unspecified for this file.
+    SOME,  //!< Some tags defined in the project are committed to yes or no; others are unspecified.
+    ALL,  //!< All tags defined in the project have been committed either yes or no for this file.
+    NO_TAGS_DEFINED  //!< No tags are defined in the project; coverage is indeterminate.
+  };
+
   struct TagProperties {
     TagSetting default_setting{TagSetting::NO};
     std::optional<rtchar_t> hotkey{};
@@ -58,12 +67,14 @@ namespace ragtag {
     bool setTag(const path_t& path, tag_t tag, TagSetting setting);
     bool clearTag(const path_t& path, tag_t tag);
     std::optional<TagSetting> getTagSetting(const path_t& path, tag_t tag) const;
+    std::optional<std::map<tag_t, TagSetting>> getAllTagSettings(const path_t& path) const;
     bool setRating(const path_t& path, rating_t rating);
     bool clearRating(const path_t& path);
     std::optional<rating_t> getRating(const path_t& path) const;
     bool hasFile(const path_t& path) const;
     std::optional<std::vector<tag_t>> getFileTags(const path_t& path) const;
     std::vector<path_t> getAllFiles() const;
+    TagCoverage getFileTagCoverage(const ragtag::path_t& file) const;
 
     struct FileInfo {
     public:

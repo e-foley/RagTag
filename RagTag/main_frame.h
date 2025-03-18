@@ -77,15 +77,6 @@ private:
     COLUMN_RATING
   };
 
-  //! Categories of "tag coverage," which simply describes the proportion of defined tags that have
-  //! been attached to a file.
-  enum class TagCoverage {
-    NONE,  //!< All tags defined in the project are unspecified for this file.
-    SOME,  //!< Some tags defined in the project are committed to yes or no; others are unspecified.
-    ALL,  //!< All tags defined in the project have been committed either yes or no for this file.
-    NO_TAGS_DEFINED  //!< No tags are defined in the project; coverage is indeterminate.
-  };
-
   //! Color used for the background of list items for files that have been fully tagged.
   static const wxColour BACKGROUND_COLOR_FULLY_TAGGED;
 
@@ -216,7 +207,6 @@ private:
   // Helper functions
   static std::optional<ragtag::path_t> qualifiedFileNavigator(
     const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);
-  TagCoverage getFileTagCoverage(const ragtag::path_t& file) const;
   std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
   static ragtag::path_t getBackupPath(const ragtag::path_t& nominal_path);
 

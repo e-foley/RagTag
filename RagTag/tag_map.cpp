@@ -184,6 +184,28 @@ namespace ragtag {
     return tag_it->second;
   }
 
+  std::optional<std::map<tag_t, TagSetting>> TagMap::getAllTagSettings(const path_t& path) const
+  {
+    const auto file_it = file_map_.find(path);
+    if (file_it == file_map_.end()) {
+      // File is not in our list.
+      return {};
+    }
+
+    std::map<tag_t, TagSetting> returning;
+    for (const auto& tag : tag_registry_) {
+      const auto tag_it_in_file = file_it->second.tags.find(tag.first);
+      if (tag_it_in_file == file_it->second.tags.end()) {
+        returning.emplace(tag.first, TagSetting::UNCOMMITTED);
+      }
+      else {
+        returning.emplace(tag.first, tag_it_in_file->second);
+      }
+    }
+
+    return returning;
+  }
+
   bool TagMap::setRating(const path_t& path, const rating_t rating) {
     const auto file_it = file_map_.find(path);
     if (file_it == file_map_.end()) {
@@ -244,6 +266,35 @@ namespace ragtag {
       file_vector.emplace_back(map_it.first);
     }
     return file_vector;
+  }
+
+  TagCoverage TagMap::getFileTagCoverage(const ragtag::path_t& file) const
+  {
+    if (tag_registry_.empty()) {
+      return TagCoverage::NO_TAGS_DEFINED;
+    }
+
+    const auto file_it = file_map_.find(file);
+    if (file_it == file_map_.end()) {
+      // File is not registered.
+      return TagCoverage::NONE;
+    }
+
+    const auto& file_tags = file_it->second.tags;
+    if (file_tags.empty()) {
+      // Since we explicitly store only YES and NO, any file that has no stored tag data is a file
+      // for which all defined tags are UNCOMMITTED.
+      return TagCoverage::NONE;
+    }
+
+    if (file_tags.size() == tag_registry_.size()) {
+      // ...By the same token, if this file has data stored for every tag, the file must be
+      // completely covered by YES and NO settings.
+      return TagCoverage::ALL;
+    }
+
+    // ...Otherwise, we must have partial coverage.
+    return TagCoverage::SOME;
   }
 
   std::vector<path_t> TagMap::selectFiles(const file_qualifier_t& fn) const {

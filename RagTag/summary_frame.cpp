@@ -163,6 +163,8 @@ void SummaryFrame::setTagMap(const ragtag::TagMap& tag_map) {
 
 void SummaryFrame::refreshFileList()
 {
+  lc_summary_->Freeze();
+
   // Cache items that have checkboxes marked so that we can re-check the relevant items after
   // populating the list. We do this as a convenience for our users so that an innocent act like
   // changing one tag on a file doesn't deselect every single file in the project.
@@ -277,6 +279,7 @@ void SummaryFrame::refreshFileList()
     std::to_string(tag_map_.numFiles()) + " project files");
   updateCopyButtonTextForSelections();
 
+  lc_summary_->Thaw();
   Refresh();
 }
 
