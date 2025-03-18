@@ -184,6 +184,28 @@ namespace ragtag {
     return tag_it->second;
   }
 
+  std::optional<std::map<tag_t, TagSetting>> TagMap::getAllTagSettings(const path_t& path) const
+  {
+    const auto file_it = file_map_.find(path);
+    if (file_it == file_map_.end()) {
+      // File is not in our list.
+      return {};
+    }
+
+    std::map<tag_t, TagSetting> returning;
+    for (const auto& tag : tag_registry_) {
+      const auto tag_it_in_file = file_it->second.tags.find(tag.first);
+      if (tag_it_in_file == file_it->second.tags.end()) {
+        returning.emplace(tag.first, TagSetting::UNCOMMITTED);
+      }
+      else {
+        returning.emplace(tag.first, tag_it_in_file->second);
+      }
+    }
+
+    return returning;
+  }
+
   bool TagMap::setRating(const path_t& path, const rating_t rating) {
     const auto file_it = file_map_.find(path);
     if (file_it == file_map_.end()) {

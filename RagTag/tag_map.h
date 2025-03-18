@@ -67,6 +67,7 @@ namespace ragtag {
     bool setTag(const path_t& path, tag_t tag, TagSetting setting);
     bool clearTag(const path_t& path, tag_t tag);
     std::optional<TagSetting> getTagSetting(const path_t& path, tag_t tag) const;
+    std::optional<std::map<tag_t, TagSetting>> getAllTagSettings(const path_t& path) const;
     bool setRating(const path_t& path, rating_t rating);
     bool clearRating(const path_t& path);
     std::optional<rating_t> getRating(const path_t& path) const;
