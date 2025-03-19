@@ -129,6 +129,43 @@ private:
   //! whether the project has been modified.
   void refreshStatusBar();
 
+  // Custom dialog prompts
+  UserIntention promptUnsavedChanges();
+  std::optional<ragtag::path_t> promptSaveProjectAs();
+  std::optional<ragtag::path_t> promptOpenProject();
+  std::optional<ragtag::path_t> promptLoadFile();
+  bool promptConfirmTagDeletion(ragtag::tag_t tag);
+  bool promptConfirmFileDeletion(const ragtag::path_t& path);
+  bool promptSaveOpportunityIfDirty();
+  void notifyCouldNotSaveProject(const ragtag::path_t& path);
+  void notifyCouldNotOpenProject(const ragtag::path_t& path);
+  // Fundamental project commands
+  void markDirty();
+  void markClean();
+  void newProject();
+  bool saveProject();
+  bool saveProjectAs(const ragtag::path_t& path);
+  bool loadFileAndSetAsActive(const ragtag::path_t& path);
+  void resetActiveFile();
+  bool openProject(const ragtag::path_t& path);
+  bool displayMediaFile(const ragtag::path_t& path);
+  bool playMedia();
+  bool pauseMedia();
+  bool stopMedia();
+  bool clearRatingOfActiveFile();
+  bool setRatingOfActiveFile(ragtag::rating_t rating);
+  bool loadNextFile();
+  bool loadPreviousFile();
+  bool loadNextUntaggedFile();
+  bool loadPreviousUntaggedFile();
+  void enterCommandMode();
+  void exitCommandMode();
+  // Helper functions
+  static std::optional<ragtag::path_t> qualifiedFileNavigator(
+    const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);
+  std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
+  static ragtag::path_t getBackupPath(const ragtag::path_t& nominal_path);
+
   // MENU EVENTS ===================================================================================
   // All functions are invoked upon selecting them via the window's menu or executing the
   // corresponding accelerator. Function signature is dictated by wxEvtHandler::Bind() requirements
@@ -167,7 +204,7 @@ private:
   void OnToggleMuteBox(wxCommandEvent& event);
   // Events of type wxEVT_LIST_ITEM_FOCUSED
   void OnFocusFile(wxListEvent& event);
-  
+
   // MEDIA EVENTS ==================================================================================
   // Events related to display of the media file.
   void OnMediaLoaded(wxMediaEvent& event);    // wxEVT_MEDIA_LOADED
@@ -185,43 +222,6 @@ private:
 
   // KEYBOARD EVENTS ===============================================================================
   void OnKeyDown(wxKeyEvent& event);  // wxEVT_CHAR_DOWN
-
-  // Custom dialog prompts
-  UserIntention promptUnsavedChanges();
-  std::optional<ragtag::path_t> promptSaveProjectAs();
-  std::optional<ragtag::path_t> promptOpenProject();
-  std::optional<ragtag::path_t> promptLoadFile();
-  bool promptConfirmTagDeletion(ragtag::tag_t tag);
-  bool promptConfirmFileDeletion(const ragtag::path_t& path);
-  bool promptSaveOpportunityIfDirty();
-  void notifyCouldNotSaveProject(const ragtag::path_t& path);
-  void notifyCouldNotOpenProject(const ragtag::path_t& path);
-  // Fundamental project commands
-  void markDirty();
-  void markClean();
-  void newProject();
-  bool saveProject();
-  bool saveProjectAs(const ragtag::path_t& path);
-  bool loadFileAndSetAsActive(const ragtag::path_t& path);
-  void resetActiveFile();
-  bool openProject(const ragtag::path_t& path);
-  bool displayMediaFile(const ragtag::path_t& path);
-  bool playMedia();
-  bool pauseMedia();
-  bool stopMedia();
-  bool clearRatingOfActiveFile();
-  bool setRatingOfActiveFile(ragtag::rating_t rating);
-  bool loadNextFile();
-  bool loadPreviousFile();
-  bool loadNextUntaggedFile();
-  bool loadPreviousUntaggedFile();
-  void enterCommandMode();
-  void exitCommandMode();
-  // Helper functions
-  static std::optional<ragtag::path_t> qualifiedFileNavigator(
-    const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);
-  std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
-  static ragtag::path_t getBackupPath(const ragtag::path_t& nominal_path);
 
   wxMenu* m_file_{ nullptr };
   wxMenu* m_project_{ nullptr };
