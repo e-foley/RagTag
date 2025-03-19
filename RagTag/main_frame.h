@@ -129,7 +129,10 @@ private:
   //! whether the project has been modified.
   void refreshStatusBar();
 
-  // Menu events
+  // MENU EVENTS ===================================================================================
+  // All functions are invoked upon selecting them via the window's menu or executing the
+  // corresponding accelerator. Function signature is dictated by wxEvtHandler::Bind() requirements
+  // for events of type wxEVT_MENU.
   void OnNewProject(wxCommandEvent& event);
   void OnOpenProject(wxCommandEvent& event);
   void OnSaveProject(wxCommandEvent& event);
@@ -142,11 +145,13 @@ private:
   void OnRefreshFileView(wxCommandEvent& event);
   void OnNextFile(wxCommandEvent& event);
   void OnPreviousFile(wxCommandEvent& event);
-  void OnKillFocus(wxFocusEvent& event);
+  void OnToggleMuteMenu(wxCommandEvent& event);
   void OnExit(wxCommandEvent& event);
-  void OnClose(wxCloseEvent& event);
   void OnAbout(wxCommandEvent& event);
-  // Button events
+
+  // CONTROL EVENTS =================================================================================
+  // These functions are invoked by the user's interactions with controls in the window.
+  // Events of type wxEVT_BUTTON
   void OnClearTagsFromFile(wxCommandEvent& event);
   void OnSetTagsToDefaults(wxCommandEvent& event);
   void OnDefineNewTag(wxCommandEvent& event);
@@ -156,23 +161,31 @@ private:
   void OnPreviousUntaggedFile(wxCommandEvent& event);
   void OnNextUntaggedFile(wxCommandEvent& event);
   void OnClickRatingButton(wxCommandEvent& event);
-  // Checkbox events
+  // Events of type wxEVT_CHECKBOX
   void OnToggleAutoplay(wxCommandEvent& event);
   void OnToggleLooping(wxCommandEvent& event);
   void OnToggleMuteBox(wxCommandEvent& event);
-  void OnToggleMuteMenu(wxCommandEvent& event);
-  // List control events
+  // Events of type wxEVT_LIST_ITEM_FOCUSED
   void OnFocusFile(wxListEvent& event);
-  // Media events
-  void OnMediaLoaded(wxMediaEvent& event);
-  void OnMediaStop(wxMediaEvent& event);
-  void OnMediaFinished(wxMediaEvent& event);
-  void OnMediaPlay(wxMediaEvent& event);
-  void OnMediaPause(wxMediaEvent& event);
-  // Events from child windows
+  
+  // MEDIA EVENTS ==================================================================================
+  // Events related to display of the media file.
+  void OnMediaLoaded(wxMediaEvent& event);    // wxEVT_MEDIA_LOADED
+  void OnMediaStop(wxMediaEvent& event);      // wxEVT_MEDIA_STOP
+  void OnMediaFinished(wxMediaEvent& event);  // wxEVT_MEDIA_FINISHED
+  void OnMediaPlay(wxMediaEvent& event);      // wxEVT_MEDIA_PLAY
+  void OnMediaPause(wxMediaEvent& event);     // wxEVT_MEDIA_PAUSE
+
+  // WINDOW EVENTS =================================================================================
+  // Events related to the handling of top-level windows themselves.
+  void OnClose(wxCloseEvent& event);      // wxEVT_CLOSE_WINDOW
+  void OnKillFocus(wxFocusEvent& event);  // wxEVT_KILL_FOCUS
+  // Custom event handler for actions taken within the project summary. (See SummaryFrameEvent.)
   void OnSummaryFrameAction(SummaryFrameEvent& event);
-  // Key presses
-  void OnKeyDown(wxKeyEvent& event);
+
+  // KEYBOARD EVENTS ===============================================================================
+  void OnKeyDown(wxKeyEvent& event);  // wxEVT_CHAR_DOWN
+
   // Custom dialog prompts
   UserIntention promptUnsavedChanges();
   std::optional<ragtag::path_t> promptSaveProjectAs();
