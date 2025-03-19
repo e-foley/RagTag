@@ -1832,4 +1832,3 @@ ragtag::path_t MainFrame::getBackupPath(const ragtag::path_t& nominal_path)
     + std::format(L"_{0:%Y%m%d%H%M%S}.tagdefbk", now);
   return nominal_path.parent_path() / ragtag::path_t(filename);
 }
-
