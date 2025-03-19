@@ -1102,8 +1102,8 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
 
     // Note that some of these already get invoked in the case that we resetActiveFile(). We can
     // optimize these redundant calls out later if we really want to.
-    refreshFileView();
     refreshRatingButtons();
+    refreshFileView();
     refreshSummary();
 
     // This shouldn't be nullptr, but we still guard against it to be safe.
@@ -1136,8 +1136,8 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
 
     // Note that some of these already get invoked in the case that we resetActiveFile(). We can
     // optimize these redundant calls out later if we really want to.
-    refreshFileView();
     refreshRatingButtons();
+    refreshFileView();
     refreshSummary();
 
     // This shouldn't be nullptr, but we still guard against it to be safe.
@@ -1540,8 +1540,8 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
   m_tags_->Enable(ID_SET_TAGS_TO_DEFAULTS, true);
 
   refreshTagToggles();
-  refreshFileView();
   refreshRatingButtons();
+  refreshFileView();
   if (is_newly_added_file) {
     // We only update the summary when the file list has changed. Otherwise, after the user selects
     // a file in the summary view, the invoking of this function instantly deselects the file that
@@ -1561,8 +1561,8 @@ void MainFrame::resetActiveFile()
 {
   active_file_ = {};
   refreshTagToggles();
-  refreshFileView();
   refreshRatingButtons();
+  refreshFileView();
   refreshSummary();
   b_stop_media_->Disable();
   b_play_pause_media_->Disable();
@@ -1642,7 +1642,7 @@ bool MainFrame::clearRatingOfActiveFile()
   }
 
   markDirty();
-  refreshRatingButtons();  // Prioritize drawing rating because it's the user's primary action.
+  refreshRatingButtons();
   refreshFileView();
   refreshSummary();
   return true;
@@ -1661,7 +1661,7 @@ bool MainFrame::setRatingOfActiveFile(ragtag::rating_t rating)
   }
 
   markDirty();
-  refreshRatingButtons();  // Prioritize drawing rating because it's the user's primary action.
+  refreshRatingButtons();
   refreshFileView();
   refreshSummary();
   return true;
