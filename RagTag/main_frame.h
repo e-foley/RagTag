@@ -129,41 +129,247 @@ private:
   //! whether the project has been modified.
   void refreshStatusBar();
 
-  // Custom dialog prompts
+  // PROMPTS =======================================================================================
+  //! Prompts the user to save their work.
+  //! 
+  //! This function does not perform any saving action; it just collects the user's intention.
+  //! Returns the user to Command Mode afterward if they were in it prior to the prompt.
+  //! 
+  //! @returns The response indicated by the user.
   UserIntention promptUnsavedChanges();
+
+  //! Prompts the user to select a path at which to save the project.
+  //! 
+  //! This function does not actually write the file; it just collects the path. Returns the user
+  //! to Command Mode if they were in it prior to the prompt.
+  //! 
+  //! @returns The path the user indicates or an empty optional if the user cancels the prompt.
   std::optional<ragtag::path_t> promptSaveProjectAs();
+
+  //! Prompts the user to select a path of a RagTag-compatible project on disk.
+  //! 
+  //! Valid files are either a RagTag project or a RagTag project backup. This function does not
+  //! actually load the file; it just collects the path. Returns the user to Command Mode if they
+  //! were in it prior to the prompt.
+  //! 
+  //! @returns The project path indicated by the user or an empty optional if the user cancels the
+  //! prompt.
   std::optional<ragtag::path_t> promptOpenProject();
+
+  //! Prompts the user to select the path of a file to add to their project.
+  //! 
+  //! No restriction is placed on the type of file the user selects. This function does not actually
+  //! load the file; it just collects the path. Returns the user to Command Mode if they were in it
+  //! prior to the prompt.
+  //! 
+  //! @returns The file path indicated by the user or an empty optional if the user cancels the
+  //! prompt.
   std::optional<ragtag::path_t> promptLoadFile();
+
+  //! Prompts the user to confirm that they wish to delete a tag.
+  //! 
+  //! This function does not actually delete the tag; it just collects the user's intent. Returns
+  //! the user to Command Mode if they were in it prior to the prompt.
+  //! 
+  //! @param tag The tag to confirm the user's intent to delete.
+  //! @returns True if the user confirms their intent to delete the tag.
   bool promptConfirmTagDeletion(ragtag::tag_t tag);
+
+  //! Prompts the user to confirm they wish to delete a file.
+  //! 
+  //! This function does not actually delete the file; it just collects the user's intent. Returns
+  //! the user to Command Mode if they were in it prior to the prompt.
+  //! 
+  //! @param path The path of the file to confirm the user's intent to delete.
+  //! @returns True if the user confirms their intent to delete the file.
   bool promptConfirmFileDeletion(const ragtag::path_t& path);
+
+  //! Prompts the user to save their work if the project has been marked dirty and saves the project
+  //! (possibly through the use of other prompts) if the user indicates a desire to save. If the
+  //! project is not dirty, does nothing.
+  //! 
+  //! Notifies the user if the saving operation fails. Returns the user to Command Mode if they were
+  //! in it prior to the prompt.
+  //! 
+  //! @returns True if the project is clean or the action corresponding to the user's intent (saving
+  //! or not saving) is performed; false if the user cancels the prompt or a desired saving operation
+  //! fails. (Essentially, true denotes that everything related to saving is wrapped up and false
+  //! denotes that there is still unfinished business.)
   bool promptSaveOpportunityIfDirty();
+
+  //! Notifies the user that the project could not be saved.
+  //! 
+  //! Returns the user to Command Mode if they were in it prior to the prompt.
+  //! 
+  //! @param path The path of the project that could not be saved.
   void notifyCouldNotSaveProject(const ragtag::path_t& path);
+
+  //! Notifies the user that a project could not be opened.
+  //! 
+  //! Returns the user to Command Mode if they were in it prior to the prompt.
+  //! 
+  //! @param path The path of the project that could not be opened.
   void notifyCouldNotOpenProject(const ragtag::path_t& path);
-  // Fundamental project commands
+
+  // FUNDAMENTAL LOW-LEVEL PROJECT COMMANDS ========================================================
+  //! Marks the project as dirty and updates user interface elements to this effect.
   void markDirty();
+
+  //! Marks the project as clean and updates user interface elements to this effect.
   void markClean();
+
+  //! Creates a new project and loads it in place of any actively loaded project.
   void newProject();
+
+  //! Attempts to saves the active project and a backup copy.
+  //!
+  //! @returns True if the project and its backup are saved successfully; false if either saving
+  //! operation fails.
   bool saveProject();
+
+  //! Attempts to save the active project and a backup copy at a given path.
+  //! 
+  //! The name of the backup copy is generated from the supplied path.
+  //! 
+  //! @param path The filename to use for the project.
+  //! @returns True if the project and its backup are saved successfully; false if either saving
+  //! operation fails.
   bool saveProjectAs(const ragtag::path_t& path);
+
+  //! Loads a file, adds it to the active project if necessary, attempts to display it, and updates
+  //! all user controls accordingly. Also establishes the file's directory as the active directory.
+  //! 
+  //! Displays the media file as if by displayMediaFile() and enables media controls based on the
+  //! filetype inferred from the file's extension.
+  //! 
+  //! If the file is new to the active project, assigns default tags to it.
+  //! 
+  //! Enables all directory navigation controls if the file is loaded.
+  //! 
+  //! Refreshes other user interface elements by refreshTagToggles(), refreshFileView(), 
+  //! refreshRatingButtons(), and refreshSummary().
+  //! 
+  //! Highlights the file in the summary window's file listing if the file is present there.
+  //! 
+  //! If the path provided matches the currently loaded file, this function does nothing.
+  //! 
+  //! @param path The path of the file to load and make active.
+  //! @returns True if the file is successfully loaded and incorporated into the project or if the
+  //! provided path matches the presently loaded file; false if the file cannot be loaded, it cannot
+  //! be added to the project (if necessary) or default tags cannot be asserted for the file (if
+  //! necessary).
   bool loadFileAndSetAsActive(const ragtag::path_t& path);
+
+  //! Clears the actively loaded file and returns user interface elements to their default state.
   void resetActiveFile();
+
+  //! Attempts to open a project from disk and updates user interface elements if successful.
+  //! 
+  //! The loaded project will be marked clean by default (see markClean()).
+  //! 
+  //! @param path The path of the project to open.
+  //! @returns True if the project is successfully opened.
   bool openProject(const ragtag::path_t& path);
+
+  //! Loads a file into the media control.
+  //! 
+  //! Note that the act of loading typically invokes the OnMediaLoaded event.
+  //! 
+  //! @param path The path of the file to display.
+  //! @return True if the file is loaded by the media control.
   bool displayMediaFile(const ragtag::path_t& path);
+
+  //! Attempts to play the file currently loaded in the media control.
+  //! 
+  //! @returns True if the internal call to wxMediaCtrl::Play() is successful.
   bool playMedia();
+
+  //! Attempts to pause the file currently loaded in the media control.
+  //! 
+  //! @returns True if the internal call to wxMediaCtrl::Pause() is successful.
   bool pauseMedia();
+
+  //! Attempts to stop the file currently loaded in the media control.
+  //! 
+  //! @returns True if the internal call to wxMediaCtrl::Stop() is successful.
   bool stopMedia();
+
+  //! Attempts to remove the rating from the active file and update user interface elements
+  //! accordingly.
+  //! 
+  //! @returns True if the rating is removed from the active file within the active project.
   bool clearRatingOfActiveFile();
+
+  //! Attemps to set the rating on the active file and update user interface elements accordingly.
+  //! 
+  //! @param rating The rating to assign the file.
+  //! @returns True if the rating is set on the active file within the active project.
   bool setRatingOfActiveFile(ragtag::rating_t rating);
+
+  //! Attempts to load the file following the currently loaded file in the directory listing, then
+  //! display it and set it as the new active file.
+  //! 
+  //! @returns True if the next file can be determined and that file is successfully loaded and set
+  //! as the active file.
   bool loadNextFile();
+
+  //! Attempts to load the file preceding the currently loaded file in the directory listing, then
+  //! display it and set it as the new active file.
+  //! 
+  //! @returns True if the previous file can be determined and that file is successfully loaded and
+  //! set as the active file.
   bool loadPreviousFile();
+
+  //! Attempts to load the nearest untagged file following the currently loaded file in the
+  //! directory listing, then display it and set it as the new active file.
+  //! 
+  //! Untagged in this context refers to files for which not all tags are committed to YES or NO.
+  //! 
+  //! @returns True if the next untagged file can be determined and that file is successfully loaded
+  //! and set as the active file.
   bool loadNextUntaggedFile();
+
+  //! Attempts to load the nearest untagged file preceding the currently loaded file in the
+  //! directory listing, then display it and set it as the new active file.
+  //! 
+  //! Untagged in this context refers to files for which not all tags are committed to YES or NO.
+  //! 
+  //! @returns True if the next untagged file can be determined and that file is successfully loaded
+  //! and set as the active file.
   bool loadPreviousUntaggedFile();
+
+  //! Enters Command Mode, enabling keyboard shortcuts without modifiers.
   void enterCommandMode();
+
+  //! Leaves Command Mode, disabling keyboard shortcuts without modifiers.
   void exitCommandMode();
-  // Helper functions
+
+  //! Identifies the nearest file in the directory that meets specified critera.
+  //! 
+  //! Ordering is based on default directory iterator ordering.
+  //! 
+  //! @param reference The file to look forward or backward from.
+  //! @param qualifier The criteria to match.
+  //! @param find_next If true, look forward; if false, look backward.
+  //! @returns A path to a file satisfying the criteria or an empty optional if no such file can be
+  //! found.
   static std::optional<ragtag::path_t> qualifiedFileNavigator(
     const ragtag::path_t& reference, const file_qualifier_t& qualifier, bool find_next);
+
+  //! Retrieves the index of the item representing a path within the directory view list control.
+  //! 
+  //! @param path The path whose index we seek.
+  //! @returns The index of the path within the directory view list control or an empty optional if
+  //! the path is not present.
   std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
+
+  //! Produces a suitable path to use to save a backup version of a project.
+  //! 
+  //! This function encodes date information into the filename and gives the file a different
+  //! extension.
+  //! 
+  //! @param nominal_path The path of the main project.
+  //! @returns A suitable path for a project backup file.
   static ragtag::path_t getBackupPath(const ragtag::path_t& nominal_path);
 
   // MENU EVENTS ===================================================================================
@@ -223,41 +429,74 @@ private:
   // KEYBOARD EVENTS ===============================================================================
   void OnKeyDown(wxKeyEvent& event);  // wxEVT_CHAR_DOWN
 
+  //! The "File" menu.
   wxMenu* m_file_{ nullptr };
+  //! The "Project" menu.
   wxMenu* m_project_{ nullptr };
+  //! The "Media" menu.
   wxMenu* m_media_{ nullptr };
+  //! The "Tags" menu.
   wxMenu* m_tags_{ nullptr };
+  //! The "Window" menu.
   wxMenu* m_window_{ nullptr };
+  //! The "Help" menu.
   wxMenu* m_help_{ nullptr };
+  //! The panel used as a container for tag toggle controls.
   wxScrolledWindow* p_tag_toggles_{ nullptr };
+  //! The sizer that positions tag toggle controls.
   wxBoxSizer* sz_tag_toggles_{ nullptr };
+  //! The media control used to display images and video.
   wxMediaCtrl* mc_media_display_{ nullptr };
+  //! The button used to stop the currently playing media.
   wxButton* b_stop_media_{ nullptr };
+  //! The button used to play and to paus the currently playing media.
   wxButton* b_play_pause_media_{ nullptr };
+  //! The checkbox used to toggle whether the media should automatically begin playing upon load.
   wxCheckBox* cb_autoplay_{ nullptr };
+  //! The checkbox used to toggle whether the media should restart after it finishes.
   wxCheckBox* cb_loop_{ nullptr };
+  //! The checkbox used to toggle whether the media plays sound.
   wxCheckBox* cb_mute_{ nullptr };
+  //! The button used to denote that a file should have no rating. (Note, this is different than 0.)
   wxToggleButton* b_no_rating_{ nullptr };
+  //! Buttons used to assign ratings of 0 through 5 stars to the file.
   std::vector<wxToggleButton*> b_ratings_{6};  // 6 ratings: 0 through 5 inclusive
+  //! Button that clears tags from the active file by marking them all as uncommitted.
   wxButton* b_clear_tags_from_file_{ nullptr };
+  //! Button that sets all tags on the file to the tags' defaults.
   wxButton* b_set_tags_to_defaults_{ nullptr };
+  //! Text displaying the directory of the active file.
   wxStaticText* st_current_directory_{ nullptr };
+  //! List control displaying the files in the directory of the active file.
   wxListCtrl* lc_files_in_directory_{ nullptr };
+  //! Button that refreshes the control displaying the files in the directory of the active file.
   wxButton* b_refresh_file_view_{ nullptr };
+  //! Button to change the active file to the previous untagged file within the directory.
   wxButton* b_previous_untagged_file_{ nullptr };
+  //! Button to change the active file to the next untagged file within the directory.
   wxButton* b_next_untagged_file_{ nullptr };
+  //! The "Project Summary" window.
   SummaryFrame* f_summary_{ nullptr };
-  // Parallel array of full paths to files presented by lc_files_in_directory_, since they cannot be
-  // included directly. It's not pretty design, but it's the best way I could come up with given
-  // wxListCtrl's limitations.
+  //! Array of full paths to files presented by lc_files_in_directory_.
+  // Implementation note: Maintaining a parallel array like this isn't ideal, but it's perhaps the
+  // least bad way of caching data that items in the list control can refer to by generic pointer as
+  // required by the wxListCtrl interface.
   std::vector<ragtag::path_t> file_paths_{};
+  //! The tag map defining the active project.
   ragtag::TagMap tag_map_{};
+  //! The file path of the current project.
   std::optional<ragtag::path_t> project_path_{};
+  //! The file path of the active file.
   std::optional<ragtag::path_t> active_file_{};
+  //! Collection of panel UI elements that represent toggle-able tags.
   std::vector<TagTogglePanel*> tag_toggle_panels_{};
+  //! Whether the project has been modified since its last save (as governed by makeDirty()).
   bool is_dirty_{ false };
+  //! Whether the user requested the media to stop (as opposed to the media automatically stopping).
   bool user_initiated_stop_media_{ false };
+  //! Whether changes are being made to the directory view at this instant.
   bool file_view_modification_in_progress_{ false };
+  //! Whether Command Mode is active.
   bool command_mode_active_{ true };
 };
 
