@@ -277,7 +277,7 @@ void SummaryFrame::refreshFileList()
 
   st_filtered_file_count_->SetLabel("Current filters: " + std::to_string(file_paths_.size()) + "/" +
     std::to_string(tag_map_.numFiles()) + " project files");
-  updateCopyButtonTextForSelections();
+  updateCopyButtonForSelections();
 
   lc_summary_->Thaw();
   Refresh();
@@ -560,12 +560,12 @@ void SummaryFrame::OnResizeColumn(wxListEvent& event)
 
 void SummaryFrame::OnFileChecked(wxListEvent& event)
 {
-  updateCopyButtonTextForSelections();
+  updateCopyButtonForSelections();
 }
 
 void SummaryFrame::OnFileUnchecked(wxListEvent& event)
 {
-  updateCopyButtonTextForSelections();
+  updateCopyButtonForSelections();
 }
 
 void SummaryFrame::OnFileFocused(wxListEvent& event)
@@ -656,7 +656,7 @@ void SummaryFrame::updateRatingFilterEnabledState() {
   }
 }
 
-void SummaryFrame::updateCopyButtonTextForSelections()
+void SummaryFrame::updateCopyButtonForSelections()
 {
   const int selected_item_count = getPathsOfSelectedFiles().size();
   if (selected_item_count == 0) {

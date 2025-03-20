@@ -104,7 +104,7 @@ private:
 
   //! Modifies the enabled state of the "copy files" button based on whether files have been
   //! selected.
-  void updateCopyButtonTextForSelections();
+  void updateCopyButtonForSelections();
 
   //! Resets all filter UI elements to their default state.
   void resetFilters();
