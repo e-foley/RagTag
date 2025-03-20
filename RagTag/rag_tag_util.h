@@ -50,7 +50,7 @@ bool isStaticMedia(const ragtag::path_t& path);
 //! 
 //! @param paths The vector of paths to present as a newline-delimited string.
 //! @returns The newline-delimited string of the paths.
-std::wstring getPathsAsNewlineDelineatedString(const std::vector<ragtag::path_t>& paths);
+std::wstring getPathsAsNewlineDelimitedString(const std::vector<ragtag::path_t>& paths);
 
 //! Attempts to move the given file to the Windows Recycle Bin without a prompt.
 //! 

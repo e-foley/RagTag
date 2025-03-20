@@ -56,7 +56,7 @@ bool RagTagUtil::isStaticMedia(const ragtag::path_t& path)
   return false;
 }
 
-std::wstring RagTagUtil::getPathsAsNewlineDelineatedString(const std::vector<ragtag::path_t>& paths)
+std::wstring RagTagUtil::getPathsAsNewlineDelimitedString(const std::vector<ragtag::path_t>& paths)
 {
   std::wstring building;
   for (int i = 0; i < paths.size(); ++i) {

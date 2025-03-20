@@ -453,7 +453,7 @@ void SummaryFrame::OnCopySelections(wxCommandEvent& event)
       + L" copied successfully.\n\n"
       + L"Perhaps a file is missing or the directory contains a file sharing the name of a file you"
       + L" are attempting to copy. Otherwise, there may be a permissions issue.\n\n"
-      + L"Files not copied:\n" + RagTagUtil::getPathsAsNewlineDelineatedString(uncopied_files),
+      + L"Files not copied:\n" + RagTagUtil::getPathsAsNewlineDelimitedString(uncopied_files),
       "Copy Incomplete", wxOK | wxCENTER | wxICON_WARNING);
     dialog.ShowModal();
   }
@@ -468,7 +468,7 @@ void SummaryFrame::OnDeleteFiles(wxCommandEvent& event)
   wxMessageDialog dialog(this, "Are you sure you want to delete "
     + std::to_string(paths_to_delete.size()) + " file" + path_plural_1 + " from your machine?\n\n"
     + path_plural_2 + " will be deleted:\n"
-    + wxString(RagTagUtil::getPathsAsNewlineDelineatedString(paths_to_delete)),
+    + wxString(RagTagUtil::getPathsAsNewlineDelimitedString(paths_to_delete)),
     "Confirm File Deletion", wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
   if (dialog.ShowModal() != wxID_OK) {
     return;
@@ -488,7 +488,7 @@ void SummaryFrame::OnRemoveFromProject(wxCommandEvent& event)
   wxMessageDialog dialog(this, "Are you sure you want to remove "
     + std::to_string(paths_to_remove.size()) + " file" + path_plural_1 + " from this project?\n\n"
     + "All tags will be removed from " + path_plural_2 + ":\n"
-    + wxString(RagTagUtil::getPathsAsNewlineDelineatedString(paths_to_remove)),
+    + wxString(RagTagUtil::getPathsAsNewlineDelimitedString(paths_to_remove)),
     "Confirm File Removal", wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_WARNING);
   if (dialog.ShowModal() != wxID_OK) {
     return;
