@@ -420,6 +420,7 @@ private:
   // KEYBOARD EVENTS ===============================================================================
   void OnKeyDown(wxKeyEvent& event);  // wxEVT_CHAR_DOWN
 
+  // USER INTERFACE ELEMENTS =======================================================================
   //! The "File" menu.
   wxMenu* m_file_{ nullptr };
   //! The "Project" menu.
@@ -468,6 +469,8 @@ private:
   wxButton* b_next_untagged_file_{ nullptr };
   //! The "Project Summary" window.
   SummaryFrame* f_summary_{ nullptr };
+
+  // ADDITIONAL DATA MEMBERS =======================================================================
   //! Array of full paths to files presented by lc_files_in_directory_.
   // Implementation note: Maintaining a parallel array like this isn't ideal, but it's perhaps the
   // least bad way of caching data that items in the list control can refer to by generic pointer as
