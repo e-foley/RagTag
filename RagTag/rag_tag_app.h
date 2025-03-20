@@ -12,6 +12,8 @@ public:
   bool OnInit() override;
 };
 
+// Forward declaration macro required by wxWidgets. See
+// https://docs.wxwidgets.org/latest/group__group__funcmacro__rtti.html#ga1523a2d553dea288d66cd35e8a0ffd5c
 wxDECLARE_APP(RagTagApp);
 
 #endif  // INCLUDE_RAG_TAG_APP_H_
