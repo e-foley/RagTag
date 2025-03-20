@@ -3,8 +3,12 @@
 
 #include <wx/wx.h>
 
+//! Top-level application for RagTag.
 class RagTagApp : public wxApp {
 public:
+  //! Presents MainFrame, the primary user interface window for the application.
+  //! 
+  //! @returns True to continue running or false to denote an immediate exit.
   bool OnInit() override;
 };
 
