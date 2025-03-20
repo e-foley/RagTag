@@ -10,16 +10,22 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 
+//! Namespace for the low-level RagTag library interface.
 namespace ragtag {
+  //! Type used to describe tags.
   typedef std::wstring tag_t;
+  //! Type used to describe paths.
   typedef std::filesystem::path path_t;
+  //! Type used to describe file ratings.
   typedef float rating_t;
+  //! Type used to describe hotkeys.
   typedef wchar_t rtchar_t;
 
+  //! Way to describe a tag's applicability to a file.
   enum class TagSetting {
-    NO = 0,
-    YES = 1,
-    UNCOMMITTED = 2
+    NO = 0,          //!< Tag does not apply to this file.
+    YES = 1,         //!< Tag applies to this file.
+    UNCOMMITTED = 2  //!< The tag's applicability to this file is not specified.
   };
 
   //! Categories of "tag coverage," which simply describes the proportion of defined tags that have
@@ -31,13 +37,22 @@ namespace ragtag {
     NO_TAGS_DEFINED  //!< No tags are defined in the project; coverage is indeterminate.
   };
 
+  //! Structure describing tag traits.
   struct TagProperties {
+    //! The default setting of the tag.
     TagSetting default_setting{TagSetting::NO};
+    //! Hotkey associated with this tag or an empty optional if no hotkey.
     std::optional<rtchar_t> hotkey{};
 
+    //! Tests equality of this TagProperties instance and another TagProperties instance.
+    //! 
+    //! Equality is defined by matching default settings and matching hotkeys.
+    //! 
+    //! @param rhs TagProperties instance to compare this instance with.
+    //! @returns True if this TagProperties instance is equal to another TagProperties instance.
     bool operator==(const TagProperties& rhs) const noexcept {
-      return default_setting == rhs.default_setting &&
-        hotkey == rhs.hotkey;
+      return default_setting == rhs.default_setting
+          && hotkey == rhs.hotkey;
     }
   };
 
