@@ -363,15 +363,6 @@ private:
   //! the path is not present.
   std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
 
-  //! Produces a suitable path to use to save a backup version of a project.
-  //! 
-  //! This function encodes date information into the filename and gives the file a different
-  //! extension.
-  //! 
-  //! @param nominal_path The path of the main project.
-  //! @returns A suitable path for a project backup file.
-  static ragtag::path_t getBackupPath(const ragtag::path_t& nominal_path);
-
   // MENU EVENTS ===================================================================================
   // All functions are invoked upon selecting them via the window's menu or executing the
   // corresponding accelerator. Function signature is dictated by wxEvtHandler::Bind() requirements

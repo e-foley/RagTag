@@ -1461,7 +1461,7 @@ bool MainFrame::saveProject() {
 
 bool MainFrame::saveProjectAs(const ragtag::path_t& path) {
   bool success = tag_map_.toFile(path);
-  const ragtag::path_t backup_path = getBackupPath(path);
+  const ragtag::path_t backup_path = RagTagUtil::getBackupPath(path);
   if (success && !std::filesystem::copy_file(path, backup_path)) {
     // We think we wrote the primary file but couldn't write the backup file.
     std::wcerr << L"Couldn't write backup file '" + backup_path.wstring() + L"'.\n";
@@ -1822,13 +1822,4 @@ std::optional<long> MainFrame::getPathListCtrlIndex(const ragtag::path_t& path) 
   }
 
   return {};
-}
-
-ragtag::path_t MainFrame::getBackupPath(const ragtag::path_t& nominal_path)
-{
-  // Take floor of seconds so that we aren't left with long decimals in the resulting filename.
-  const auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());
-  const std::wstring filename = nominal_path.stem().wstring()
-    + std::format(L"_{0:%Y%m%d%H%M%S}.tagdefbk", now);
-  return nominal_path.parent_path() / ragtag::path_t(filename);
 }

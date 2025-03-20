@@ -64,6 +64,15 @@ bool deleteFile(const ragtag::path_t& path);
 //! 
 //! @returns A string containing the version of the RagTag app.
 std::wstring getRagTagAppVersionString();
+
+//! Produces a suitable path to use to save a backup version of a project.
+//! 
+//! This function encodes date information into the filename and gives the file a different
+//! extension.
+//! 
+//! @param nominal_path The path of the main project.
+//! @returns A suitable path for a project backup file.
+ragtag::path_t getBackupPath(const ragtag::path_t& nominal_path);
 }  // namespace RagTagUtil
 
 #endif  // INCLUDE_RAG_TAG_UTIL_H
