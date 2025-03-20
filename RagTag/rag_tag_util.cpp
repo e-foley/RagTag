@@ -101,6 +101,6 @@ ragtag::path_t RagTagUtil::getBackupPath(const ragtag::path_t& nominal_path)
   // Take floor of seconds so that we aren't left with long decimals in the resulting filename.
   const auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());
   const std::wstring filename = nominal_path.stem().wstring()
-    + std::format(L"_{0:%Y%m%d%H%M%S}.tagdefbk", now);
+    + std::format(L"_{0:%Y%m%d%H%M%S}", now) + BACKUP_TAG_MAP_FILE_EXTENSION.wstring();
   return nominal_path.parent_path() / ragtag::path_t(filename);
 }
