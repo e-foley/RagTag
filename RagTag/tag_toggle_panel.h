@@ -67,6 +67,7 @@ private:
   void OnClickDelete(wxCommandEvent& event);
   void OnCheckboxChange(wxCommandEvent& event);
 
+  wxWindow* parent_{};
   ragtag::tag_t tag_{};
   std::optional<ragtag::rtchar_t> hotkey_{};
   bool hotkey_enabled_{ false };

@@ -7,8 +7,8 @@ wxDEFINE_EVENT(TAG_TOGGLE_BUTTON_EVENT, TagToggleEvent);
 
 TagTogglePanel::TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, wxString label,
   std::optional<ragtag::rtchar_t> hotkey) 
-  : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS), tag_(tag),
-  hotkey_(hotkey) {
+  : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS),
+  parent_(parent), tag_(tag), hotkey_(hotkey) {
   wxBoxSizer* sz_tag_toggle = new wxBoxSizer(wxHORIZONTAL);
   this->SetSizer(sz_tag_toggle);
 
@@ -86,12 +86,12 @@ bool TagTogglePanel::processKeyEvent(wxKeyEvent& event)
     case wxMOD_NONE:
       sending.setDesiredState(current_checked_state == wxCHK_CHECKED ?
         ragtag::TagSetting::UNCOMMITTED : ragtag::TagSetting::YES);
-      wxPostEvent(GetParent(), sending);
+      wxPostEvent(parent_, sending);
       return true;
     case wxMOD_SHIFT:
       sending.setDesiredState(current_checked_state == wxCHK_UNCHECKED ?
         ragtag::TagSetting::UNCOMMITTED : ragtag::TagSetting::NO);
-      wxPostEvent(GetParent(), sending);
+      wxPostEvent(parent_, sending);
       return true;
     default:
       break;
@@ -102,12 +102,12 @@ bool TagTogglePanel::processKeyEvent(wxKeyEvent& event)
 
 void TagTogglePanel::OnClickEdit(wxCommandEvent& event) {
   TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::EDIT_TAG);
-  wxPostEvent(GetParent(), sending);
+  wxPostEvent(parent_, sending);
 }
 
 void TagTogglePanel::OnClickDelete(wxCommandEvent& event) {
   TagToggleEvent sending(tag_, TagToggleEvent::DesiredAction::DELETE_TAG);
-  wxPostEvent(GetParent(), sending);
+  wxPostEvent(parent_, sending);
 }
 
 void TagTogglePanel::OnCheckboxChange(wxCommandEvent& event) {
@@ -125,6 +125,6 @@ void TagTogglePanel::OnCheckboxChange(wxCommandEvent& event) {
     break;
   }
 
-  wxPostEvent(GetParent(), sending);
+  wxPostEvent(parent_, sending);
 }
 
