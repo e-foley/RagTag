@@ -233,7 +233,7 @@ private:
   wxButton* b_copy_selections_{};
 };
 
-// Forward-declare SummaryFrame event so that wxWidgets' wxDECLARE_EVENT macro can do what it needs.
+// Forward-declare SummaryFrameEvent so that wxWidgets' wxDECLARE_EVENT macro can do what it needs.
 class SummaryFrameEvent;
 wxDECLARE_EVENT(SUMMARY_FRAME_EVENT, SummaryFrameEvent);
 
@@ -273,7 +273,7 @@ public:
   //! Duplicates this SummaryFrameEvent as a new SummaryFrameEvent instance with identical state.
   //! 
   //! @returns A pointer to a new SummaryFrameEvent instance with state matching the object on which
-  //! this function was invoked.
+  //!     this function was invoked.
   wxEvent* Clone() const {
     return new SummaryFrameEvent(*this);
   }
