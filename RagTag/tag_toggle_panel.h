@@ -7,16 +7,59 @@
 #include <wx/stattext.h>
 #include <wx/window.h>
 
+//! Control for a single tag, offering the user the ability to apply it or remove it from a file.
+//! Also includes buttons to modify or delete the tag itself.
+//! 
+//! This class uses a one-to-one translation convention between visual checkbox state and
+//! TagSetting. A checked box corresponds to TagSetting::YES; an unchecked box corresponds to
+//! TagSetting::NO; a box in its third, "undetermined" state corresponds to TagSetting::UNCOMMITTED.
+//! 
+//! This class itself does not perform modifications to the actively loaded project; it merely
+//! conveys the user's intent via events. (See TagToggleEvent.)
 class TagTogglePanel : public wxPanel {
 public:
+  //! Constructor.
+  //! 
+  //! @param parent The parent window.
+  //! @param tag The tag this panel represents and manipulates.
+  //! @param label The text displayed in this panel. (This is not required to match the tag.)
+  //! @param hotkey The hotkey that activates this tag when the application is in command mode.
+  //!     Supply an empty optional if this tag is not to have a hotkey. If supplied, the hotkey must
+  //!     be a single capital alphabetical character between A and Z.
   TagTogglePanel(wxWindow* parent, ragtag::tag_t tag, wxString label,
     std::optional<ragtag::rtchar_t> hotkey);
+  
+  //! Destructor.
   virtual ~TagTogglePanel();
-  // This function does not emit a checkbox event.
+
+  //! Visually update the panel's checkbox to convey the given state.
+  //! 
+  //! This function does not emit a checkbox event.
+  //! 
+  //! @param state The state to convey via the checkbox (e.g., TagSetting::YES to check the box).
   void setCheckBoxState(ragtag::TagSetting state);
+
+  //! Get the TagSetting appropriate for the current state of the checkbox.
+  //! 
+  //! @returns The TagSetting appropriate for the current state of the checkbox (e.g.,
+  //!     TagSetting::YES if the checkbox is checked).
   ragtag::TagSetting getCheckBoxState() const;
+
+  //! Grays out the checkbox and the hotkey text. Also disables the hotkey and prevents user
+  //! manipulation of the checkbox.
   void disableCheckboxAndHotkey();
+
+  //! Updates the display of the checkbox and hotkey text to show that the control is live.
+  //! Re-enables the associated hotkey and re-allows user manipulation of the checkbox.
   void enableCheckboxAndHotkey();
+
+  //! Function allowing the panel to act on wxKeyEvents triggered elsewhere.
+  //! 
+  //! Posts a TagToggleEvent to the parent if the key matches this panel's hotkey.
+  //! 
+  //! @param event The wxKeyEvent to process if possible.
+  //! @returns True if the supplied event matches this panel's hotkey and the TagToggleEvent is
+  //!     sent to the panel's parent.
   bool processKeyEvent(wxKeyEvent& event);
 
 private:
