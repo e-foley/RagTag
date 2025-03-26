@@ -74,7 +74,7 @@ private:
   };
 
   //! Columns displayed within the directory viewer.
-  enum FileViewColumn {
+  enum DirectoryViewColumn {
     COLUMN_FILENAME,
     COLUMN_TAG_COVERAGE,
     COLUMN_RATING
@@ -115,7 +115,7 @@ private:
   void refreshTagToggles();
 
   //! Immediately update the display of files within the directory to match the model.
-  void refreshFileView();
+  void refreshDirectoryView();
 
   //! Immediately update the display of buttons used for rating files to match the model,
   //! potentially enabling or disabling them.
@@ -249,7 +249,7 @@ private:
   //! 
   //! Enables all directory navigation controls if the file is loaded.
   //! 
-  //! Refreshes other user interface elements by refreshTagToggles(), refreshFileView(), 
+  //! Refreshes other user interface elements by refreshTagToggles(), refreshDirectoryView(), 
   //! refreshRatingButtons(), and refreshSummary().
   //! 
   //! Highlights the file in the summary window's file listing if the file is present there.
@@ -500,14 +500,15 @@ private:
   //! @param event The wxCommandEvent describing the user's action.
   void OnShowSummary(wxCommandEvent& event);
 
-  //! Invoked when Refresh File View is selected from the menu or activated using its accelerator.
+  //! Invoked when Refresh Directory View is selected from the menu or activated using its
+  //! accelerator.
   //! 
   //! Traverses the active directory and updates the directory view with any changes that have been
   //! made. (Perhaps the user added files to the directory and would like to see them reflected in
   //! the app's file listing.)
   //! 
   //! @param event The wxCommandEvent describing the user's action.
-  void OnRefreshFileView(wxCommandEvent& event);
+  void OnRefreshDirectoryView(wxCommandEvent& event);
 
   //! Invoked when About is selected from the menu or activated using its accelerator.
   //! 

@@ -193,7 +193,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
   lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
   lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
-  refreshFileView();
+  refreshDirectoryView();
   sz_directory->Add(lc_files_in_directory_, 1, wxEXPAND | wxALL, 5);
 
   wxPanel* p_file_navigation = new wxPanel(sz_directory->GetStaticBox());
@@ -204,7 +204,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   sz_file_navigation->Add(b_open_file, 1, wxEXPAND | wxALL, 5);
   b_refresh_file_view_ = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
   b_refresh_file_view_->Disable();
-  b_refresh_file_view_->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshFileView, this);
+  b_refresh_file_view_->Bind(wxEVT_BUTTON, &MainFrame::OnRefreshDirectoryView, this);
   sz_file_navigation->Add(b_refresh_file_view_, 1, wxEXPAND | wxALL, 5);
   b_previous_untagged_file_ = new wxButton(p_file_navigation, ID_PREVIOUS_UNTAGGED_FILE,
     L"\U00002191 Untagged");
@@ -302,7 +302,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   Bind(wxEVT_MENU, &MainFrame::OnFocusDirectoryView, this, ID_FOCUS_DIRECTORY_VIEW);
   Bind(wxEVT_MENU, &MainFrame::OnEnterCommandMode, this, ID_ENTER_COMMAND_MODE);
   Bind(wxEVT_MENU, &MainFrame::OnFocusTags, this, ID_FOCUS_TAGS);
-  Bind(wxEVT_MENU, &MainFrame::OnRefreshFileView, this, ID_REFRESH_FILE_VIEW);
+  Bind(wxEVT_MENU, &MainFrame::OnRefreshDirectoryView, this, ID_REFRESH_FILE_VIEW);
   Bind(wxEVT_MENU, &MainFrame::OnNextFile, this, ID_NEXT_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnPreviousFile, this, ID_PREVIOUS_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnNextUntaggedFile, this, ID_NEXT_UNTAGGED_FILE);
@@ -398,7 +398,7 @@ void MainFrame::refreshTagToggles() {
   p_tag_toggles_->Update();
 }
 
-void MainFrame::refreshFileView()
+void MainFrame::refreshDirectoryView()
 {
   lc_files_in_directory_->Freeze();
 
@@ -684,9 +684,9 @@ void MainFrame::OnLoadFile(wxCommandEvent& event)
   loadFileAndSetAsActive(*path_pending);
 }
 
-void MainFrame::OnRefreshFileView(wxCommandEvent& event)
+void MainFrame::OnRefreshDirectoryView(wxCommandEvent& event)
 {
-  refreshFileView();
+  refreshDirectoryView();
 }
 
 void MainFrame::OnNextFile(wxCommandEvent& event)
@@ -747,7 +747,7 @@ void MainFrame::OnClearTagsFromFile(wxCommandEvent& event)
   }
 
   refreshTagToggles();
-  refreshFileView();
+  refreshDirectoryView();
   refreshSummary();
 }
 
@@ -762,7 +762,7 @@ void MainFrame::OnSetTagsToDefaults(wxCommandEvent& event)
   }
 
   refreshTagToggles();
-  refreshFileView();
+  refreshDirectoryView();
   refreshSummary();
 }
 
@@ -862,7 +862,7 @@ void MainFrame::OnFocusFile(wxListEvent& event)
   // 
   // Gross, but the best I could come up with given wxListCtrl's limitations.
   // Goal is to reinterpret the user data as a pointer leading to the path name that was set for
-  // this item in refreshFileView().
+  // this item in refreshDirectoryView().
   const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(event.GetIndex());
   if (!loadFileAndSetAsActive(*reinterpret_cast<ragtag::path_t*>(user_data))) {
     // TODO: Log error.
@@ -922,7 +922,7 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
   // Looks like everything was successful. Refresh the panel to show our new tag.
   markDirty();
   refreshTagToggles();
-  refreshFileView();
+  refreshDirectoryView();
   refreshSummary();
 
   SetStatusText(L"Created tag '" + tag_entry_result->tag + L"'.");
@@ -1016,7 +1016,7 @@ void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
   // Whether or not we know a change was made, refresh the tag toggle list to ensure we're
   // presenting the latest information to the user.
   refreshTagToggles();
-  refreshFileView();
+  refreshDirectoryView();
   refreshSummary();
 }
 
@@ -1104,7 +1104,7 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
     // Note that some of these already get invoked in the case that we resetActiveFile(). We can
     // optimize these redundant calls out later if we really want to.
     refreshRatingButtons();
-    refreshFileView();
+    refreshDirectoryView();
     refreshSummary();
 
     // This shouldn't be nullptr, but we still guard against it to be safe.
@@ -1138,7 +1138,7 @@ void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
     // Note that some of these already get invoked in the case that we resetActiveFile(). We can
     // optimize these redundant calls out later if we really want to.
     refreshRatingButtons();
-    refreshFileView();
+    refreshDirectoryView();
     refreshSummary();
 
     // This shouldn't be nullptr, but we still guard against it to be safe.
@@ -1542,7 +1542,7 @@ bool MainFrame::loadFileAndSetAsActive(const ragtag::path_t& path)
 
   refreshTagToggles();
   refreshRatingButtons();
-  refreshFileView();
+  refreshDirectoryView();
   if (is_newly_added_file) {
     // We only update the summary when the file list has changed. Otherwise, after the user selects
     // a file in the summary view, the invoking of this function instantly deselects the file that
@@ -1563,7 +1563,7 @@ void MainFrame::resetActiveFile()
   active_file_ = {};
   refreshTagToggles();
   refreshRatingButtons();
-  refreshFileView();
+  refreshDirectoryView();
   refreshSummary();
   b_stop_media_->Disable();
   b_play_pause_media_->Disable();
@@ -1644,7 +1644,7 @@ bool MainFrame::clearRatingOfActiveFile()
 
   markDirty();
   refreshRatingButtons();
-  refreshFileView();
+  refreshDirectoryView();
   refreshSummary();
   return true;
 }
@@ -1663,7 +1663,7 @@ bool MainFrame::setRatingOfActiveFile(ragtag::rating_t rating)
 
   markDirty();
   refreshRatingButtons();
-  refreshFileView();
+  refreshDirectoryView();
   refreshSummary();
   return true;
 }
