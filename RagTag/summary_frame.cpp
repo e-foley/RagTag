@@ -305,7 +305,7 @@ void SummaryFrame::refreshTagFilter()
     dd_tag_selection_->Append(tags_[i]);
     if (last_tag_selection.has_value() && tags_[i] == *last_tag_selection) {
       // The tag label matches the label of the tag that was most recently selected, so let's
-      // reselect that item as a convenience to the user. (Offset by 1 to acccount for "(None)".)
+      // reselect that item as a convenience to the user. (Offset by 1 to account for "(None)".)
       current_tag_selection_index = i + 1;
     }
   }

@@ -374,7 +374,7 @@ namespace ragtag {
 
     //! Converts a string to a wide string.
     //! 
-    //! @param strsing The string to convert.
+    //! @param string The string to convert.
     //! @returns The wide-string equivalent of the input string.
     static std::wstring toWString(const std::string& string);
 

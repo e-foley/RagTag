@@ -344,7 +344,7 @@ private:
   //! Leaves Command Mode, disabling keyboard shortcuts without modifiers.
   void exitCommandMode();
 
-  //! Identifies the nearest file in the directory that meets specified critera.
+  //! Identifies the nearest file in the directory that meets specified criteria.
   //! 
   //! Ordering is based on default directory iterator ordering.
   //! 
