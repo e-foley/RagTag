@@ -403,6 +403,32 @@ private:
   //! @param event The wxCommandEvent describing the user's action.
   void OnSaveProjectAs(wxCommandEvent& event);
 
+  //! Invoked when Create Tag is selected from the menu, activated using its accelerator, or
+  //! activated through its button.
+  //! 
+  //! Opens a dialog window allowing the user to define a new tag and its properties. If the dialog
+  //! is confirmed, the tag is added to the project and UI elements are updated accordingly.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnDefineNewTag(wxCommandEvent& event);
+
+  //! Invoked when Clear Tags from Active File is selected from the menu, activated using its
+  //! accelerator, or activated through the Clear File Tags button.
+  //! 
+  //! Sets all tags to UNCOMMITTED on the current file.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnClearTagsFromFile(wxCommandEvent& event);
+
+  //! Invoked when Default Tags on Active File is selected from the menu, activated using its
+  //! accelerator, or activated through the Default File Tags button.
+  //! 
+  //! Sets all tags to their default state on the current file. (These defaults are properties of
+  //! the tags assigned during tag creation.)
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnSetTagsToDefaults(wxCommandEvent& event);
+
   //! Invoked when Enter Command Mode is selected from the menu or activated using its accelerator.
   //! 
   //! Enters Command Mode, allowing simple keyboard-based directory navigation and tag assignment.
@@ -493,9 +519,7 @@ private:
   // CONTROL EVENTS =================================================================================
   // These functions are invoked by the user's interactions with controls in the window.
   // Events of type wxEVT_BUTTON
-  void OnClearTagsFromFile(wxCommandEvent& event);
-  void OnSetTagsToDefaults(wxCommandEvent& event);
-  void OnDefineNewTag(wxCommandEvent& event);
+
   void OnTagToggleButtonClick(TagToggleEvent& event);
   void OnStopMedia(wxCommandEvent& event);
   void OnPlayPauseMedia(wxCommandEvent& event);
