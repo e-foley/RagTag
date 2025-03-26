@@ -438,6 +438,28 @@ private:
   //! @param event The wxCommandEvent describing the user's action.
   void OnPreviousFile(wxCommandEvent& event);
 
+  //! Invoked when Next Untagged File is selected from the menu, activated using its accelerator, or
+  //! activated using the corresponding button.
+  //! 
+  //! Proceeds to the next file following the current one within the current directory that is not
+  //! fully tagged, if there is one. If such a file is found, it is made the active file, displayed
+  //! in the media viewer, and (if not part of the project) added to the project with default tag
+  //! settings.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnNextUntaggedFile(wxCommandEvent& event);
+
+  //! Invoked when Previous Untagged File is selected from the menu, activated using its
+  //! accelerator, or activated using the corresponding button.
+  //! 
+  //! Navigates to the nearest file preceding the current one within the current directory that is
+  //! not fully tagged, if there is one. If such a file is found, it is made the active file,
+  //! displayed in the media viewer, and (if not part of the project) added to the project with
+  //! default tag settings.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnPreviousUntaggedFile(wxCommandEvent& event);
+
   //! Invoked when Play/Pause Media is selected from the menu, activated using its accelerator, or
   //! activated using the Play/Pause button.
   //! 
@@ -540,8 +562,6 @@ private:
   // Events of type wxEVT_BUTTON
 
   void OnTagToggleButtonClick(TagToggleEvent& event);
-  void OnPreviousUntaggedFile(wxCommandEvent& event);
-  void OnNextUntaggedFile(wxCommandEvent& event);
   void OnClickRatingButton(wxCommandEvent& event);
   // Events of type wxEVT_CHECKBOX
   void OnToggleAutoplay(wxCommandEvent& event);
