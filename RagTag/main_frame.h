@@ -19,6 +19,9 @@
 
 //! Primary UI window for the RagTag application that provides the user essential controls for their
 //! project, such as viewing media, assigning ratings, and attaching tags.
+//! 
+//! An important concept is "Command Mode," which allows the user to assign/remove tags and navigate
+//! the current directory with minimal modifier key usage and without a mouse.
 class MainFrame : public wxFrame {
 public:
   //! Constructor.
@@ -367,20 +370,124 @@ private:
   // All functions are invoked upon selecting them via the window's menu or executing the
   // corresponding accelerator. Function signature is dictated by wxEvtHandler::Bind() requirements
   // for events of type wxEVT_MENU.
+
+  //! Invoked when New Project is selected from the menu or activated using its accelerator.
+  //! 
+  //! Offers the user the opportunity to save their work if appropriate before creating a new
+  //! project and setting it as the active one, refreshing all UI elements accordingly.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnNewProject(wxCommandEvent& event);
+
+  //! Invoked when Open Project is selected from the menu or activated using its accelerator.
+  //! 
+  //! Offers the user the opportunity to save their work if appropriate before prompting the user
+  //! to locate a project to load from disk. Upon selection and successful loading, it will be set
+  //! as the active project and all UI elements will be updated accordingly.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnOpenProject(wxCommandEvent& event);
+
+  //! Invoked when Save Project is selected from the menu or activated using its accelerator.
+  //! 
+  //! Saves the project, prompting the user to select a path if the project doesn't have one or if
+  //! the current project was built from a backup file. The project is marked clean.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnSaveProject(wxCommandEvent& event);
+
+  //! Invoked when Save Project As is selected from the menu or activated using its accelerator.
+  //! 
+  //! Saves the project at a user-selected path. The project is marked clean.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnSaveProjectAs(wxCommandEvent& event);
+
+  //! Invoked when Enter Command Mode is selected from the menu or activated using its accelerator.
+  //! 
+  //! Enters Command Mode, allowing simple keyboard-based directory navigation and tag assignment.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnEnterCommandMode(wxCommandEvent& event);
+
+  //! Invoked when Focus Directory View is selected from the menu or activated using its
+  //! accelerator.
+  //! 
+  //! Exits Command Mode (if active) and places focus on the directory listing.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnFocusDirectoryView(wxCommandEvent& event);
+
+  //! Invoked when Focus Tags is selected from the menu or activated using its accelerator.
+  //! 
+  //! Exits Command Mode (if active) and places focus on the tag listing.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnFocusTags(wxCommandEvent& event);
+
+  //! Invoked when Show Summary is selected from the menu or activated using its accelerator.
+  //! 
+  //! Shows the project summary window or focuses it if it is already showhn. 
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnShowSummary(wxCommandEvent& event);
+
+  //! Invoked when Load File is selected from the menu or activated using its accelerator.
+  //! 
+  //! Prompts the user to load a file. If they do, the active directory is changed, the file is set
+  //! as the active file, and the file is added to the current project with default tag settings. If
+  //! the file is a media file, it is displayed.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnLoadFile(wxCommandEvent& event);
+
+  //! Invoked when Refresh File View is selected from the menu or activated using its accelerator.
+  //! 
+  //! Traverses the active directory and updates the directory view with any changes that have been
+  //! made. (Perhaps the user added files to the directory and would like to see them reflected in
+  //! the app's file listing.)
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnRefreshFileView(wxCommandEvent& event);
+
+  //! Invoked when Next File is selected from the menu or activated using its accelerator.
+  //! 
+  //! Proceeds to the file following the current one within the current directory. This file is then
+  //! considered the active file, displayed in the media viewer, and (if not part of the project)
+  //! added to the project with default tag settings.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnNextFile(wxCommandEvent& event);
+
+  //! Invoked when Previous File is selected from the menu or activated using its accelerator.
+  //! 
+  //! Navigates to the file preceding the current one within the current directory. This file is
+  //! then considered the active file, displayed in the media viewer, and (if not part of the
+  //! project) added to the project with default tag settings.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnPreviousFile(wxCommandEvent& event);
+
+  //! Invoked when Toggle Mute is selected from the menu or activated using its accelerator.
+  //! 
+  //! Mutes or unmutes media. The setting is retained between files but not between app sessions.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnToggleMuteMenu(wxCommandEvent& event);
+
+  //! Invoked when Quit is selected from the menu or activated using its accelerator.
+  //! 
+  //! Offers the user the opportunity to save their project if appropriate, then exits the
+  //! application.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnExit(wxCommandEvent& event);
+
+  //! Invoked when About is selected from the menu or activated using its accelerator.
+  //! 
+  //! Shows information about the application and its developer.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnAbout(wxCommandEvent& event);
 
   // CONTROL EVENTS =================================================================================
