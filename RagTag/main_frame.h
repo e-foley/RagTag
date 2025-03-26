@@ -438,6 +438,24 @@ private:
   //! @param event The wxCommandEvent describing the user's action.
   void OnPreviousFile(wxCommandEvent& event);
 
+  //! Invoked when Play/Pause Media is selected from the menu, activated using its accelerator, or
+  //! activated using the Play/Pause button.
+  //! 
+  //! Plays the media if it is currently stopped or paused; pauses the media if it is currently
+  //! playing.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnPlayPauseMedia(wxCommandEvent& event);
+  
+  //! Invoked when Stop Media is selected from the menu, activated using its accelerator, or
+  //! activated using the Stop button.
+  //! 
+  //! Halts playback of the current media and resets its tracker position to the beginning of the
+  //! media such that a subsequent play command will play the media from its start.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnStopMedia(wxCommandEvent& event);
+
   //! Invoked when Toggle Mute is selected from the menu or activated using its accelerator.
   //! 
   //! Mutes or unmutes media. The setting is retained between files but not between app sessions.
@@ -522,8 +540,6 @@ private:
   // Events of type wxEVT_BUTTON
 
   void OnTagToggleButtonClick(TagToggleEvent& event);
-  void OnStopMedia(wxCommandEvent& event);
-  void OnPlayPauseMedia(wxCommandEvent& event);
   void OnPreviousUntaggedFile(wxCommandEvent& event);
   void OnNextUntaggedFile(wxCommandEvent& event);
   void OnClickRatingButton(wxCommandEvent& event);
