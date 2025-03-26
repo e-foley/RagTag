@@ -535,7 +535,7 @@ private:
 
   //! Invoked when Show Summary is selected from the menu or activated using its accelerator.
   //! 
-  //! Shows the project summary window or focuses it if it is already showhn. 
+  //! Shows the project summary window or focuses it if it is already shown. 
   //! 
   //! @param event The wxCommandEvent describing the user's action.
   void OnShowSummary(wxCommandEvent& event);
