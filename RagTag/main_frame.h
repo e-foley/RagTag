@@ -475,7 +475,7 @@ private:
   //! @param event The wxCommandEvent describing the user's action.
   void OnToggleMuteMenu(wxCommandEvent& event);
 
-  //! Invoked when Quit is selected from the menu or activated using its accelerator.
+  //! Invoked when Exit is selected from the menu or activated using its accelerator.
   //! 
   //! Offers the user the opportunity to save their project if appropriate, then exits the
   //! application.

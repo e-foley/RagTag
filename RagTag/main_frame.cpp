@@ -27,7 +27,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   m_file_->Append(ID_SAVE_PROJECT, "&Save Project...\tCtrl-S");
   m_file_->Append(ID_SAVE_PROJECT_AS, "Save Project &As...\tCtrl-Shift-S");
   m_file_->AppendSeparator();
-  m_file_->Append(wxID_EXIT, "&Quit\tAlt-F4");
+  m_file_->Append(wxID_EXIT, "&Exit\tAlt-F4");
 
   m_project_ = new wxMenu;
   m_project_->Append(ID_LOAD_FILE, "&Load File...\tCtrl-O");
