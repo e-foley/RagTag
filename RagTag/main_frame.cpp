@@ -324,7 +324,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   // directly to the TagTogglePanel object. (All other button events are bound directly to their
   // object.) Figure out the difference and implement a fix such that the custom event matches how
   // ordinary events on other objects are handled.
-  Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnTagToggleButtonClick, this);
+  Bind(TAG_TOGGLE_BUTTON_EVENT, &MainFrame::OnClickTagToggleButton, this);
   Bind(SUMMARY_FRAME_EVENT, &MainFrame::OnSummaryFrameAction, this);
 
   refreshTitleBar();
@@ -928,7 +928,7 @@ void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
   SetStatusText(L"Created tag '" + tag_entry_result->tag + L"'.");
 }
 
-void MainFrame::OnTagToggleButtonClick(TagToggleEvent& event) {
+void MainFrame::OnClickTagToggleButton(TagToggleEvent& event) {
   switch (event.getDesiredAction()) {
   case TagToggleEvent::DesiredAction::EDIT_TAG: {
     // Cache existing tag properties for convenience.

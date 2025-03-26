@@ -561,7 +561,7 @@ private:
   // These functions are invoked by the user's interactions with controls in the window.
   // Events of type wxEVT_BUTTON
 
-  void OnTagToggleButtonClick(TagToggleEvent& event);
+  void OnClickTagToggleButton(TagToggleEvent& event);
   void OnClickRatingButton(wxCommandEvent& event);
   // Events of type wxEVT_CHECKBOX
   void OnToggleAutoplay(wxCommandEvent& event);
