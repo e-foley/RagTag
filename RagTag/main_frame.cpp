@@ -53,7 +53,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   m_media_->Append(ID_TOGGLE_MUTE, "Toggle &Mute\tCtrl-M");
 
   m_tags_ = new wxMenu;
-  m_tags_->Append(ID_DEFINE_NEW_TAG, "Define New &Tag...\tCtrl-T");
+  m_tags_->Append(ID_DEFINE_NEW_TAG, "Create &Tag...\tCtrl-T");
   m_tags_->Append(ID_CLEAR_TAGS_FROM_FILE, "&Clear Tags from Active File\tCtrl-C");
   m_tags_->Enable(ID_CLEAR_TAGS_FROM_FILE, false);
   m_tags_->Append(ID_SET_TAGS_TO_DEFAULTS, "&Default Tags on Active File\tCtrl-D");
