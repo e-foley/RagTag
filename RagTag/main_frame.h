@@ -403,6 +403,48 @@ private:
   //! @param event The wxCommandEvent describing the user's action.
   void OnSaveProjectAs(wxCommandEvent& event);
 
+  //! Invoked when Exit is selected from the menu or activated using its accelerator.
+  //! 
+  //! Offers the user the opportunity to save their project if appropriate, then exits the
+  //! application.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnExit(wxCommandEvent& event);
+
+  //! Invoked when Load File is selected from the menu or activated using its accelerator.
+  //! 
+  //! Prompts the user to load a file. If they do, the active directory is changed, the file is set
+  //! as the active file, and the file is added to the current project with default tag settings. If
+  //! the file is a media file, it is displayed.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnLoadFile(wxCommandEvent& event);
+
+  //! Invoked when Next File is selected from the menu or activated using its accelerator.
+  //! 
+  //! Proceeds to the file following the current one within the current directory. This file is then
+  //! considered the active file, displayed in the media viewer, and (if not part of the project)
+  //! added to the project with default tag settings.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnNextFile(wxCommandEvent& event);
+
+  //! Invoked when Previous File is selected from the menu or activated using its accelerator.
+  //! 
+  //! Navigates to the file preceding the current one within the current directory. This file is
+  //! then considered the active file, displayed in the media viewer, and (if not part of the
+  //! project) added to the project with default tag settings.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnPreviousFile(wxCommandEvent& event);
+
+  //! Invoked when Toggle Mute is selected from the menu or activated using its accelerator.
+  //! 
+  //! Mutes or unmutes media. The setting is retained between files but not between app sessions.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
+  void OnToggleMuteMenu(wxCommandEvent& event);
+
   //! Invoked when Create Tag is selected from the menu, activated using its accelerator, or
   //! activated through its button.
   //! 
@@ -458,15 +500,6 @@ private:
   //! @param event The wxCommandEvent describing the user's action.
   void OnShowSummary(wxCommandEvent& event);
 
-  //! Invoked when Load File is selected from the menu or activated using its accelerator.
-  //! 
-  //! Prompts the user to load a file. If they do, the active directory is changed, the file is set
-  //! as the active file, and the file is added to the current project with default tag settings. If
-  //! the file is a media file, it is displayed.
-  //! 
-  //! @param event The wxCommandEvent describing the user's action.
-  void OnLoadFile(wxCommandEvent& event);
-
   //! Invoked when Refresh File View is selected from the menu or activated using its accelerator.
   //! 
   //! Traverses the active directory and updates the directory view with any changes that have been
@@ -475,39 +508,6 @@ private:
   //! 
   //! @param event The wxCommandEvent describing the user's action.
   void OnRefreshFileView(wxCommandEvent& event);
-
-  //! Invoked when Next File is selected from the menu or activated using its accelerator.
-  //! 
-  //! Proceeds to the file following the current one within the current directory. This file is then
-  //! considered the active file, displayed in the media viewer, and (if not part of the project)
-  //! added to the project with default tag settings.
-  //! 
-  //! @param event The wxCommandEvent describing the user's action.
-  void OnNextFile(wxCommandEvent& event);
-
-  //! Invoked when Previous File is selected from the menu or activated using its accelerator.
-  //! 
-  //! Navigates to the file preceding the current one within the current directory. This file is
-  //! then considered the active file, displayed in the media viewer, and (if not part of the
-  //! project) added to the project with default tag settings.
-  //! 
-  //! @param event The wxCommandEvent describing the user's action.
-  void OnPreviousFile(wxCommandEvent& event);
-
-  //! Invoked when Toggle Mute is selected from the menu or activated using its accelerator.
-  //! 
-  //! Mutes or unmutes media. The setting is retained between files but not between app sessions.
-  //! 
-  //! @param event The wxCommandEvent describing the user's action.
-  void OnToggleMuteMenu(wxCommandEvent& event);
-
-  //! Invoked when Exit is selected from the menu or activated using its accelerator.
-  //! 
-  //! Offers the user the opportunity to save their project if appropriate, then exits the
-  //! application.
-  //! 
-  //! @param event The wxCommandEvent describing the user's action.
-  void OnExit(wxCommandEvent& event);
 
   //! Invoked when About is selected from the menu or activated using its accelerator.
   //! 
