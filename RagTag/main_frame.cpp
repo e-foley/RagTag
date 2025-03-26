@@ -64,6 +64,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   m_window_->Enable(ID_ENTER_COMMAND_MODE, false);
   m_window_->Append(ID_FOCUS_DIRECTORY_VIEW, "&Focus Directory View\tCtrl-F");
   m_window_->Append(ID_FOCUS_TAGS, "Focus Ta&gs\tCtrl-G");
+  m_window_->AppendSeparator();
   m_window_->Append(ID_REFRESH_FILE_VIEW, "&Refresh Directory View\tF5");
   m_window_->Enable(ID_REFRESH_FILE_VIEW, false);
   m_window_->AppendSeparator();
