@@ -2,6 +2,10 @@
 #include "rag_tag_app.h"
 
 bool RagTagApp::OnInit() {
+  // Dark mode is gorgeous but induces bad flickering that appears to be a rendering bug.
+  // TODO: Change this to Appearance::System after the flickering issue is addressed (either by
+  // wxWidgets or by code changes on my side).
+  SetAppearance(Appearance::Light);
   MainFrame* frame = new MainFrame();
   frame->Show();
   return true;
