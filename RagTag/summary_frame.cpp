@@ -382,6 +382,219 @@ ragtag::TagMap::file_qualifier_t SummaryFrame::getOverallRuleFromFilterUi()
     };
 }
 
+std::optional<ragtag::path_t> SummaryFrame::promptCopyDestination()
+{
+  wxString wx_path = wxDirSelector("Select Directory to Copy To", wxEmptyString, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST | wxDD_NEW_DIR_BUTTON,
+    wxDefaultPosition, this);
+  if (wx_path.empty()) {
+    // User canceled the dialog.
+    return {};
+  }
+
+  return ragtag::path_t(wx_path.ToStdWstring());
+}
+
+void SummaryFrame::updateRatingFilterEnabledState() {
+  if (cb_show_rated_->IsChecked()) {
+    sl_min_rating_->Enable();
+    sl_max_rating_->Enable();
+  }
+  else {
+    sl_min_rating_->Disable();
+    sl_max_rating_->Disable();
+  }
+}
+
+void SummaryFrame::updateCopyButtonForSelections()
+{
+  const int selected_item_count = getPathsOfSelectedFiles().size();
+  if (selected_item_count == 0) {
+    b_delete_files_->Disable();
+    b_remove_from_project_->Disable();
+    b_copy_selections_->Disable();
+  }
+  else {
+    b_delete_files_->Enable();
+    b_remove_from_project_->Enable();
+    b_copy_selections_->Enable();
+  }
+}
+
+void SummaryFrame::resetFilters()
+{
+  sl_min_rating_->SetValue(0);
+  sl_max_rating_->SetValue(5);
+  cb_show_rated_->SetValue(wxCHK_CHECKED);
+  cb_show_unrated_->SetValue(wxCHK_CHECKED);
+  dd_tag_selection_->SetSelection(0);
+  cb_show_yes_->SetValue(wxCHK_CHECKED);
+  cb_show_no_->SetValue(wxCHK_UNCHECKED);
+  cb_show_uncommitted_->SetValue(wxCHK_UNCHECKED);
+  cb_show_present_->SetValue(wxCHK_CHECKED);
+  cb_show_missing_->SetValue(wxCHK_CHECKED);
+}
+
+void SummaryFrame::populateAndEllipsizePathColumn()
+{
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    const auto path = getPathForItemIndex(i);
+    if (!path.has_value()) {
+      // Really shouldn't happen.
+      continue;
+    }
+
+    std::wstring path_displayed = path->wstring();
+    if (!std::filesystem::exists(*path)) {
+      path_displayed.append(L" [???]");
+    }
+
+    const auto ellipsized = lc_summary_->Ellipsize(path_displayed, wxWindowDC(lc_summary_),
+      wxELLIPSIZE_START, lc_summary_->GetColumnWidth(PATH_COLUMN_INDEX) - PATH_EXTENT_MARGIN_PX);
+    lc_summary_->SetItem(i, PATH_COLUMN_INDEX, ellipsized);
+  }
+}
+
+std::vector<ragtag::path_t> SummaryFrame::getPathsOfSelectedFiles() const
+{
+  std::vector<ragtag::path_t> returning;
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    if (lc_summary_->IsItemChecked(i)) {
+      const auto path = getPathForItemIndex(i);
+      if (path.has_value()) {
+        returning.push_back(*path);
+      }
+    }
+  }
+  return returning;
+}
+
+std::optional<ragtag::path_t> SummaryFrame::getPathForItemIndex(int index) const
+{
+  // This isn't as simple as invoking file_paths_[i], since list control indices shift around during
+  // sorting operations. Thankfully, the item data (where we placed a pointer to the actual path)
+  // moves along with the item.
+  wxUIntPtr p_data_nominal = lc_summary_->GetItemData(index);
+  if (p_data_nominal == 0) {
+    return {};
+  }
+
+  return *reinterpret_cast<ragtag::path_t*>(p_data_nominal);
+}
+
+void SummaryFrame::OnClickHeading(wxListEvent& event)
+{
+  const int column = event.GetColumn();
+  if (column == -1) {
+    // User clicked the header bar away from a column. Ignore.
+    return;
+  }
+
+  // This is a pain, but because wxListCtrl's sort operation requires a free-floating function
+  // (not a member function that has access to object internals), we have to manually supply it a
+  // snapshot of the information we would like to sort. We do this by sending it a pointer to an
+  // instance of a helper struct we populate with information the sorting function requires.
+  SortHelper sort_helper;
+  sort_helper.p_tag_map = &tag_map_;
+
+  // GetSortIndicator() returns the column in which the current sort indicator is shown, or -1.
+  // When a new column is clicked, we prefer to sort descending first (except for text), which
+  // is the opposite of the default behavior.
+  bool ascending = column == PATH_COLUMN_INDEX;
+  if (lc_summary_->GetSortIndicator() == column) {
+    // Same column is re-clicked.
+    ascending = lc_summary_->GetUpdatedAscendingSortIndicator(column);
+  }
+  sort_helper.sort_ascending = ascending;
+
+  if (column == PATH_COLUMN_INDEX) {
+    lc_summary_->SortItems(&SummaryFrame::pathSort, reinterpret_cast<wxIntPtr>(&sort_helper));
+  }
+  else if (column == RATING_COLUMN_INDEX) {
+    lc_summary_->SortItems(&SummaryFrame::ratingSort, reinterpret_cast<wxIntPtr>(&sort_helper));
+  }
+  else if (column >= FIRST_TAG_COLUMN_INDEX) {
+    // TODO: Consider caching all tags when refreshing so we don't need to re-procure the list here.
+    const auto all_tags = tag_map_.getAllTags();
+    sort_helper.tag = all_tags[column - FIRST_TAG_COLUMN_INDEX].first;
+    lc_summary_->SortItems(&SummaryFrame::tagSort, reinterpret_cast<wxIntPtr>(&sort_helper));
+  }
+
+  lc_summary_->ShowSortIndicator(column, ascending);
+}
+
+void SummaryFrame::OnResizeColumn(wxListEvent& event)
+{
+  populateAndEllipsizePathColumn();
+}
+
+void SummaryFrame::OnFileChecked(wxListEvent& event)
+{
+  updateCopyButtonForSelections();
+}
+
+void SummaryFrame::OnFileUnchecked(wxListEvent& event)
+{
+  updateCopyButtonForSelections();
+}
+
+void SummaryFrame::OnFileFocused(wxListEvent& event)
+{
+  const auto path = getPathForItemIndex(event.GetIndex());
+  if (!path.has_value()) {
+    return;
+  }
+  std::vector<ragtag::path_t> path_container(1, *path);
+  SummaryFrameEvent sending(path_container, SummaryFrameEvent::Action::SELECT_FILE);
+  wxPostEvent(GetParent(), sending);
+  event.Skip();
+}
+
+void SummaryFrame::OnFilterChangeGeneric(wxCommandEvent& event)
+{
+  refreshFileList();
+}
+
+void SummaryFrame::OnMinSliderMove(wxCommandEvent& event) {
+  if (sl_min_rating_->GetValue() > sl_max_rating_->GetValue()) {
+    sl_max_rating_->SetValue(sl_min_rating_->GetValue());
+  }
+  refreshFileList();
+}
+
+void SummaryFrame::OnMaxSliderMove(wxCommandEvent& event) {
+  if (sl_max_rating_->GetValue() < sl_min_rating_->GetValue()) {
+    sl_min_rating_->SetValue(sl_max_rating_->GetValue());
+  }
+  refreshFileList();
+}
+
+void SummaryFrame::OnClickShowRated(wxCommandEvent& event)
+{
+  updateRatingFilterEnabledState();
+  refreshFileList();
+}
+
+void SummaryFrame::OnResetFilters(wxCommandEvent& event)
+{
+  resetFilters();
+  updateRatingFilterEnabledState();
+  refreshFileList();
+}
+
+void SummaryFrame::OnSelectAllFiles(wxCommandEvent& event)
+{
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    lc_summary_->CheckItem(i, true);
+  }
+}
+
+void SummaryFrame::OnDeselectAllFiles(wxCommandEvent& event)
+{
+  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
+    lc_summary_->CheckItem(i, false);
+  }
+}
+
 void SummaryFrame::OnCopySelections(wxCommandEvent& event)
 {
   const std::vector<ragtag::path_t> files_to_copy = getPathsOfSelectedFiles();
@@ -505,124 +718,12 @@ void SummaryFrame::OnKeyPressed(wxKeyEvent& event)
   if (event.GetKeyCode() == WXK_F5) {
     refreshTagFilter();
     refreshFileList();
-  } else if (event.GetUnicodeKey() == 'W' && event.GetModifiers() == wxMOD_CONTROL) {
+  }
+  else if (event.GetUnicodeKey() == 'W' && event.GetModifiers() == wxMOD_CONTROL) {
     Close();
-  } else {
+  }
+  else {
     event.Skip();
-  }
-}
-
-void SummaryFrame::OnClickHeading(wxListEvent& event)
-{
-  const int column = event.GetColumn();
-  if (column == -1) {
-    // User clicked the header bar away from a column. Ignore.
-    return;
-  }
-
-  // This is a pain, but because wxListCtrl's sort operation requires a free-floating function
-  // (not a member function that has access to object internals), we have to manually supply it a
-  // snapshot of the information we would like to sort. We do this by sending it a pointer to an
-  // instance of a helper struct we populate with information the sorting function requires.
-  SortHelper sort_helper;
-  sort_helper.p_tag_map = &tag_map_;
-
-  // GetSortIndicator() returns the column in which the current sort indicator is shown, or -1.
-  // When a new column is clicked, we prefer to sort descending first (except for text), which
-  // is the opposite of the default behavior.
-  bool ascending = column == PATH_COLUMN_INDEX;
-  if (lc_summary_->GetSortIndicator() == column) {
-    // Same column is re-clicked.
-    ascending = lc_summary_->GetUpdatedAscendingSortIndicator(column);
-  }
-  sort_helper.sort_ascending = ascending;
-
-  if (column == PATH_COLUMN_INDEX) {
-    lc_summary_->SortItems(&SummaryFrame::pathSort, reinterpret_cast<wxIntPtr>(&sort_helper));
-  }
-  else if (column == RATING_COLUMN_INDEX) {
-    lc_summary_->SortItems(&SummaryFrame::ratingSort, reinterpret_cast<wxIntPtr>(&sort_helper));
-  }
-  else if (column >= FIRST_TAG_COLUMN_INDEX) {
-    // TODO: Consider caching all tags when refreshing so we don't need to re-procure the list here.
-    const auto all_tags = tag_map_.getAllTags();
-    sort_helper.tag = all_tags[column - FIRST_TAG_COLUMN_INDEX].first;
-    lc_summary_->SortItems(&SummaryFrame::tagSort, reinterpret_cast<wxIntPtr>(&sort_helper));
-  }
-
-  lc_summary_->ShowSortIndicator(column, ascending);
-}
-
-void SummaryFrame::OnResizeColumn(wxListEvent& event)
-{
-  populateAndEllipsizePathColumn();
-}
-
-void SummaryFrame::OnFileChecked(wxListEvent& event)
-{
-  updateCopyButtonForSelections();
-}
-
-void SummaryFrame::OnFileUnchecked(wxListEvent& event)
-{
-  updateCopyButtonForSelections();
-}
-
-void SummaryFrame::OnFileFocused(wxListEvent& event)
-{
-  const auto path = getPathForItemIndex(event.GetIndex());
-  if (!path.has_value()) {
-    return;
-  }
-  std::vector<ragtag::path_t> path_container(1, *path);
-  SummaryFrameEvent sending(path_container, SummaryFrameEvent::Action::SELECT_FILE);
-  wxPostEvent(GetParent(), sending);
-  event.Skip();
-}
-
-void SummaryFrame::OnFilterChangeGeneric(wxCommandEvent& event)
-{
-  refreshFileList();
-}
-
-void SummaryFrame::OnMinSliderMove(wxCommandEvent& event) {
-  if (sl_min_rating_->GetValue() > sl_max_rating_->GetValue()) {
-    sl_max_rating_->SetValue(sl_min_rating_->GetValue());
-  }
-  refreshFileList();
-}
-
-void SummaryFrame::OnMaxSliderMove(wxCommandEvent& event) {
-  if (sl_max_rating_->GetValue() < sl_min_rating_->GetValue()) {
-    sl_min_rating_->SetValue(sl_max_rating_->GetValue());
-  }
-  refreshFileList();
-}
-
-void SummaryFrame::OnClickShowRated(wxCommandEvent& event)
-{
-  updateRatingFilterEnabledState();
-  refreshFileList();
-}
-
-void SummaryFrame::OnResetFilters(wxCommandEvent& event)
-{
-  resetFilters();
-  updateRatingFilterEnabledState();
-  refreshFileList();
-}
-
-void SummaryFrame::OnSelectAllFiles(wxCommandEvent& event)
-{
-  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
-    lc_summary_->CheckItem(i, true);
-  }
-}
-
-void SummaryFrame::OnDeselectAllFiles(wxCommandEvent& event)
-{
-  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
-    lc_summary_->CheckItem(i, false);
   }
 }
 
@@ -631,105 +732,6 @@ void SummaryFrame::OnClose(wxCloseEvent& event)
   // For convenience of synchronization between the main frame and the summary frame, it's more
   // convenient if we don't flat-out destroy the summary frame when it's closed but merely hide it.
   Hide();
-}
-
-std::optional<ragtag::path_t> SummaryFrame::promptCopyDestination()
-{
-  wxString wx_path = wxDirSelector("Select Directory to Copy To", wxEmptyString, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST | wxDD_NEW_DIR_BUTTON,
-    wxDefaultPosition, this);
-  if (wx_path.empty()) {
-    // User canceled the dialog.
-    return {};
-  }
-
-  return ragtag::path_t(wx_path.ToStdWstring());
-}
-
-void SummaryFrame::updateRatingFilterEnabledState() {
-  if (cb_show_rated_->IsChecked()) {
-    sl_min_rating_->Enable();
-    sl_max_rating_->Enable();
-  }
-  else {
-    sl_min_rating_->Disable();
-    sl_max_rating_->Disable();
-  }
-}
-
-void SummaryFrame::updateCopyButtonForSelections()
-{
-  const int selected_item_count = getPathsOfSelectedFiles().size();
-  if (selected_item_count == 0) {
-    b_delete_files_->Disable();
-    b_remove_from_project_->Disable();
-    b_copy_selections_->Disable();
-  }
-  else {
-    b_delete_files_->Enable();
-    b_remove_from_project_->Enable();
-    b_copy_selections_->Enable();
-  }
-}
-
-void SummaryFrame::resetFilters()
-{
-  sl_min_rating_->SetValue(0);
-  sl_max_rating_->SetValue(5);
-  cb_show_rated_->SetValue(wxCHK_CHECKED);
-  cb_show_unrated_->SetValue(wxCHK_CHECKED);
-  dd_tag_selection_->SetSelection(0);
-  cb_show_yes_->SetValue(wxCHK_CHECKED);
-  cb_show_no_->SetValue(wxCHK_UNCHECKED);
-  cb_show_uncommitted_->SetValue(wxCHK_UNCHECKED);
-  cb_show_present_->SetValue(wxCHK_CHECKED);
-  cb_show_missing_->SetValue(wxCHK_CHECKED);
-}
-
-void SummaryFrame::populateAndEllipsizePathColumn()
-{
-  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
-    const auto path = getPathForItemIndex(i);
-    if (!path.has_value()) {
-      // Really shouldn't happen.
-      continue;
-    }
-
-    std::wstring path_displayed = path->wstring();
-    if (!std::filesystem::exists(*path)) {
-      path_displayed.append(L" [???]");
-    }
-
-    const auto ellipsized = lc_summary_->Ellipsize(path_displayed, wxWindowDC(lc_summary_),
-      wxELLIPSIZE_START, lc_summary_->GetColumnWidth(PATH_COLUMN_INDEX) - PATH_EXTENT_MARGIN_PX);
-    lc_summary_->SetItem(i, PATH_COLUMN_INDEX, ellipsized);
-  }
-}
-
-std::vector<ragtag::path_t> SummaryFrame::getPathsOfSelectedFiles() const
-{
-  std::vector<ragtag::path_t> returning;
-  for (int i = 0; i < lc_summary_->GetItemCount(); ++i) {
-    if (lc_summary_->IsItemChecked(i)) {
-      const auto path = getPathForItemIndex(i);
-      if (path.has_value()) {
-        returning.push_back(*path);
-      }
-    }
-  }
-  return returning;
-}
-
-std::optional<ragtag::path_t> SummaryFrame::getPathForItemIndex(int index) const
-{
-  // This isn't as simple as invoking file_paths_[i], since list control indices shift around during
-  // sorting operations. Thankfully, the item data (where we placed a pointer to the actual path)
-  // moves along with the item.
-  wxUIntPtr p_data_nominal = lc_summary_->GetItemData(index);
-  if (p_data_nominal == 0) {
-    return {};
-  }
-  
-  return *reinterpret_cast<ragtag::path_t*>(p_data_nominal);
 }
 
 int wxCALLBACK SummaryFrame::pathSort(wxIntPtr item1, wxIntPtr item2, wxIntPtr sort_data)
