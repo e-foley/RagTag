@@ -376,7 +376,7 @@ private:
   //! Offers the user the opportunity to save their work if appropriate before creating a new
   //! project and setting it as the active one, refreshing all UI elements accordingly.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnNewProject(wxCommandEvent& event);
 
   //! Invoked when Open Project is selected from the menu or activated using its accelerator.
@@ -385,7 +385,7 @@ private:
   //! to locate a project to load from disk. Upon selection and successful loading, it will be set
   //! as the active project and all UI elements will be updated accordingly.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnOpenProject(wxCommandEvent& event);
 
   //! Invoked when Save Project is selected from the menu or activated using its accelerator.
@@ -393,14 +393,14 @@ private:
   //! Saves the project, prompting the user to select a path if the project doesn't have one or if
   //! the current project was built from a backup file. The project is marked clean.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnSaveProject(wxCommandEvent& event);
 
   //! Invoked when Save Project As is selected from the menu or activated using its accelerator.
   //! 
   //! Saves the project at a user-selected path. The project is marked clean.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnSaveProjectAs(wxCommandEvent& event);
 
   //! Invoked when Exit is selected from the menu or activated using its accelerator.
@@ -408,7 +408,7 @@ private:
   //! Offers the user the opportunity to save their project if appropriate, then exits the
   //! application.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnExit(wxCommandEvent& event);
 
   //! Invoked when Load File is selected from the menu or activated using its accelerator.
@@ -417,7 +417,7 @@ private:
   //! as the active file, and the file is added to the current project with default tag settings. If
   //! the file is a media file, it is displayed.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnLoadFile(wxCommandEvent& event);
 
   //! Invoked when Next File is selected from the menu or activated using its accelerator.
@@ -426,7 +426,7 @@ private:
   //! considered the active file, displayed in the media viewer, and (if not part of the project)
   //! added to the project with default tag settings.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnNextFile(wxCommandEvent& event);
 
   //! Invoked when Previous File is selected from the menu or activated using its accelerator.
@@ -435,7 +435,7 @@ private:
   //! then considered the active file, displayed in the media viewer, and (if not part of the
   //! project) added to the project with default tag settings.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnPreviousFile(wxCommandEvent& event);
 
   //! Invoked when Next Untagged File is selected from the menu, activated using its accelerator, or
@@ -446,7 +446,7 @@ private:
   //! in the media viewer, and (if not part of the project) added to the project with default tag
   //! settings.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnNextUntaggedFile(wxCommandEvent& event);
 
   //! Invoked when Previous Untagged File is selected from the menu, activated using its
@@ -457,7 +457,7 @@ private:
   //! displayed in the media viewer, and (if not part of the project) added to the project with
   //! default tag settings.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnPreviousUntaggedFile(wxCommandEvent& event);
 
   //! Invoked when Play/Pause Media is selected from the menu, activated using its accelerator, or
@@ -466,7 +466,7 @@ private:
   //! Plays the media if it is currently stopped or paused; pauses the media if it is currently
   //! playing.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnPlayPauseMedia(wxCommandEvent& event);
   
   //! Invoked when Stop Media is selected from the menu, activated using its accelerator, or
@@ -475,14 +475,14 @@ private:
   //! Halts playback of the current media and resets its tracker position to the beginning of the
   //! media such that a subsequent play command will play the media from its start.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnStopMedia(wxCommandEvent& event);
 
   //! Invoked when Toggle Mute is selected from the menu or activated using its accelerator.
   //! 
   //! Mutes or unmutes media. The setting is retained between files but not between app sessions.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnToggleMuteMenu(wxCommandEvent& event);
 
   //! Invoked when Create Tag is selected from the menu, activated using its accelerator, or
@@ -491,7 +491,7 @@ private:
   //! Opens a dialog window allowing the user to define a new tag and its properties. If the dialog
   //! is confirmed, the tag is added to the project and UI elements are updated accordingly.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnDefineNewTag(wxCommandEvent& event);
 
   //! Invoked when Clear Tags from Active File is selected from the menu, activated using its
@@ -499,7 +499,7 @@ private:
   //! 
   //! Sets all tags to UNCOMMITTED on the current file.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnClearTagsFromFile(wxCommandEvent& event);
 
   //! Invoked when Default Tags on Active File is selected from the menu, activated using its
@@ -508,14 +508,14 @@ private:
   //! Sets all tags to their default state on the current file. (These defaults are properties of
   //! the tags assigned during tag creation.)
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnSetTagsToDefaults(wxCommandEvent& event);
 
   //! Invoked when Enter Command Mode is selected from the menu or activated using its accelerator.
   //! 
   //! Enters Command Mode, allowing simple keyboard-based directory navigation and tag assignment.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnEnterCommandMode(wxCommandEvent& event);
 
   //! Invoked when Focus Directory View is selected from the menu or activated using its
@@ -523,21 +523,21 @@ private:
   //! 
   //! Exits Command Mode (if active) and places focus on the directory listing.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnFocusDirectoryView(wxCommandEvent& event);
 
   //! Invoked when Focus Tags is selected from the menu or activated using its accelerator.
   //! 
   //! Exits Command Mode (if active) and places focus on the tag listing.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnFocusTags(wxCommandEvent& event);
 
   //! Invoked when Show Summary is selected from the menu or activated using its accelerator.
   //! 
   //! Shows the project summary window or focuses it if it is already shown. 
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnShowSummary(wxCommandEvent& event);
 
   //! Invoked when Refresh Directory View is selected from the menu or activated using its
@@ -547,14 +547,14 @@ private:
   //! made. (Perhaps the user added files to the directory and would like to see them reflected in
   //! the app's file listing.)
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnRefreshDirectoryView(wxCommandEvent& event);
 
   //! Invoked when About is selected from the menu or activated using its accelerator.
   //! 
   //! Shows information about the application and its developer.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_MENU describing the user's action.
   void OnAbout(wxCommandEvent& event);
 
   // CONTROL EVENTS =================================================================================
@@ -575,28 +575,28 @@ private:
   //! Sets the corresponding rating on the active file or removes the rating from the active file
   //! (per each button's function).
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_BUTTON describing the user's action.
   void OnClickRatingButton(wxCommandEvent& event);
   
   //! Invoked when the user toggles the Autoplay checkbox.
   //! 
   //! Allows or prevents automatic playing of the media as soon as it is loaded.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_CHECKBOX describing the user's action.
   void OnToggleAutoplayBox(wxCommandEvent& event);
 
   //! Invoked when the user toggles the Loop checkbox.
   //! 
   //! Allows or prevents looping of media files (i.e., playing from the start after finishing).
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_CHECKBOX describing the user's action.
   void OnToggleLoopBox(wxCommandEvent& event);
 
   //! Invoked when the user toggles the Mute checkbox.
   //! 
   //! Prevents or allows media audio.
   //! 
-  //! @param event The wxCommandEvent describing the user's action.
+  //! @param event The wxCommandEvent of type wxEVT_CHECKBOX describing the user's action.
   void OnToggleMuteBox(wxCommandEvent& event);
 
   //! Invoked when the user focuses a file in the directory view (typically by clicking it or
@@ -605,7 +605,7 @@ private:
   //! Loads the focused file, sets it as active, displays it if it's a media file, and if the file
   //! is not in the project, adds it to the project with default tags.
   //! 
-  //! @param event The wxListEvent describing the user's action.
+  //! @param event The wxListEvent of type wxEVT_LIST_ITEM_FOCUSED describing the user's action.
   void OnFocusFile(wxListEvent& event);
 
   // MEDIA EVENTS ==================================================================================
