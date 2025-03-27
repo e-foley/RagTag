@@ -15,7 +15,7 @@ set(SRC_FILES
     tag_toggle_panel.h
     tag_toggle_panel.cpp)
 
-add_executable(RagTag WIN32 ${SRC_FILES})
+add_executable(RagTag WIN32 ${SRC_FILES} app.rc)
 
 target_include_directories(RagTag PRIVATE
                            "../libs/json/include"

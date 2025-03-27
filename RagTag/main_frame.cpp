@@ -20,6 +20,7 @@ const double MainFrame::MEDIA_PANE_GRAVITY = 0.75;
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosition,
   wxSize(900, 720)) {
   SetMinSize(wxSize(800, 540));
+  SetIcons(wxIconBundle(wxICON(IDI_ICON1)));
 
   m_file_ = new wxMenu;
   m_file_->Append(ID_NEW_PROJECT, "&New Project...\tCtrl-N");
