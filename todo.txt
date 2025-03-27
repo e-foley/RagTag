@@ -49,6 +49,8 @@ EXECUTION
   https://docs.wxwidgets.org/latest/overview_windowids.html. Make sure we aren't using these.
 * Turn default file view column widths into constants.
 * Turn "Play" and "Pause" labels into constants.
+* Credit Freepik (for the app icon) before publishing the app:
+  https://support.freepik.com/s/article/Attribution-How-when-and-where?language=en_US
 
 FEATURES
 * Add ability to drag tags around.
