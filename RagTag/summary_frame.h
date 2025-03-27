@@ -129,22 +129,130 @@ private:
   std::optional<ragtag::path_t> getPathForItemIndex(int index) const;
 
   // EVENT FUNCTIONS ===============================================================================
+  //! Invoked when the user clicks a heading of the file listing.
+  //! 
+  //! Sorts the files by that column or reverses the existing sort.
+  //! 
+  //! @param event The wxListEvent of type wxEVT_LIST_COL_CLICK describing the action.
   void OnClickHeading(wxListEvent& event);
+
+  //! Invoked when the user resizes a column of the file listing.
+  //! 
+  //! @param event The wxListEvent of type wxEVT_LIST_COL_DRAGGING describing the action.
   void OnResizeColumn(wxListEvent& event);
+
+  //! Invoked when the user checks the checkbox tied to a file in the file listing.
+  //! 
+  //! Notes it as a selected file for the purposes of bulk copying, removal, or deletion.
+  //! 
+  //! @param event The wxListEvent of type wxEVT_LIST_ITEM_CHECKED describing the action.
   void OnFileChecked(wxListEvent& event);
+
+  //! Invoked when the user unchecks the checkbox tied to a file in the file listing.
+  //! 
+  //! Removes its status as a selected file for the purposes of bulk copying, removal, or deletion.
+  //! 
+  //! @param event The wxListEvent of type wxEVT_LIST_ITEM_UNCHECKED describing the action.
   void OnFileUnchecked(wxListEvent& event);
+
+  //! Invoked when the user focus a file in the file listing (by clicking on it or otherwise
+  //! selecting it).
+  //! 
+  //! Sends an event to the main window to display this file and set it as the active file.
+  //! 
+  //! @param event The wxListEvent of type wxEVT_LIST_ITEM_FOCUSED describing the action.
   void OnFileFocused(wxListEvent& event);
+
+  //! Invoked when manipulating controls that adjust the file filter (for controls that don't need
+  //! a more specialized action).
+  //! 
+  //! Applies the filter and refreshes the file list to show the results of the filter.
+  //! 
+  //! @param event The wxCommandEvent of type wxEVT_CHECKBOX or wxEVT_COMBOBOX describing the
+  //!     action.
   void OnFilterChangeGeneric(wxCommandEvent& event);
+
+  //! Invoked when the user adjusts the slider controlling the minimum rating of the filter.
+  //! 
+  //! Refreshes the file list and modifies the max slider if needed to prevent overlap.
+  //! 
+  //! @param event The wxCommandEvent of type wxEVT_SLIDER describing the action.
   void OnMinSliderMove(wxCommandEvent& event);
+
+  //! Invoked when the user adjusts the slider controlling the maximum rating of the filter.
+  //! 
+  //! Refreshes the file list and modifies the min slider if needed to prevent overlap.
+  //! 
+  //! @param event The wxCommandEvent of type wxEVT_SLIDER describing the action.
   void OnMaxSliderMove(wxCommandEvent& event);
+
+  //! Invoked when the Show Rated checkbox is adjusted.
+  //! 
+  //! Adjusts the filter and refreshes the file list to show the results of the filter.
+  //! 
+  //! @param event The wxCommandEvent of type wxEVT_CHECKBOX describing the action.
   void OnClickShowRated(wxCommandEvent& event);
+
+  //! Invoked when the Reset Filters button is clicked or otherwise activated.
+  //! 
+  //! Sets all filters to their default configuration, then refreshes th efile list to show the
+  //! results of the filter.
+  //! 
+  //! @param event The wxCommandEvent of type wxEVT_BUTTON describing the action.
   void OnResetFilters(wxCommandEvent& event);
+
+  //! Invoked when the Select All Files button is clicked or otherwise activated.
+  //! 
+  //! Checks the boxes of all files in the file listing and considers all files selected for the
+  //! purpose of bulk copying, removal, or deletion.
+  //! 
+  //! @param event The wxCommandEvent of type wxEVT_BUTTON describing the action.
   void OnSelectAllFiles(wxCommandEvent& event);
+
+  //! Invoked when the Deselect All Files button is clicked or otherwise activated.
+  //! 
+  //! Unchecks the boxes of all files in the file listing and considers all files not selected for
+  //! the purpose of bulk copying, removal, or deletion.
+  //! 
+  //! @param event The wxCommandEvent of type wxEVT_BUTTON describing the action.
   void OnDeselectAllFiles(wxCommandEvent& event);
+
+  //! Invoked when the Copy Selected Files to Directory button is clicked or otherwise activated.
+  //! 
+  //! Prompts the user for a destination to copy selected files to, and performs the copy if the
+  //! user selects a destination.
+  //! 
+  //! @param event The wxCommandEvent of type wxEVT_BUTTON describing the action.
   void OnCopySelections(wxCommandEvent& event);
+
+  //! Invoked when the Delete Selected Files button is clicked or otherwise activated.
+  //! 
+  //! Prompts the user to confirm their intent to delete these files, then performs the deletion if
+  //! the user assents.
+  //! 
+  //! @param event The wxCommandEvent of type wxEVT_BUTTON describing the action.
   void OnDeleteFiles(wxCommandEvent& event);
+
+  //! Invoked when the Remove Selected Files from Project button is clicked or otherwise activated.
+  //! 
+  //! Prompts the user to confirm their intent to remove files from the project, then performs the
+  //! removal if the user assents.
+  //! 
+  //! @param event The wxCommandEvent of type wxEVT_BUTTON describing the action.
   void OnRemoveFromProject(wxCommandEvent& event);
+
+  //! Processes keyboard input.
+  //! 
+  //! Action is only taken through this function if the user presses F5, in which case a refresh of
+  //! the file listing is performed, or the user presses Ctrl+W, which is equivalent to "closing"
+  //! (for us, hiding) the project summary window.
   void OnKeyPressed(wxKeyEvent& event);
+
+  //! Invoked when the user attempts to close the window.
+  //! 
+  //! Hides the window, but does not actually destroy it.
+  //! 
+  //! @param event The wxCloseEvent of type wxEVT_CLOSE_WINDOW describing the action.
   void OnClose(wxCloseEvent& event);
 
   // SORTING FUNCTIONS =============================================================================
