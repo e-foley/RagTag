@@ -582,682 +582,6 @@ void MainFrame::refreshStatusBar()
   GetStatusBar()->SetStatusText(command_mode_active_ ? "CMD" : "", 1);
 }
 
-void MainFrame::OnNewProject(wxCommandEvent& event) {
-  if (!promptSaveOpportunityIfDirty()) {
-    return;
-  }
-
-  // If we've made it this far, we have permission to create a new project.
-  newProject();
-  resetActiveFile();
-  SetStatusText("Created new project.");
-}
-
-void MainFrame::OnOpenProject(wxCommandEvent& event) {
-  if (!promptSaveOpportunityIfDirty()) {
-    return;
-  }
-
-  // If we've gotten this far, we have permission to open a file.
-  std::optional<ragtag::path_t> path_pending = promptOpenProject();
-  if (!path_pending.has_value()) {
-    // User canceled dialog.
-    return;
-  }
-
-  if (!openProject(*path_pending)) {
-    notifyCouldNotOpenProject(*path_pending);
-    return;
-  }
-}
-
-void MainFrame::OnSaveProject(wxCommandEvent& event) {
-  if (!project_path_.has_value() || project_path_->extension() ==
-    RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION) {
-    const std::optional<ragtag::path_t> path = promptSaveProjectAs();
-    if (!path.has_value()) {
-      // User canceled dialog.
-      return;
-    }
-    if (!saveProjectAs(*path)) {
-      notifyCouldNotSaveProject(*path);
-      return;
-    }
-    project_path_ = path;
-  } else if (!saveProject()) {
-    notifyCouldNotSaveProject(*project_path_);
-    return;
-  }
-
-  markClean();
-  SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
-}
-
-void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
-  const std::optional<ragtag::path_t> path = promptSaveProjectAs();
-  if (!path.has_value()) {
-    // User canceled dialog.
-    return;
-  }
-  if (!saveProjectAs(*path)) {
-    notifyCouldNotSaveProject(*path);
-    return;
-  }
-  project_path_ = path;
-  markClean();
-  SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
-}
-
-void MainFrame::OnEnterCommandMode(wxCommandEvent& event)
-{
-  enterCommandMode();
-}
-
-void MainFrame::OnFocusDirectoryView(wxCommandEvent& event)
-{
-  lc_files_in_directory_->SetFocus();
-}
-
-void MainFrame::OnFocusTags(wxCommandEvent& event)
-{
-  p_tag_toggles_->SetFocus();
-}
-
-void MainFrame::OnShowSummary(wxCommandEvent& event)
-{
-  if (f_summary_->IsShown()) {
-    f_summary_->SetFocus();
-  }
-  else {
-    f_summary_->Show();
-  }
-}
-
-void MainFrame::OnLoadFile(wxCommandEvent& event)
-{
-  std::optional<ragtag::path_t> path_pending = promptLoadFile();
-  if (!path_pending.has_value()) {
-    // User canceled dialog.
-    return;
-  }
-
-  loadFileAndSetAsActive(*path_pending);
-}
-
-void MainFrame::OnRefreshDirectoryView(wxCommandEvent& event)
-{
-  refreshDirectoryView();
-}
-
-void MainFrame::OnNextFile(wxCommandEvent& event)
-{
-  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
-  loadNextFile();
-}
-
-void MainFrame::OnPreviousFile(wxCommandEvent& event)
-{
-  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
-  loadPreviousFile();
-}
-
-void MainFrame::OnKillFocus(wxFocusEvent& event)
-{
-  exitCommandMode();
-}
-
-void MainFrame::OnExit(wxCommandEvent& event) {
-  Close(false);  // `false` allows action to be vetoed in OnClose event handler.
-}
-
-void MainFrame::OnClose(wxCloseEvent& event) {
-  if (!event.CanVeto()) {
-    Destroy();
-    return;
-  }
-
-  if (promptSaveOpportunityIfDirty()) {
-    Destroy();
-  }
-  else {
-    event.Veto();
-  }
-}
-
-void MainFrame::OnAbout(wxCommandEvent& event) {
-  // (c) replacement technique from https://forums.wxwidgets.org/viewtopic.php?p=158583#p158583
-  wxString about_string(L"RagTag " + RagTagUtil::getRagTagAppVersionString()
-    + L"\n\n(c) 2025 by Ed Foley");
-#if wxUSE_UNICODE
-  const wxString copyright_symbol = wxString::FromUTF8("\xc2\xa9");
-  about_string.Replace("(c)", copyright_symbol);
-#endif
-
-  wxMessageBox(about_string, "About", wxOK | wxICON_INFORMATION);
-}
-
-void MainFrame::OnClearTagsFromFile(wxCommandEvent& event)
-{
-  if (!active_file_.has_value()) {
-    return;
-  }
-
-  for (auto tag : tag_map_.getAllTags()) {
-    tag_map_.clearTag(*active_file_, tag.first);
-  }
-
-  refreshTagToggles();
-  refreshDirectoryView();
-  refreshSummary();
-}
-
-void MainFrame::OnSetTagsToDefaults(wxCommandEvent& event)
-{
-  if (!active_file_.has_value()) {
-    return;
-  }
-
-  for (auto tag : tag_map_.getAllTags()) {
-    tag_map_.setTag(*active_file_, tag.first, tag.second.default_setting);
-  }
-
-  refreshTagToggles();
-  refreshDirectoryView();
-  refreshSummary();
-}
-
-void MainFrame::OnStopMedia(wxCommandEvent& event) {
-  user_initiated_stop_media_ = true;
-  // TODO: Returns an undocumented bool that we can use if we want to.
-  stopMedia();
-}
-
-void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
-{
-  const wxMediaState media_state = mc_media_display_->GetState();
-  switch (media_state) {
-  case wxMEDIASTATE_STOPPED:
-  case wxMEDIASTATE_PAUSED:
-    // TODO: Returns an undocumented bool that we can use here if we want to.
-    playMedia();
-    break;
-  default:
-  case wxMEDIASTATE_PLAYING:
-    // TODO: Returns an undocumented bool that we can use here if we want to.
-    pauseMedia();
-    break;
-  }
-}
-
-void MainFrame::OnPreviousUntaggedFile(wxCommandEvent& event)
-{
-  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
-  loadPreviousUntaggedFile();
-}
-
-void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
-{
-  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
-  loadNextUntaggedFile();
-}
-
-void MainFrame::OnClickRatingButton(wxCommandEvent& event)
-{
-  if (!active_file_.has_value()) {
-    // wxWidgets shows puts the button in its "selected" state upon a click, but we don't want this.
-    // Instead, we refresh the buttons to make them all show as unselected.
-    refreshRatingButtons();
-    return;
-  }
-
-  if (event.GetId() == ID_NO_RATING) {
-    if (!clearRatingOfActiveFile()) {
-      // TODO: Report error.
-      SetStatusText("Could not clear rating from active file.");
-    }
-  }
-  else {
-    if (!setRatingOfActiveFile(event.GetId() - ID_RATING_0)) {
-      // TODO: Report error.
-      SetStatusText("Could not set rating on active file.");
-    }
-  }
-}
-
-void MainFrame::OnToggleAutoplayBox(wxCommandEvent& event)
-{
-  cb_autoplay_->SetValue(!cb_autoplay_->IsChecked());
-}
-
-void MainFrame::OnToggleLoopBox(wxCommandEvent& event)
-{
-  cb_loop_->SetValue(!cb_loop_->IsChecked());
-}
-
-void MainFrame::OnToggleMuteBox(wxCommandEvent& event)
-{
-  mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
-}
-
-void MainFrame::OnToggleMuteMenu(wxCommandEvent& event)
-{
-  cb_mute_->SetValue(!cb_mute_->IsChecked());
-  OnToggleMuteBox(event);
-}
-
-void MainFrame::OnFocusFile(wxListEvent& event)
-{
-  if (file_view_modification_in_progress_) {
-    // When items are removed from the list view, such as when redrawing the control after loading a
-    // file from a directory with fewer items than the current item's directory, the currently
-    // "focused" items can change without user intent. The associated event--this function--fires
-    // and causes the files to be loaded transiently, potentially triggering an unintended file to
-    // be marked as the presently active file and/or causing a crash.
-    //
-    // Instead, we just eschew loading when we're told that the control is being modified.
-    return;
-  }
-
-  // Load and display the file.
-  // 
-  // Gross, but the best I could come up with given wxListCtrl's limitations.
-  // Goal is to reinterpret the user data as a pointer leading to the path name that was set for
-  // this item in refreshDirectoryView().
-  const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(event.GetIndex());
-  if (!loadFileAndSetAsActive(*reinterpret_cast<ragtag::path_t*>(user_data))) {
-    // TODO: Log error.
-  }
-}
-
-void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
-  TagEntryDialog* tag_entry_frame = new TagEntryDialog(this);
-  const bool command_mode_cache = command_mode_active_;
-  auto tag_entry_result = tag_entry_frame->promptTagEntry();
-  if (command_mode_cache) {
-    enterCommandMode();
-  }
-  if (!tag_entry_result.has_value()) {
-    // Prompt was canceled. Don't do anything.
-    // TODO: Remove this debug message.
-    SetStatusText("Tag entry prompt canceled.");
-    return;
-  }
-
-  if (tag_map_.isTagRegistered(tag_entry_result->tag)) {
-    // The "newly created" tag has a name that's already registered.
-    wxMessageDialog dialog(this, L"Could not create tag.\n\nTag '" + tag_entry_result->tag
-      + L"' is already registered.", "Could Not Create Tag", wxOK | wxICON_WARNING);
-    dialog.ShowModal();
-    if (command_mode_cache) {
-      enterCommandMode();
-    }
-    SetStatusText(L"Tag '" + tag_entry_result->tag + L"' is already registered.");
-    return;
-  }
-
-  if (!tag_map_.registerTag(tag_entry_result->tag, tag_entry_result->tag_properties)) {
-    // TODO: Report error.
-    SetStatusText(L"Could not register tag '" + tag_entry_result->tag + L"'.");
-    return;
-  }
-
-  if (tag_entry_result->apply_to_all_project_files) {
-    auto all_files = tag_map_.getAllFiles();
-    for (auto file : all_files) {
-      // TODO: Log if any of these fails.
-      tag_map_.setTag(file, tag_entry_result->tag,
-        tag_entry_result->tag_properties.default_setting);
-    }
-  }
-
-  // Assign the tag's default to the currently opened file, if applicable.
-  if (active_file_.has_value()) {
-    if (!tag_map_.setTag(*active_file_, tag_entry_result->tag,
-      tag_entry_result->tag_properties.default_setting)) {
-      // TODO: Report error.
-      SetStatusText(L"Could not set tag '" + tag_entry_result->tag + L"' on currently open file.");
-    }
-  }
-
-  // Looks like everything was successful. Refresh the panel to show our new tag.
-  markDirty();
-  refreshTagToggles();
-  refreshDirectoryView();
-  refreshSummary();
-
-  SetStatusText(L"Created tag '" + tag_entry_result->tag + L"'.");
-}
-
-void MainFrame::OnClickTagToggleButton(TagToggleEvent& event) {
-  switch (event.getDesiredAction()) {
-  case TagToggleEvent::DesiredAction::EDIT_TAG: {
-    // Cache existing tag properties for convenience.
-    const ragtag::tag_t old_tag = event.getTag();
-    const auto props_ret = tag_map_.getTagProperties(old_tag);
-    if (!props_ret.has_value()) {
-      // Shouldn't happen.
-      SetStatusText(L"Couldn't get existing tag properties for tag '" + old_tag + L"'.");
-      break;
-    }
-    const ragtag::TagProperties old_props = *props_ret;
-
-    TagEntryDialog* tag_entry_frame = new TagEntryDialog(this, old_tag, old_props);
-    auto tag_entry_result = tag_entry_frame->promptTagEntry();
-    if (!tag_entry_result.has_value()) {
-      // Prompt was canceled. Don't do anything.
-      // TODO: Remove this debug message.
-      SetStatusText("Tag entry prompt canceled.");
-      break;
-    }
-
-    const ragtag::tag_t& new_tag = tag_entry_result->tag;  // Alias for convenience
-
-    // TODO: Don't assume that changes have been made.
-    markDirty();
-
-    // If the name is different from before, the tag has been renamed.
-    if (new_tag != old_tag) {
-      if (!tag_map_.renameTag(old_tag, new_tag)) {
-        SetStatusText(L"Could not rename tag '" + old_tag + L"' to '" + new_tag + L"'.");
-        break;
-      }
-    }
-
-    if (!tag_map_.setTagProperties(new_tag, tag_entry_result->tag_properties)) {
-      SetStatusText(L"Could not set properties for tag '" + new_tag + L"'.");
-    }
-
-    // Apply default to all files in project if requested.
-    if (tag_entry_result->apply_to_all_project_files) {
-      auto all_files = tag_map_.getAllFiles();
-      for (auto file : all_files) {
-        // TODO: Log if any of these fails.
-        tag_map_.setTag(file, tag_entry_result->tag,
-          tag_entry_result->tag_properties.default_setting);
-      }
-    }
-
-    SetStatusText(L"Modified tag '" + old_tag + L"'/'" + new_tag + L"'.");
-    break;
-  }
-  case TagToggleEvent::DesiredAction::DELETE_TAG: {
-    if (promptConfirmTagDeletion(event.getTag())) {
-      // TODO: Don't assume that changes have been made.
-      markDirty();
-
-      if (tag_map_.deleteTag(event.getTag())) {
-        SetStatusText(L"Deleted tag '" + event.getTag() + L"'.");
-      }
-      else {
-        // TODO: Report error.
-        SetStatusText(L"Could not delete tag '" + event.getTag() + L"'.");
-      }
-    }
-    break;
-  }
-  case TagToggleEvent::DesiredAction::UPDATE_TAG_STATE: {
-    if (active_file_.has_value()) {
-      // TODO: Don't assume that changes have been made.
-      markDirty();
-
-      if (!tag_map_.setTag(*active_file_, event.getTag(), event.getDesiredState())) {
-        // TODO: Report error.
-        SetStatusText(L"Could not assert tag '" + event.getTag() + L"' on file '"
-          + active_file_->wstring() + L"'.");
-      }
-    }
-    break;
-  }
-  default:
-    std::wcerr << "Unexpected desired action from tag toggle button.\n";
-    break;
-  }
-
-  // Whether or not we know a change was made, refresh the tag toggle list to ensure we're
-  // presenting the latest information to the user.
-  refreshTagToggles();
-  refreshDirectoryView();
-  refreshSummary();
-}
-
-void MainFrame::OnMediaLoaded(wxMediaEvent& event)
-{
-  if (!active_file_.has_value()) {
-    // Shouldn't happen, but let's avoid a segfault just in case.
-    return;
-  }
-
-  // NOTE: SetVolume() returns an undocumented bool.
-  mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
-  if (cb_autoplay_->IsChecked() && !RagTagUtil::isStaticMedia(*active_file_)) {
-    // Unused bool.
-    playMedia();
-  }
-}
-
-void MainFrame::OnMediaStop(wxMediaEvent& event)
-{
-  // When a media file finishes playing, it emits Finished and Stopped events nearly simultaneously.
-  // Without this conditional, the button text tends to flash to "Play" then immediately back to
-  // "Pause" as a video loops, which is distracting.
-  //
-  // I'd like to think there's a more elegant way of doing this, but this is the best approach I
-  // found in the half hour I devoted to the problem.
-  if (user_initiated_stop_media_ || !cb_loop_->IsChecked()) {
-    b_play_pause_media_->SetLabel("Play");
-  }
-  user_initiated_stop_media_ = false;
-}
-
-void MainFrame::OnMediaFinished(wxMediaEvent& event)
-{
-  if (cb_loop_->IsChecked()) {
-    playMedia();
-  }
-  else {
-    b_play_pause_media_->SetLabel("Play");
-  }
-}
-
-void MainFrame::OnMediaPlay(wxMediaEvent& event)
-{
-  b_play_pause_media_->SetLabel("Pause");
-}
-
-void MainFrame::OnMediaPause(wxMediaEvent& event)
-{
-  b_play_pause_media_->SetLabel("Play");
-}
-
-void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
-{
-  const auto action = event.getAction();
-  switch (action) {
-  case SummaryFrameEvent::Action::SELECT_FILE: {
-    const auto path_container = event.getPaths();
-    if (path_container.empty()) {
-      // This shouldn't happen.
-      std::wcerr << "OnSummaryFrameAction called with empty path list.\n";
-    }
-
-    if (!loadFileAndSetAsActive(path_container[0])) {
-      // TODO: Report error
-      SetStatusText(L"Could not display file '" + path_container[0].wstring() + L"'.");
-    }
-    break;
-  }
-  case SummaryFrameEvent::Action::REMOVE_FILES: {
-    // Confirmation has already been granted if this event fires.
-    int removed_file_count = 0;
-    for (const auto& path : event.getPaths()) {
-      // TODO: Use this bool for extra error reporting.
-      if (tag_map_.removeFile(path)) {
-        markDirty();
-        ++removed_file_count;
-        if (active_file_.has_value() && path == *active_file_) {
-          // The file we're removing from the project is the actively loaded one. Reset active_file_.
-          resetActiveFile();
-        }
-      }
-    }
-
-    // Note that some of these already get invoked in the case that we resetActiveFile(). We can
-    // optimize these redundant calls out later if we really want to.
-    refreshRatingButtons();
-    refreshDirectoryView();
-    refreshSummary();
-
-    // This shouldn't be nullptr, but we still guard against it to be safe.
-    if (f_summary_ != nullptr) {
-      const std::string file_plural = removed_file_count == 1 ? " was" : "s were";
-      wxMessageDialog dialog(f_summary_, std::to_string(removed_file_count)
-        + " file" + file_plural + " removed from the project.", "Files Removed");
-      dialog.ShowModal();
-    }
-    break;
-  }
-  case SummaryFrameEvent::Action::DELETE_FILES: {
-    // Confirmation has already been granted if this event fires.
-    int deleted_file_count = 0;
-    for (const auto& path : event.getPaths()) {
-      if (RagTagUtil::deleteFile(path)) {
-        ++deleted_file_count;
-      }
-      // Deleted files should also be removed from the project lest we retain dangling references to
-      // files that don't exist anymore.
-      // TODO: Use this bool for extra error reporting.
-      if (tag_map_.removeFile(path)) {
-        markDirty();
-        if (active_file_.has_value() && path == *active_file_) {
-          // The file we're removing from the project is the actively loaded one. Reset active_file_.
-          resetActiveFile();
-        }
-      }
-    }
-
-    // Note that some of these already get invoked in the case that we resetActiveFile(). We can
-    // optimize these redundant calls out later if we really want to.
-    refreshRatingButtons();
-    refreshDirectoryView();
-    refreshSummary();
-
-    // This shouldn't be nullptr, but we still guard against it to be safe.
-    if (f_summary_ != nullptr) {
-      const std::string file_plural = deleted_file_count == 1 ? " was" : "s were";
-      wxMessageDialog dialog(f_summary_, std::to_string(deleted_file_count)
-        + " file" + file_plural + " deleted.", "Files Deleted");
-      dialog.ShowModal();
-    }
-    break;
-  }
-  default:
-    std::wcerr << "Unrecognized SummaryFrameEvent action.\n";
-    break;
-  }
-}
-
-void MainFrame::OnKeyDown(wxKeyEvent& event)
-{
-  const int key_code = event.GetKeyCode();
-  const int modifiers = event.GetModifiers();
-  if (key_code == WXK_DELETE && modifiers == wxMOD_NONE) {
-    // Attempt to delete the file with prompting.
-    if (active_file_.has_value() && promptConfirmFileDeletion(*active_file_)) {
-      ragtag::path_t path_cache = *active_file_;  // Copy for use in error dialog.
-      // Cache next file name so that we can switch to it if deletion is successful.
-      const auto next_file = qualifiedFileNavigator(
-        *active_file_, [](const ragtag::path_t&) {return true; }, true);
-      if (!RagTagUtil::deleteFile(path_cache)) {
-        // TODO: Report error.
-        SetStatusText(L"Could not delete file '" + path_cache.wstring() + L"'.");
-      }
-
-      // Remove the file from our project also.
-      const bool did_remove_file_from_tag_map = tag_map_.removeFile(path_cache);
-      if (did_remove_file_from_tag_map) {
-        markDirty();
-      } else {
-        SetStatusText(L"Could not remove file '" + path_cache.wstring() + L"' from the project.");
-      }
-
-      // Compare next file against original file so that we don't attempt to reload a file that was
-      // just deleted in the case we deleted the last file in the directory.
-      if (next_file.has_value() && *next_file != path_cache) {
-        loadFileAndSetAsActive(*next_file);
-      }
-      else {
-        resetActiveFile();
-      }
-    }
-  }
-  else if (key_code == 'W' && modifiers == wxMOD_CONTROL) {
-    Close(false);  // `false` allows action to be vetoed in OnClose event handler.
-  }
-  else if (command_mode_active_ && key_code == WXK_SPACE) {
-    if (modifiers == wxMOD_NONE) {
-      loadNextUntaggedFile();
-    }
-    else if (modifiers == wxMOD_SHIFT) {
-      loadPreviousUntaggedFile();
-    }
-  }
-  else if (command_mode_active_ && (key_code == WXK_DOWN || key_code == WXK_RIGHT)) {
-    if (modifiers == wxMOD_NONE) {
-      loadNextFile();
-    }
-    else if (modifiers == wxMOD_SHIFT) {
-      loadNextUntaggedFile();
-    }
-  }
-  else if (command_mode_active_ && (key_code == WXK_UP || key_code == WXK_LEFT)) {
-    if (modifiers == wxMOD_NONE) {
-      loadPreviousFile();
-    }
-    else if (modifiers == wxMOD_SHIFT) {
-      loadPreviousUntaggedFile();
-    }
-  }
-  else if (command_mode_active_ && key_code == '-' && modifiers == wxMOD_NONE) {
-    clearRatingOfActiveFile();
-  }
-  else if (command_mode_active_ && key_code >= '0' && key_code <= '5') {
-    if (modifiers == wxMOD_SHIFT) {
-      clearRatingOfActiveFile();
-    }
-    else if (modifiers == wxMOD_NONE) {
-      const int desired_rating = key_code - '0';
-      setRatingOfActiveFile(desired_rating);
-    }
-  }
-  else if (command_mode_active_ && key_code >= WXK_NUMPAD0 && key_code <= WXK_NUMPAD5
-    && modifiers == wxMOD_NONE) {
-    const int desired_rating = key_code - WXK_NUMPAD0;
-    setRatingOfActiveFile(desired_rating);
-  }
-  else if (command_mode_active_ && key_code == WXK_NUMPAD_DECIMAL && modifiers == wxMOD_NONE) {
-    // We provide this option because shift+numpad navigates controls by default.
-    clearRatingOfActiveFile();
-  }
-  else if (command_mode_active_) {
-    // Test against all the tag toggle hotkeys.
-    bool key_processed = false;
-    for (const auto& tag_toggle_panel : tag_toggle_panels_) {
-      if (tag_toggle_panel->processKeyEvent(event)) {
-        key_processed = true;
-        // Could `break` here, but this would break the situation where multiple tags share a
-        // hotkey. I don't think we should support this use case, but the enforcement mechanism to
-        // prevent it definitely shouldn't be placed at *this* spot.
-      }
-    }
-    if (!key_processed) {
-      event.Skip();
-    }
-  }
-  else {
-    event.Skip();
-  }
-}
-
 MainFrame::UserIntention MainFrame::promptUnsavedChanges() {
   wxMessageDialog md_unsaved_changes(this, "You have unsaved changes.", "Unsaved Changes",
       wxYES_NO | wxCANCEL | wxICON_WARNING);
@@ -1823,4 +1147,682 @@ std::optional<long> MainFrame::getPathListCtrlIndex(const ragtag::path_t& path) 
   }
 
   return {};
+}
+
+void MainFrame::OnNewProject(wxCommandEvent& event) {
+  if (!promptSaveOpportunityIfDirty()) {
+    return;
+  }
+
+  // If we've made it this far, we have permission to create a new project.
+  newProject();
+  resetActiveFile();
+  SetStatusText("Created new project.");
+}
+
+void MainFrame::OnOpenProject(wxCommandEvent& event) {
+  if (!promptSaveOpportunityIfDirty()) {
+    return;
+  }
+
+  // If we've gotten this far, we have permission to open a file.
+  std::optional<ragtag::path_t> path_pending = promptOpenProject();
+  if (!path_pending.has_value()) {
+    // User canceled dialog.
+    return;
+  }
+
+  if (!openProject(*path_pending)) {
+    notifyCouldNotOpenProject(*path_pending);
+    return;
+  }
+}
+
+void MainFrame::OnSaveProject(wxCommandEvent& event) {
+  if (!project_path_.has_value() || project_path_->extension() ==
+    RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION) {
+    const std::optional<ragtag::path_t> path = promptSaveProjectAs();
+    if (!path.has_value()) {
+      // User canceled dialog.
+      return;
+    }
+    if (!saveProjectAs(*path)) {
+      notifyCouldNotSaveProject(*path);
+      return;
+    }
+    project_path_ = path;
+  }
+  else if (!saveProject()) {
+    notifyCouldNotSaveProject(*project_path_);
+    return;
+  }
+
+  markClean();
+  SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
+}
+
+void MainFrame::OnSaveProjectAs(wxCommandEvent& event) {
+  const std::optional<ragtag::path_t> path = promptSaveProjectAs();
+  if (!path.has_value()) {
+    // User canceled dialog.
+    return;
+  }
+  if (!saveProjectAs(*path)) {
+    notifyCouldNotSaveProject(*path);
+    return;
+  }
+  project_path_ = path;
+  markClean();
+  SetStatusText(L"Saved project '" + project_path_->wstring() + L"'.");
+}
+
+void MainFrame::OnExit(wxCommandEvent& event) {
+  Close(false);  // `false` allows action to be vetoed in OnClose event handler.
+}
+
+void MainFrame::OnLoadFile(wxCommandEvent& event)
+{
+  std::optional<ragtag::path_t> path_pending = promptLoadFile();
+  if (!path_pending.has_value()) {
+    // User canceled dialog.
+    return;
+  }
+
+  loadFileAndSetAsActive(*path_pending);
+}
+
+void MainFrame::OnNextFile(wxCommandEvent& event)
+{
+  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
+  loadNextFile();
+}
+
+void MainFrame::OnPreviousFile(wxCommandEvent& event)
+{
+  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
+  loadPreviousFile();
+}
+
+void MainFrame::OnNextUntaggedFile(wxCommandEvent& event)
+{
+  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
+  loadNextUntaggedFile();
+}
+
+void MainFrame::OnPreviousUntaggedFile(wxCommandEvent& event)
+{
+  // TODO: Returns a bool we can use; however, function itself already modifies status bar.
+  loadPreviousUntaggedFile();
+}
+
+void MainFrame::OnPlayPauseMedia(wxCommandEvent& event)
+{
+  const wxMediaState media_state = mc_media_display_->GetState();
+  switch (media_state) {
+  case wxMEDIASTATE_STOPPED:
+  case wxMEDIASTATE_PAUSED:
+    // TODO: Returns an undocumented bool that we can use here if we want to.
+    playMedia();
+    break;
+  default:
+  case wxMEDIASTATE_PLAYING:
+    // TODO: Returns an undocumented bool that we can use here if we want to.
+    pauseMedia();
+    break;
+  }
+}
+
+void MainFrame::OnStopMedia(wxCommandEvent& event) {
+  user_initiated_stop_media_ = true;
+  // TODO: Returns an undocumented bool that we can use if we want to.
+  stopMedia();
+}
+
+void MainFrame::OnToggleMuteMenu(wxCommandEvent& event)
+{
+  cb_mute_->SetValue(!cb_mute_->IsChecked());
+  OnToggleMuteBox(event);
+}
+
+void MainFrame::OnDefineNewTag(wxCommandEvent& event) {
+  TagEntryDialog* tag_entry_frame = new TagEntryDialog(this);
+  const bool command_mode_cache = command_mode_active_;
+  auto tag_entry_result = tag_entry_frame->promptTagEntry();
+  if (command_mode_cache) {
+    enterCommandMode();
+  }
+  if (!tag_entry_result.has_value()) {
+    // Prompt was canceled. Don't do anything.
+    // TODO: Remove this debug message.
+    SetStatusText("Tag entry prompt canceled.");
+    return;
+  }
+
+  if (tag_map_.isTagRegistered(tag_entry_result->tag)) {
+    // The "newly created" tag has a name that's already registered.
+    wxMessageDialog dialog(this, L"Could not create tag.\n\nTag '" + tag_entry_result->tag
+      + L"' is already registered.", "Could Not Create Tag", wxOK | wxICON_WARNING);
+    dialog.ShowModal();
+    if (command_mode_cache) {
+      enterCommandMode();
+    }
+    SetStatusText(L"Tag '" + tag_entry_result->tag + L"' is already registered.");
+    return;
+  }
+
+  if (!tag_map_.registerTag(tag_entry_result->tag, tag_entry_result->tag_properties)) {
+    // TODO: Report error.
+    SetStatusText(L"Could not register tag '" + tag_entry_result->tag + L"'.");
+    return;
+  }
+
+  if (tag_entry_result->apply_to_all_project_files) {
+    auto all_files = tag_map_.getAllFiles();
+    for (auto file : all_files) {
+      // TODO: Log if any of these fails.
+      tag_map_.setTag(file, tag_entry_result->tag,
+        tag_entry_result->tag_properties.default_setting);
+    }
+  }
+
+  // Assign the tag's default to the currently opened file, if applicable.
+  if (active_file_.has_value()) {
+    if (!tag_map_.setTag(*active_file_, tag_entry_result->tag,
+      tag_entry_result->tag_properties.default_setting)) {
+      // TODO: Report error.
+      SetStatusText(L"Could not set tag '" + tag_entry_result->tag + L"' on currently open file.");
+    }
+  }
+
+  // Looks like everything was successful. Refresh the panel to show our new tag.
+  markDirty();
+  refreshTagToggles();
+  refreshDirectoryView();
+  refreshSummary();
+
+  SetStatusText(L"Created tag '" + tag_entry_result->tag + L"'.");
+}
+
+void MainFrame::OnClearTagsFromFile(wxCommandEvent& event)
+{
+  if (!active_file_.has_value()) {
+    return;
+  }
+
+  for (auto tag : tag_map_.getAllTags()) {
+    tag_map_.clearTag(*active_file_, tag.first);
+  }
+
+  refreshTagToggles();
+  refreshDirectoryView();
+  refreshSummary();
+}
+
+void MainFrame::OnSetTagsToDefaults(wxCommandEvent& event)
+{
+  if (!active_file_.has_value()) {
+    return;
+  }
+
+  for (auto tag : tag_map_.getAllTags()) {
+    tag_map_.setTag(*active_file_, tag.first, tag.second.default_setting);
+  }
+
+  refreshTagToggles();
+  refreshDirectoryView();
+  refreshSummary();
+}
+
+void MainFrame::OnEnterCommandMode(wxCommandEvent& event)
+{
+  enterCommandMode();
+}
+
+void MainFrame::OnFocusDirectoryView(wxCommandEvent& event)
+{
+  lc_files_in_directory_->SetFocus();
+}
+
+void MainFrame::OnFocusTags(wxCommandEvent& event)
+{
+  p_tag_toggles_->SetFocus();
+}
+
+void MainFrame::OnShowSummary(wxCommandEvent& event)
+{
+  if (f_summary_->IsShown()) {
+    f_summary_->SetFocus();
+  }
+  else {
+    f_summary_->Show();
+  }
+}
+
+void MainFrame::OnRefreshDirectoryView(wxCommandEvent& event)
+{
+  refreshDirectoryView();
+}
+
+void MainFrame::OnAbout(wxCommandEvent& event) {
+  // (c) replacement technique from https://forums.wxwidgets.org/viewtopic.php?p=158583#p158583
+  wxString about_string(L"RagTag " + RagTagUtil::getRagTagAppVersionString()
+    + L"\n\n(c) 2025 by Ed Foley");
+#if wxUSE_UNICODE
+  const wxString copyright_symbol = wxString::FromUTF8("\xc2\xa9");
+  about_string.Replace("(c)", copyright_symbol);
+#endif
+
+  wxMessageBox(about_string, "About", wxOK | wxICON_INFORMATION);
+}
+
+void MainFrame::OnClickTagToggleButton(TagToggleEvent& event) {
+  switch (event.getDesiredAction()) {
+  case TagToggleEvent::DesiredAction::EDIT_TAG: {
+    // Cache existing tag properties for convenience.
+    const ragtag::tag_t old_tag = event.getTag();
+    const auto props_ret = tag_map_.getTagProperties(old_tag);
+    if (!props_ret.has_value()) {
+      // Shouldn't happen.
+      SetStatusText(L"Couldn't get existing tag properties for tag '" + old_tag + L"'.");
+      break;
+    }
+    const ragtag::TagProperties old_props = *props_ret;
+
+    TagEntryDialog* tag_entry_frame = new TagEntryDialog(this, old_tag, old_props);
+    auto tag_entry_result = tag_entry_frame->promptTagEntry();
+    if (!tag_entry_result.has_value()) {
+      // Prompt was canceled. Don't do anything.
+      // TODO: Remove this debug message.
+      SetStatusText("Tag entry prompt canceled.");
+      break;
+    }
+
+    const ragtag::tag_t& new_tag = tag_entry_result->tag;  // Alias for convenience
+
+    // TODO: Don't assume that changes have been made.
+    markDirty();
+
+    // If the name is different from before, the tag has been renamed.
+    if (new_tag != old_tag) {
+      if (!tag_map_.renameTag(old_tag, new_tag)) {
+        SetStatusText(L"Could not rename tag '" + old_tag + L"' to '" + new_tag + L"'.");
+        break;
+      }
+    }
+
+    if (!tag_map_.setTagProperties(new_tag, tag_entry_result->tag_properties)) {
+      SetStatusText(L"Could not set properties for tag '" + new_tag + L"'.");
+    }
+
+    // Apply default to all files in project if requested.
+    if (tag_entry_result->apply_to_all_project_files) {
+      auto all_files = tag_map_.getAllFiles();
+      for (auto file : all_files) {
+        // TODO: Log if any of these fails.
+        tag_map_.setTag(file, tag_entry_result->tag,
+          tag_entry_result->tag_properties.default_setting);
+      }
+    }
+
+    SetStatusText(L"Modified tag '" + old_tag + L"'/'" + new_tag + L"'.");
+    break;
+  }
+  case TagToggleEvent::DesiredAction::DELETE_TAG: {
+    if (promptConfirmTagDeletion(event.getTag())) {
+      // TODO: Don't assume that changes have been made.
+      markDirty();
+
+      if (tag_map_.deleteTag(event.getTag())) {
+        SetStatusText(L"Deleted tag '" + event.getTag() + L"'.");
+      }
+      else {
+        // TODO: Report error.
+        SetStatusText(L"Could not delete tag '" + event.getTag() + L"'.");
+      }
+    }
+    break;
+  }
+  case TagToggleEvent::DesiredAction::UPDATE_TAG_STATE: {
+    if (active_file_.has_value()) {
+      // TODO: Don't assume that changes have been made.
+      markDirty();
+
+      if (!tag_map_.setTag(*active_file_, event.getTag(), event.getDesiredState())) {
+        // TODO: Report error.
+        SetStatusText(L"Could not assert tag '" + event.getTag() + L"' on file '"
+          + active_file_->wstring() + L"'.");
+      }
+    }
+    break;
+  }
+  default:
+    std::wcerr << "Unexpected desired action from tag toggle button.\n";
+    break;
+  }
+
+  // Whether or not we know a change was made, refresh the tag toggle list to ensure we're
+  // presenting the latest information to the user.
+  refreshTagToggles();
+  refreshDirectoryView();
+  refreshSummary();
+}
+
+void MainFrame::OnClickRatingButton(wxCommandEvent& event)
+{
+  if (!active_file_.has_value()) {
+    // wxWidgets shows puts the button in its "selected" state upon a click, but we don't want this.
+    // Instead, we refresh the buttons to make them all show as unselected.
+    refreshRatingButtons();
+    return;
+  }
+
+  if (event.GetId() == ID_NO_RATING) {
+    if (!clearRatingOfActiveFile()) {
+      // TODO: Report error.
+      SetStatusText("Could not clear rating from active file.");
+    }
+  }
+  else {
+    if (!setRatingOfActiveFile(event.GetId() - ID_RATING_0)) {
+      // TODO: Report error.
+      SetStatusText("Could not set rating on active file.");
+    }
+  }
+}
+
+void MainFrame::OnToggleAutoplayBox(wxCommandEvent& event)
+{
+  cb_autoplay_->SetValue(!cb_autoplay_->IsChecked());
+}
+
+void MainFrame::OnToggleLoopBox(wxCommandEvent& event)
+{
+  cb_loop_->SetValue(!cb_loop_->IsChecked());
+}
+
+void MainFrame::OnToggleMuteBox(wxCommandEvent& event)
+{
+  mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
+}
+
+void MainFrame::OnFocusFile(wxListEvent& event)
+{
+  if (file_view_modification_in_progress_) {
+    // When items are removed from the list view, such as when redrawing the control after loading a
+    // file from a directory with fewer items than the current item's directory, the currently
+    // "focused" items can change without user intent. The associated event--this function--fires
+    // and causes the files to be loaded transiently, potentially triggering an unintended file to
+    // be marked as the presently active file and/or causing a crash.
+    //
+    // Instead, we just eschew loading when we're told that the control is being modified.
+    return;
+  }
+
+  // Load and display the file.
+  // 
+  // Gross, but the best I could come up with given wxListCtrl's limitations.
+  // Goal is to reinterpret the user data as a pointer leading to the path name that was set for
+  // this item in refreshDirectoryView().
+  const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(event.GetIndex());
+  if (!loadFileAndSetAsActive(*reinterpret_cast<ragtag::path_t*>(user_data))) {
+    // TODO: Log error.
+  }
+}
+
+void MainFrame::OnMediaLoaded(wxMediaEvent& event)
+{
+  if (!active_file_.has_value()) {
+    // Shouldn't happen, but let's avoid a segfault just in case.
+    return;
+  }
+
+  // NOTE: SetVolume() returns an undocumented bool.
+  mc_media_display_->SetVolume(cb_mute_->IsChecked() ? 0.0 : 1.0);
+  if (cb_autoplay_->IsChecked() && !RagTagUtil::isStaticMedia(*active_file_)) {
+    // Unused bool.
+    playMedia();
+  }
+}
+
+void MainFrame::OnMediaStop(wxMediaEvent& event)
+{
+  // When a media file finishes playing, it emits Finished and Stopped events nearly simultaneously.
+  // Without this conditional, the button text tends to flash to "Play" then immediately back to
+  // "Pause" as a video loops, which is distracting.
+  //
+  // I'd like to think there's a more elegant way of doing this, but this is the best approach I
+  // found in the half hour I devoted to the problem.
+  if (user_initiated_stop_media_ || !cb_loop_->IsChecked()) {
+    b_play_pause_media_->SetLabel("Play");
+  }
+  user_initiated_stop_media_ = false;
+}
+
+void MainFrame::OnMediaFinished(wxMediaEvent& event)
+{
+  if (cb_loop_->IsChecked()) {
+    playMedia();
+  }
+  else {
+    b_play_pause_media_->SetLabel("Play");
+  }
+}
+
+void MainFrame::OnMediaPlay(wxMediaEvent& event)
+{
+  b_play_pause_media_->SetLabel("Pause");
+}
+
+void MainFrame::OnMediaPause(wxMediaEvent& event)
+{
+  b_play_pause_media_->SetLabel("Play");
+}
+
+void MainFrame::OnClose(wxCloseEvent& event) {
+  if (!event.CanVeto()) {
+    Destroy();
+    return;
+  }
+
+  if (promptSaveOpportunityIfDirty()) {
+    Destroy();
+  }
+  else {
+    event.Veto();
+  }
+}
+
+void MainFrame::OnKillFocus(wxFocusEvent& event)
+{
+  exitCommandMode();
+}
+
+void MainFrame::OnSummaryFrameAction(SummaryFrameEvent& event)
+{
+  const auto action = event.getAction();
+  switch (action) {
+  case SummaryFrameEvent::Action::SELECT_FILE: {
+    const auto path_container = event.getPaths();
+    if (path_container.empty()) {
+      // This shouldn't happen.
+      std::wcerr << "OnSummaryFrameAction called with empty path list.\n";
+    }
+
+    if (!loadFileAndSetAsActive(path_container[0])) {
+      // TODO: Report error
+      SetStatusText(L"Could not display file '" + path_container[0].wstring() + L"'.");
+    }
+    break;
+  }
+  case SummaryFrameEvent::Action::REMOVE_FILES: {
+    // Confirmation has already been granted if this event fires.
+    int removed_file_count = 0;
+    for (const auto& path : event.getPaths()) {
+      // TODO: Use this bool for extra error reporting.
+      if (tag_map_.removeFile(path)) {
+        markDirty();
+        ++removed_file_count;
+        if (active_file_.has_value() && path == *active_file_) {
+          // The file we're removing from the project is the actively loaded one. Reset active_file_.
+          resetActiveFile();
+        }
+      }
+    }
+
+    // Note that some of these already get invoked in the case that we resetActiveFile(). We can
+    // optimize these redundant calls out later if we really want to.
+    refreshRatingButtons();
+    refreshDirectoryView();
+    refreshSummary();
+
+    // This shouldn't be nullptr, but we still guard against it to be safe.
+    if (f_summary_ != nullptr) {
+      const std::string file_plural = removed_file_count == 1 ? " was" : "s were";
+      wxMessageDialog dialog(f_summary_, std::to_string(removed_file_count)
+        + " file" + file_plural + " removed from the project.", "Files Removed");
+      dialog.ShowModal();
+    }
+    break;
+  }
+  case SummaryFrameEvent::Action::DELETE_FILES: {
+    // Confirmation has already been granted if this event fires.
+    int deleted_file_count = 0;
+    for (const auto& path : event.getPaths()) {
+      if (RagTagUtil::deleteFile(path)) {
+        ++deleted_file_count;
+      }
+      // Deleted files should also be removed from the project lest we retain dangling references to
+      // files that don't exist anymore.
+      // TODO: Use this bool for extra error reporting.
+      if (tag_map_.removeFile(path)) {
+        markDirty();
+        if (active_file_.has_value() && path == *active_file_) {
+          // The file we're removing from the project is the actively loaded one. Reset active_file_.
+          resetActiveFile();
+        }
+      }
+    }
+
+    // Note that some of these already get invoked in the case that we resetActiveFile(). We can
+    // optimize these redundant calls out later if we really want to.
+    refreshRatingButtons();
+    refreshDirectoryView();
+    refreshSummary();
+
+    // This shouldn't be nullptr, but we still guard against it to be safe.
+    if (f_summary_ != nullptr) {
+      const std::string file_plural = deleted_file_count == 1 ? " was" : "s were";
+      wxMessageDialog dialog(f_summary_, std::to_string(deleted_file_count)
+        + " file" + file_plural + " deleted.", "Files Deleted");
+      dialog.ShowModal();
+    }
+    break;
+  }
+  default:
+    std::wcerr << "Unrecognized SummaryFrameEvent action.\n";
+    break;
+  }
+}
+
+void MainFrame::OnKeyDown(wxKeyEvent& event)
+{
+  const int key_code = event.GetKeyCode();
+  const int modifiers = event.GetModifiers();
+  if (key_code == WXK_DELETE && modifiers == wxMOD_NONE) {
+    // Attempt to delete the file with prompting.
+    if (active_file_.has_value() && promptConfirmFileDeletion(*active_file_)) {
+      ragtag::path_t path_cache = *active_file_;  // Copy for use in error dialog.
+      // Cache next file name so that we can switch to it if deletion is successful.
+      const auto next_file = qualifiedFileNavigator(
+        *active_file_, [](const ragtag::path_t&) {return true; }, true);
+      if (!RagTagUtil::deleteFile(path_cache)) {
+        // TODO: Report error.
+        SetStatusText(L"Could not delete file '" + path_cache.wstring() + L"'.");
+      }
+
+      // Remove the file from our project also.
+      const bool did_remove_file_from_tag_map = tag_map_.removeFile(path_cache);
+      if (did_remove_file_from_tag_map) {
+        markDirty();
+      }
+      else {
+        SetStatusText(L"Could not remove file '" + path_cache.wstring() + L"' from the project.");
+      }
+
+      // Compare next file against original file so that we don't attempt to reload a file that was
+      // just deleted in the case we deleted the last file in the directory.
+      if (next_file.has_value() && *next_file != path_cache) {
+        loadFileAndSetAsActive(*next_file);
+      }
+      else {
+        resetActiveFile();
+      }
+    }
+  }
+  else if (key_code == 'W' && modifiers == wxMOD_CONTROL) {
+    Close(false);  // `false` allows action to be vetoed in OnClose event handler.
+  }
+  else if (command_mode_active_ && key_code == WXK_SPACE) {
+    if (modifiers == wxMOD_NONE) {
+      loadNextUntaggedFile();
+    }
+    else if (modifiers == wxMOD_SHIFT) {
+      loadPreviousUntaggedFile();
+    }
+  }
+  else if (command_mode_active_ && (key_code == WXK_DOWN || key_code == WXK_RIGHT)) {
+    if (modifiers == wxMOD_NONE) {
+      loadNextFile();
+    }
+    else if (modifiers == wxMOD_SHIFT) {
+      loadNextUntaggedFile();
+    }
+  }
+  else if (command_mode_active_ && (key_code == WXK_UP || key_code == WXK_LEFT)) {
+    if (modifiers == wxMOD_NONE) {
+      loadPreviousFile();
+    }
+    else if (modifiers == wxMOD_SHIFT) {
+      loadPreviousUntaggedFile();
+    }
+  }
+  else if (command_mode_active_ && key_code == '-' && modifiers == wxMOD_NONE) {
+    clearRatingOfActiveFile();
+  }
+  else if (command_mode_active_ && key_code >= '0' && key_code <= '5') {
+    if (modifiers == wxMOD_SHIFT) {
+      clearRatingOfActiveFile();
+    }
+    else if (modifiers == wxMOD_NONE) {
+      const int desired_rating = key_code - '0';
+      setRatingOfActiveFile(desired_rating);
+    }
+  }
+  else if (command_mode_active_ && key_code >= WXK_NUMPAD0 && key_code <= WXK_NUMPAD5
+    && modifiers == wxMOD_NONE) {
+    const int desired_rating = key_code - WXK_NUMPAD0;
+    setRatingOfActiveFile(desired_rating);
+  }
+  else if (command_mode_active_ && key_code == WXK_NUMPAD_DECIMAL && modifiers == wxMOD_NONE) {
+    // We provide this option because shift+numpad navigates controls by default.
+    clearRatingOfActiveFile();
+  }
+  else if (command_mode_active_) {
+    // Test against all the tag toggle hotkeys.
+    bool key_processed = false;
+    for (const auto& tag_toggle_panel : tag_toggle_panels_) {
+      if (tag_toggle_panel->processKeyEvent(event)) {
+        key_processed = true;
+        // Could `break` here, but this would break the situation where multiple tags share a
+        // hotkey. I don't think we should support this use case, but the enforcement mechanism to
+        // prevent it definitely shouldn't be placed at *this* spot.
+      }
+    }
+    if (!key_processed) {
+      event.Skip();
+    }
+  }
+  else {
+    event.Skip();
+  }
 }
