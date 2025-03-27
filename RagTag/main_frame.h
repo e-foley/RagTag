@@ -564,8 +564,8 @@ private:
   void OnClickTagToggleButton(TagToggleEvent& event);
   void OnClickRatingButton(wxCommandEvent& event);
   // Events of type wxEVT_CHECKBOX
-  void OnToggleAutoplay(wxCommandEvent& event);
-  void OnToggleLooping(wxCommandEvent& event);
+  void OnToggleAutoplayBox(wxCommandEvent& event);
+  void OnToggleLoopBox(wxCommandEvent& event);
   void OnToggleMuteBox(wxCommandEvent& event);
   // Events of type wxEVT_LIST_ITEM_FOCUSED
   void OnFocusFile(wxListEvent& event);

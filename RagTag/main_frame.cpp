@@ -309,8 +309,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   Bind(wxEVT_MENU, &MainFrame::OnPreviousUntaggedFile, this, ID_PREVIOUS_UNTAGGED_FILE);
   Bind(wxEVT_MENU, &MainFrame::OnStopMedia, this, ID_STOP_MEDIA);
   Bind(wxEVT_MENU, &MainFrame::OnPlayPauseMedia, this, ID_PLAY_PAUSE_MEDIA);
-  Bind(wxEVT_MENU, &MainFrame::OnToggleAutoplay, this, ID_TOGGLE_AUTOPLAY);
-  Bind(wxEVT_MENU, &MainFrame::OnToggleLooping, this, ID_TOGGLE_LOOPING);
+  Bind(wxEVT_MENU, &MainFrame::OnToggleAutoplayBox, this, ID_TOGGLE_AUTOPLAY);
+  Bind(wxEVT_MENU, &MainFrame::OnToggleLoopBox, this, ID_TOGGLE_LOOPING);
   Bind(wxEVT_MENU, &MainFrame::OnToggleMuteMenu, this, ID_TOGGLE_MUTE);
   Bind(wxEVT_MENU, &MainFrame::OnDefineNewTag, this, ID_DEFINE_NEW_TAG);
   Bind(wxEVT_MENU, &MainFrame::OnClearTagsFromFile, this, ID_CLEAR_TAGS_FROM_FILE);
@@ -824,12 +824,12 @@ void MainFrame::OnClickRatingButton(wxCommandEvent& event)
   }
 }
 
-void MainFrame::OnToggleAutoplay(wxCommandEvent& event)
+void MainFrame::OnToggleAutoplayBox(wxCommandEvent& event)
 {
   cb_autoplay_->SetValue(!cb_autoplay_->IsChecked());
 }
 
-void MainFrame::OnToggleLooping(wxCommandEvent& event)
+void MainFrame::OnToggleLoopBox(wxCommandEvent& event)
 {
   cb_loop_->SetValue(!cb_loop_->IsChecked());
 }
