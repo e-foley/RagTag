@@ -560,7 +560,7 @@ private:
   // CONTROL EVENTS =================================================================================
   // These functions are invoked by the user's interactions with controls in the window.
 
-  //! Invoked when a button on a tag toggle control is clicked.
+  //! Invoked when a button on a tag toggle control is clicked or otherwise activated.
   //! 
   //! Depending on the action the user indicates by the specific button they click, either opens a
   //! dialog to allow editing of tag properties or a dialog where the user can confirm their intent
@@ -652,7 +652,7 @@ private:
   //! Invoked when the user attempts to close the window.
   //! 
   //! Offers the user a chance to save their project if appropriate. Unless the user cancels this
-  //! action, the window is detroyed and the program exits.
+  //! action, the window is destroyed and the program exits.
   //! 
   //! @param event The wxCloseEvent of type wxEVT_CLOSE_WINDOW describing the action.
   void OnClose(wxCloseEvent& event);

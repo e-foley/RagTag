@@ -195,7 +195,7 @@ private:
 
   //! Invoked when the Reset Filters button is clicked or otherwise activated.
   //! 
-  //! Sets all filters to their default configuration, then refreshes th efile list to show the
+  //! Sets all filters to their default configuration, then refreshes the file list to show the
   //! results of the filter.
   //! 
   //! @param event The wxCommandEvent of type wxEVT_BUTTON describing the action.
