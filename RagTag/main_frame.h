@@ -559,34 +559,135 @@ private:
 
   // CONTROL EVENTS =================================================================================
   // These functions are invoked by the user's interactions with controls in the window.
-  // Events of type wxEVT_BUTTON
 
+  //! Invoked when a button on a tag toggle control is clicked.
+  //! 
+  //! Depending on the action the user indicates by the specific button they click, either opens a
+  //! dialog to allow editing of tag properties or a dialog where the user can confirm their intent
+  //! to delete the tag.
+  //! 
+  //! @param event Contains details about the user's action, including the type of button that is
+  //!     activated.
   void OnClickTagToggleButton(TagToggleEvent& event);
+
+  //! Invoked when one of the rating buttons is clicked or otherwise activated.
+  //! 
+  //! Sets the corresponding rating on the active file or removes the rating from the active file
+  //! (per each button's function).
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnClickRatingButton(wxCommandEvent& event);
-  // Events of type wxEVT_CHECKBOX
+  
+  //! Invoked when the user toggles the Autoplay checkbox.
+  //! 
+  //! Allows or prevents automatic playing of the media as soon as it is loaded.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnToggleAutoplayBox(wxCommandEvent& event);
+
+  //! Invoked when the user toggles the Loop checkbox.
+  //! 
+  //! Allows or prevents looping of media files (i.e., playing from the start after finishing).
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnToggleLoopBox(wxCommandEvent& event);
+
+  //! Invoked when the user toggles the Mute checkbox.
+  //! 
+  //! Prevents or allows media audio.
+  //! 
+  //! @param event The wxCommandEvent describing the user's action.
   void OnToggleMuteBox(wxCommandEvent& event);
-  // Events of type wxEVT_LIST_ITEM_FOCUSED
+
+  //! Invoked when the user focuses a file in the directory view (typically by clicking it or
+  //! navigating to it using arrow keys).
+  //! 
+  //! Loads the focused file, sets it as active, displays it if it's a media file, and if the file
+  //! is not in the project, adds it to the project with default tags.
+  //! 
+  //! @param event The wxListEvent describing the user's action.
   void OnFocusFile(wxListEvent& event);
 
   // MEDIA EVENTS ==================================================================================
-  // Events related to display of the media file.
-  void OnMediaLoaded(wxMediaEvent& event);    // wxEVT_MEDIA_LOADED
-  void OnMediaStop(wxMediaEvent& event);      // wxEVT_MEDIA_STOP
-  void OnMediaFinished(wxMediaEvent& event);  // wxEVT_MEDIA_FINISHED
-  void OnMediaPlay(wxMediaEvent& event);      // wxEVT_MEDIA_PLAY
-  void OnMediaPause(wxMediaEvent& event);     // wxEVT_MEDIA_PAUSE
+  // Events invoked by media controls.
+  //! Invoked when a media file is loaded.
+  //! 
+  //! Plays the media if the autoplay setting is enabled and the media can be played.
+  //! 
+  //! @param event The wxMediaEvent of type wxEVT_MEDIA_LOADED describing the action.
+  void OnMediaLoaded(wxMediaEvent& event);
+
+  //! Invoked when playback of a media file is stopped by user intervention or because it has
+  //! reached the end of playback (in which case OnMediaFinished() is also executed).
+  //! 
+  //! Updates internal state and sets the Play/Pause button label to "Play".
+  //! 
+  //! @param event The wxMediaEvent of type wxEVT_MEDIA_STOP describing the action.
+  void OnMediaStop(wxMediaEvent& event);
+
+  //! Invoked when end of a media file has been reached.
+  //! 
+  //! Restarts the media file if the loop setting is enabled; otherwise, changes the label of the
+  //! Play/Pause button to "Play".
+  //! 
+  //! @param event The wxMediaEvent of type wxEVT_MEDIA_FINISHED describing the action.
+  void OnMediaFinished(wxMediaEvent& event);
+
+  //! Invoked when media begins playing.
+  //! 
+  //! Sets the label of the Play/Pause button to "Pause".
+  //! 
+  //! @param event The wxMediaEvent of type wxEVT_MEDIA_PLAY describing the action.
+  void OnMediaPlay(wxMediaEvent& event);
+
+  //! Invoked when media is instructed to pause.
+  //! 
+  //! Sets the label of the Play/Pause button to "Play".
+  //! 
+  //! @param event The wxMediaEvent of type wxEVT_MEDIA_PAUSE describing the action.
+  void OnMediaPause(wxMediaEvent& event);
 
   // WINDOW EVENTS =================================================================================
   // Events related to the handling of top-level windows themselves.
-  void OnClose(wxCloseEvent& event);      // wxEVT_CLOSE_WINDOW
-  void OnKillFocus(wxFocusEvent& event);  // wxEVT_KILL_FOCUS
-  // Custom event handler for actions taken within the project summary. (See SummaryFrameEvent.)
+  //! Invoked when the user attempts to close the window.
+  //! 
+  //! Offers the user a chance to save their project if appropriate. Unless the user cancels this
+  //! action, the window is detroyed and the program exits.
+  //! 
+  //! @param event The wxCloseEvent of type wxEVT_CLOSE_WINDOW describing the action.
+  void OnClose(wxCloseEvent& event);
+
+  //! Invoked when the main window loses focus.
+  //! 
+  //! Exits Command Mode.
+  //! 
+  //! @param event The wxFocusEvent of type wxEVT_KILL_FOCUS describing the user's action.
+  void OnKillFocus(wxFocusEvent& event);
+
+  //! Custom event handler for actions taken within the project summary that are to be reflected in
+  //! the main window. (See SummaryFrameEvent.)
+  //! 
+  //! Based on the action described by the event, either selects a specific file (changing the
+  //! active directory as needed), removes one or more files from the project, or deletes one or
+  //! more files.
+  //! 
+  //! @param event The SummaryFrameEvent describing the user's intent communicated through the
+  //!     project summary window.
   void OnSummaryFrameAction(SummaryFrameEvent& event);
 
   // KEYBOARD EVENTS ===============================================================================
-  void OnKeyDown(wxKeyEvent& event);  // wxEVT_CHAR_DOWN
+  //! Processes keyboard input independent from menu accelerators.
+  //! 
+  //! When entered in Command Mode, such keystrokes can be used to assign a rating, adjust tags, or
+  //! navigate files within the directory. Regardless of the state of Command Mode, files can be
+  //! deleted (with Delete, pending a prompt) and the main window can be closed (with Ctrl+W,
+  //! pending final prompts to save the project if appropriate).
+  //! 
+  //! A full description of this function is best left to a user manual.
+  //! 
+  //! @param event The wxKeyEvent of type wxEVT_CHAR_DOWN describing the action, including the
+  //!     pressed key and any modifiers (Shift, Ctrl, etc.).
+  void OnKeyDown(wxKeyEvent& event);
 
   // USER INTERFACE ELEMENTS =======================================================================
   //! The "File" menu.
