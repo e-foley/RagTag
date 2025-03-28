@@ -88,7 +88,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   m_window_->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-Y");
 
   m_help_ = new wxMenu;
-  m_help_->Append(wxID_ABOUT);
+  m_help_->Append(wxID_ABOUT, "About RagTag\tF1");
 
   wxMenuBar* mb_menu_bar = new wxMenuBar;
   mb_menu_bar->Append(m_file_, "&File");
