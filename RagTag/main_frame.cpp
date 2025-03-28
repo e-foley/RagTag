@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License along with RagTag. If not, see
 // <https://www.gnu.org/licenses/>.
 
+#include "about_dialog.h"
 #include "main_frame.h"
 #include "rag_tag_util.h"
 #include "tag_entry_dialog.h"
@@ -1420,15 +1421,19 @@ void MainFrame::OnRefreshDirectoryView(wxCommandEvent& event)
 }
 
 void MainFrame::OnAbout(wxCommandEvent& event) {
-  // (c) replacement technique from https://forums.wxwidgets.org/viewtopic.php?p=158583#p158583
-  wxString about_string(L"RagTag " + RagTagUtil::getRagTagAppVersionString()
-    + L"\n\n(c) 2025 by Edward Foley");
-#if wxUSE_UNICODE
-  const wxString copyright_symbol = wxString::FromUTF8("\xc2\xa9");
-  about_string.Replace("(c)", copyright_symbol);
-#endif
-
-  wxMessageBox(about_string, "About", wxOK | wxICON_INFORMATION);
+//  // (c) replacement technique from https://forums.wxwidgets.org/viewtopic.php?p=158583#p158583
+//  wxString about_string(L"RagTag " + RagTagUtil::getRagTagAppVersionString()
+//    + L"\n\n(c) 2025 by Edward Foley");
+//#if wxUSE_UNICODE
+//  const wxString copyright_symbol = wxString::FromUTF8("\xc2\xa9");
+//  about_string.Replace("(c)", copyright_symbol);
+//#endif
+//
+//
+//
+//  wxMessageBox(about_string, "About", wxOK | wxICON_INFORMATION);
+  AboutDialog* about = new AboutDialog(this);
+  about->Show();
 }
 
 void MainFrame::OnClickTagToggleButton(TagToggleEvent& event) {
