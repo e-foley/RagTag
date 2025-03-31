@@ -1,3 +1,19 @@
+// Copyright (C) 2025 by Edward Foley
+//
+// This file is part of RagTag.
+//
+// RagTag is free software: you can redistribute it and/or modify it under the terms of the GNU
+// General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// RagTag is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+// the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with RagTag. If not, see
+// <https://www.gnu.org/licenses/>.
+
+#include "about_dialog.h"
 #include "main_frame.h"
 #include "rag_tag_util.h"
 #include "tag_entry_dialog.h"
@@ -72,7 +88,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   m_window_->Append(ID_SHOW_SUMMARY, "Show &Project Summary\tCtrl-Y");
 
   m_help_ = new wxMenu;
-  m_help_->Append(wxID_ABOUT);
+  m_help_->Append(wxID_ABOUT, "About RagTag\tF1");
 
   wxMenuBar* mb_menu_bar = new wxMenuBar;
   mb_menu_bar->Append(m_file_, "&File");
@@ -1405,15 +1421,8 @@ void MainFrame::OnRefreshDirectoryView(wxCommandEvent& event)
 }
 
 void MainFrame::OnAbout(wxCommandEvent& event) {
-  // (c) replacement technique from https://forums.wxwidgets.org/viewtopic.php?p=158583#p158583
-  wxString about_string(L"RagTag " + RagTagUtil::getRagTagAppVersionString()
-    + L"\n\n(c) 2025 by Ed Foley");
-#if wxUSE_UNICODE
-  const wxString copyright_symbol = wxString::FromUTF8("\xc2\xa9");
-  about_string.Replace("(c)", copyright_symbol);
-#endif
-
-  wxMessageBox(about_string, "About", wxOK | wxICON_INFORMATION);
+  AboutDialog* about = new AboutDialog(this);
+  about->ShowModal();
 }
 
 void MainFrame::OnClickTagToggleButton(TagToggleEvent& event) {

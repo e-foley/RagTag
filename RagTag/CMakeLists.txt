@@ -1,5 +1,7 @@
 ﻿# Group source files
 set(SRC_FILES
+    about_dialog.h
+    about_dialog.cpp
     main_frame.h
     main_frame.cpp
     rag_tag_app.h
