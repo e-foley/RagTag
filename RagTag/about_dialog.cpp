@@ -50,7 +50,7 @@ AboutDialog::AboutDialog(wxWindow* parent) : wxDialog(parent, wxID_ANY, "About R
     "https://www.gnu.org/licenses/gpl-3.0.html"), 0, wxALL | wxEXPAND, 2);
   sz_ragtag->Add(new wxHyperlinkCtrl(this, wxID_ANY, "Logo designed by Freepik",
     "https://www.freepik.com"), 0, wxALL | wxEXPAND, 2);
-  sz_ragtag->AddSpacer(18);
+  sz_ragtag->AddSpacer(20);
   sz_ragtag->Add(new wxStaticText(this, wxID_ANY,
     "This application was made possible thanks to other open-source projects:"),
     0, wxALL | wxEXPAND, 2);
