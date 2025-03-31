@@ -28,12 +28,12 @@ AboutDialog::AboutDialog(wxWindow* parent) : wxDialog(parent, wxID_ANY, "About R
   SetSizer(sz_about);
 
   wxBoxSizer* sz_ragtag = new wxBoxSizer(wxVERTICAL);
-  // (c) replacement technique from https://forums.wxwidgets.org/viewtopic.php?p=158583#p158583
   wxString about_string(L"RagTag " + RagTagUtil::getRagTagAppVersionString());
   wxStaticText* st_ragtag = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
     wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
   st_ragtag->SetLabelMarkup("<b>" + about_string + "</b>");
   sz_ragtag->Add(st_ragtag, 0, wxALL | wxEXPAND, 2);
+  // (c) replacement technique from https://forums.wxwidgets.org/viewtopic.php?p=158583#p158583
   wxString copyright_string(L"Copyright (c) 2025 by Edward Foley");
 #if wxUSE_UNICODE
   const wxString copyright_symbol = wxString::FromUTF8("\xc2\xa9");
