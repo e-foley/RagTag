@@ -37,7 +37,7 @@ public:
   //!     configuring radio buttons accordingly).
   TagEntryDialog(wxWindow* parent, ragtag::tag_t tag, const ragtag::TagProperties& tag_properties);
 
-  //! Displays the TagEntryDialog and gather's the user's response to the dialog.
+  //! Displays the TagEntryDialog and gathers the user's response to the dialog.
   //! 
   //! @returns The tag configuration and related settings communicated by the user through their
   //!     actions in this dialog, or a default optional if the user exits the dialog early.
