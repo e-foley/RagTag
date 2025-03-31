@@ -23,7 +23,6 @@
 AboutDialog::AboutDialog(wxWindow* parent) : wxDialog(parent, wxID_ANY, "About RagTag"),
   parent_(parent)
 {
-  SetSize(500, 700);
   wxBoxSizer* sz_about = new wxBoxSizer(wxVERTICAL);
   SetSizer(sz_about);
 
