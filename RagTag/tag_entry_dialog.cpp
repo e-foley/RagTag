@@ -74,7 +74,7 @@ TagEntryDialog::TagEntryDialog(wxWindow* parent, ragtag::tag_t tag,
   sz_button_row->Add(b_cancel, 0);
   sz_rows->Add(sz_button_row, 0, wxEXPAND | wxALL, 10);
 
-  this->SetSizerAndFit(sz_rows);  // Auto-fits window to sizer requirements.
+  SetSizerAndFit(sz_rows);  // Auto-fits window to sizer requirements.
 
   Bind(wxEVT_CHAR_HOOK, &TagEntryDialog::OnKeyDown, this);
 }
