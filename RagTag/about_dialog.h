@@ -27,9 +27,6 @@ public:
   //! @param parent The parent window.
   AboutDialog(wxWindow* parent);
 
-  ////! Displays the AboutDialog.
-  //void display();
-
 private:
   //! Event handler for when the user clicks "OK".
   //! 
