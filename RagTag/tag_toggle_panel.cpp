@@ -142,4 +142,3 @@ void TagTogglePanel::OnCheckboxChange(wxCommandEvent& event) {
 
   wxPostEvent(parent_, sending);
 }
-
