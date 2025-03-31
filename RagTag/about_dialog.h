@@ -17,7 +17,7 @@
 #define INCLUDE_ABOUT_DIALOG_H
 
 #include <wx/dialog.h>
-#include <wx/textctrl.h>
+#include <wx/event.h>
 
 //! A simple dialog that acknowledges people and projects that enabled RagTag.
 class AboutDialog : public wxDialog {
@@ -37,6 +37,14 @@ private:
   //! 
   //! @param event Information about the event that triggered this function.
   void OnOk(wxCommandEvent& event);
+
+  //! Event handler for key presses.
+  //! 
+  //! Exits the dialog upon Ctrl+W or Esc.
+  //! 
+  //! @param event Information about the event that triggered this function, including keyboard
+  //!     state.
+  void OnKeyDown(wxKeyEvent& event);
 
   //! Parent window.
   wxWindow* parent_{ nullptr };

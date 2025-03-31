@@ -1433,7 +1433,7 @@ void MainFrame::OnAbout(wxCommandEvent& event) {
 //
 //  wxMessageBox(about_string, "About", wxOK | wxICON_INFORMATION);
   AboutDialog* about = new AboutDialog(this);
-  about->Show();
+  about->ShowModal();
 }
 
 void MainFrame::OnClickTagToggleButton(TagToggleEvent& event) {

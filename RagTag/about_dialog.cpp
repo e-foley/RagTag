@@ -20,8 +20,8 @@
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 
-AboutDialog::AboutDialog(wxWindow* parent) : wxDialog(parent, wxID_ANY, "About RagTag"),
-  parent_(parent)
+AboutDialog::AboutDialog(wxWindow* parent) : wxDialog(parent, wxID_ANY, "About RagTag",
+  wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxWANTS_CHARS), parent_(parent)
 {
   wxBoxSizer* sz_about = new wxBoxSizer(wxVERTICAL);
   SetSizer(sz_about);
@@ -100,8 +100,21 @@ AboutDialog::AboutDialog(wxWindow* parent) : wxDialog(parent, wxID_ANY, "About R
   sz_about->Add(sz_bottom_button, 0, wxEXPAND | wxALL, 10);
 
   SetSizerAndFit(sz_about);  // Auto-fits window to sizer requirements.
+
+  Bind(wxEVT_CHAR_HOOK, &AboutDialog::OnKeyDown, this);
 }
 
 void AboutDialog::OnOk(wxCommandEvent& event) {
-  Close();
+  EndModal(wxID_OK);
+}
+
+void AboutDialog::OnKeyDown(wxKeyEvent& event)
+{
+  if (event.GetKeyCode() == WXK_ESCAPE
+    || event.GetUnicodeKey() == 'W' && event.GetModifiers() == wxMOD_CONTROL) {
+    EndModal(wxID_CANCEL);
+  }
+  else {
+    event.Skip();
+  }
 }
