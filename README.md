@@ -16,7 +16,7 @@ Unless you choose to delete files, all your files stay on your machine exactly w
 
 When you're ready, open the Project Summary, filter your files by their attributes, and copy the filtered files to a temporary workspace for whatever final processing you have in mind.
 
-![RagTag Project Summary](https://github.com/e-foley/RagTag/blob/develop/images/main.jpg?raw=true)
+![RagTag Project Summary](https://github.com/e-foley/RagTag/blob/develop/images/summary.jpg?raw=true)
 
 Add more files later? The application will highlight untagged files within a directory so that you can focus on only the new additions.
 
