@@ -71,3 +71,15 @@ RagTag is built using [wxWidgets](https://wxwidgets.org/). I employ Niels Lohman
 I am deeply grateful for the teams of dedicated, selfless contributors that make these projects possible and also thankful that they have shared their work with the world for others like myself to incorporate into their own works.
 
 Please see [LICENSE-3RD-PARTY.txt](LICENSE-3RD-PARTY.txt) for the licenses under which these libraries are distributed.
+
+
+## Contributing
+
+Currently, RagTag has a development team of one. You are welcome to clone the [RagTag repository](https://github.com/e-foley/RagTag) and submit pull requests to be considered for inclusion into the primary codebase. The project's maintainer, [Ed Foley](https://github.com/e-foley), will decide whether to approve or reject these changes.
+
+
+## Support
+
+If you encounter a bug in the program, please [open an issue](https://github.com/e-foley/RagTag/issues) if an appropriate issue does not already exist.
+
+If you have a [question](https://github.com/e-foley/RagTag/discussions/categories/q-a) about RagTag or an [idea](https://github.com/e-foley/RagTag/discussions/categories/ideas) for a new feature, please share it using the [GitHub Discussions](https://github.com/e-foley/RagTag/discussions) interface.
