@@ -72,6 +72,7 @@ I am deeply grateful for the teams of dedicated, selfless contributors that make
 
 Please see [LICENSE-3RD-PARTY.txt](LICENSE-3RD-PARTY.txt) for the licenses under which these libraries are distributed.
 
+The RagTag logo was designed by [Freepik](https://www.freepik.com/).
 
 ## Contributing
 
