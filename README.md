@@ -62,3 +62,12 @@ RagTag is free software: you can redistribute it and/or modify it under the term
 RagTag is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with RagTag. If not, see <https://www.gnu.org/licenses/>.
+
+
+## Acknowledgments
+
+RagTag is built using [wxWidgets](https://wxwidgets.org/). I employ Niels Lohmann's [JSON for Modern C++](https://github.com/nlohmann/json/) library for JSON writing/parsing and [Catch2](https://github.com/catchorg/Catch2) for unit testing.
+
+I am deeply grateful for the teams of dedicated, selfless contributors that make these projects possible and also thankful that they have shared their work with the world for others like myself to incorporate into their own works.
+
+Please see [LICENSE-3RD-PARTY.txt](LICENSE-3RD-PARTY.txt) for the licenses under which these libraries are distributed.
