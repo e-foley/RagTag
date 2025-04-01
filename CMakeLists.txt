@@ -11,6 +11,16 @@ endif()
 
 project ("RagTag")
 
+add_compile_definitions(_UNICODE)
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)  # Because wxWidgets throws a ton of these warnings
+set(wxBUILD_SHARED OFF)
+
 # Include sub-projects.
 add_subdirectory ("RagTag")
-add_subdirectory ("wxWidgets")
+add_subdirectory ("Tests")
+add_subdirectory ("libs/Catch2")
+add_subdirectory ("libs/json")
+add_subdirectory ("libs/wxWidgets")
+
+# Configure RagTag as the startup project in Visual Studio
+set_directory_properties(PROPERTIES VS_STARTUP_PROJECT RagTag)

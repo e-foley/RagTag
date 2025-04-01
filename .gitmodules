@@ -1,6 +1,9 @@
-[submodule "abseil-cpp"]
-	path = abseil-cpp
-	url = https://github.com/abseil/abseil-cpp
-[submodule "wxWidgets"]
-	path = wxWidgets
+[submodule "libs/Catch2"]
+	path = libs/Catch2
+	url = https://github.com/catchorg/Catch2
+[submodule "libs/json"]
+	path = libs/json
+	url = https://github.com/nlohmann/json
+[submodule "libs/wxWidgets"]
+	path = libs/wxWidgets
 	url = https://github.com/wxWidgets/wxWidgets

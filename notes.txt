@@ -1,6 +1,0 @@
-wxWidgets is a submodule that itself uses submodules.
-
-Per https://stackoverflow.com/a/1032653...
-
-* The first time a repo is checked out, run `git submodule update --init --recursive`.
-* Subsequently, use `git submodule update --recursive`.
