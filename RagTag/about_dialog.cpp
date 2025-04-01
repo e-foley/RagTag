@@ -44,8 +44,9 @@ AboutDialog::AboutDialog(wxWindow* parent) : wxDialog(parent, wxID_ANY, "About R
     "Released under the terms of the GNU General Public License v3.0", wxDefaultPosition,
     wxDefaultSize, wxALIGN_CENTER_HORIZONTAL), 0, wxALL | wxEXPAND, 2);
   sz_ragtag->AddSpacer(10);
-  sz_ragtag->Add(new wxHyperlinkCtrl(this, wxID_ANY, "GitHub repository",
-    "https://github.com/e-foley/RagTag"), 0, wxALL | wxEXPAND, 2);
+  sz_ragtag->Add(new wxHyperlinkCtrl(this, wxID_ANY,
+    "GitHub repository (report bugs and ask questions here)", "https://github.com/e-foley/RagTag"),
+    0, wxALL | wxEXPAND, 2);
   sz_ragtag->Add(new wxHyperlinkCtrl(this, wxID_ANY, "License (GNU General Public License v3.0)",
     "https://www.gnu.org/licenses/gpl-3.0.html"), 0, wxALL | wxEXPAND, 2);
   sz_ragtag->Add(new wxHyperlinkCtrl(this, wxID_ANY, "Logo designed by Freepik",
