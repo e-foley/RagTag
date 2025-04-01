@@ -32,9 +32,9 @@ const wxString RagTagUtil::GLYPH_RATING_HALF_STAR = L"\U000000BD";  // U+00BD is
 const int RagTagUtil::MAX_STARS = 5;
 const ragtag::path_t RagTagUtil::DEFAULT_TAG_MAP_FILE_EXTENSION = L".tagdef";
 const ragtag::path_t RagTagUtil::BACKUP_TAG_MAP_FILE_EXTENSION = L".tagdefbk";
-const int RagTagUtil::RAGTAG_APP_VERSION_MAJOR = 0;
-const int RagTagUtil::RAGTAG_APP_VERSION_MINOR = 1;
-const int RagTagUtil::RAGTAG_APP_VERSION_PATCH = 1;
+const int RagTagUtil::RAGTAG_APP_VERSION_MAJOR = 1;
+const int RagTagUtil::RAGTAG_APP_VERSION_MINOR = 0;
+const int RagTagUtil::RAGTAG_APP_VERSION_PATCH = 0;
 
 wxString RagTagUtil::getStarTextForRating(float rating)
 {
