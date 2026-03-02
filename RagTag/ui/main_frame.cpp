@@ -216,7 +216,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   wxPanel* p_file_navigation = new wxPanel(sz_directory->GetStaticBox());
   wxBoxSizer* sz_file_navigation = new wxBoxSizer(wxHORIZONTAL);
   p_file_navigation->SetSizer(sz_file_navigation);
-  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load File...");
+  wxButton* b_open_file = new wxButton(p_file_navigation, ID_LOAD_FILE, "Load file...");
   b_open_file->Bind(wxEVT_BUTTON, &MainFrame::OnLoadFile, this);
   sz_file_navigation->Add(b_open_file, 1, wxEXPAND | wxALL, 5);
   b_refresh_file_view_ = new wxButton(p_file_navigation, ID_REFRESH_FILE_VIEW, "Refresh");
@@ -287,16 +287,16 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   wxBoxSizer* sz_tag_toggles_button_bar = new wxBoxSizer(wxHORIZONTAL);
   p_tag_toggles_button_bar->SetSizer(sz_tag_toggles_button_bar);
   wxButton* b_define_new_tag = new wxButton(p_tag_toggles_button_bar, ID_DEFINE_NEW_TAG,
-    "Create Tag...");
+    "Create tag...");
   b_define_new_tag->Bind(wxEVT_BUTTON, &MainFrame::OnDefineNewTag, this);
   sz_tag_toggles_button_bar->Add(b_define_new_tag, 1, wxEXPAND | wxALL, 5);
   b_clear_tags_from_file_ = new wxButton(p_tag_toggles_button_bar, ID_CLEAR_TAGS_FROM_FILE,
-    "Clear File Tags");
+    "Clear file tags");
   b_clear_tags_from_file_->Enable(false);
   b_clear_tags_from_file_->Bind(wxEVT_BUTTON, &MainFrame::OnClearTagsFromFile, this);
   sz_tag_toggles_button_bar->Add(b_clear_tags_from_file_, 1, wxEXPAND | wxALL, 5);
   b_set_tags_to_defaults_ = new wxButton(p_tag_toggles_button_bar, ID_SET_TAGS_TO_DEFAULTS,
-    "Default File Tags");
+    "Default file tags");
   b_set_tags_to_defaults_->Enable(false);
   b_set_tags_to_defaults_->Bind(wxEVT_BUTTON, &MainFrame::OnSetTagsToDefaults, this);
   sz_tag_toggles_button_bar->Add(b_set_tags_to_defaults_, 1, wxEXPAND | wxALL, 5);
