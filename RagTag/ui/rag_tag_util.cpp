@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License along with RagTag. If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "rag_tag_util.h"
+#include "ui/rag_tag_util.h"
 #include <format>
 #include <wx/wx.h>
 

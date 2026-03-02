@@ -16,7 +16,7 @@
 #ifndef INCLUDE_RAG_TAG_UTIL_H
 #define INCLUDE_RAG_TAG_UTIL_H
 
-#include "tag_map.h"
+#include "tagging/tag_map.h"
 #include <wx/string.h>
 #include <string>
 #include <vector>

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License along with RagTag. If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "tag_entry_dialog.h"
+#include "ui/tag_entry_dialog.h"
 #include <wx/button.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>

@@ -16,7 +16,7 @@
 #ifndef INCLUDE_TAG_TOGGLE_PANEL_H
 #define INCLUDE_TAG_TOGGLE_PANEL_H
 
-#include "tag_map.h"
+#include "tagging/tag_map.h"
 #include <wx/checkbox.h>
 #include <wx/panel.h>
 #include <wx/stattext.h>

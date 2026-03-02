@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License along with RagTag. If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "tag_map.h"
+#include "tagging/tag_map.h"
 #include <algorithm>
 #include <codecvt>
 #include <fstream>

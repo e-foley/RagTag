@@ -16,7 +16,7 @@
 #ifndef INCLUDE_TAG_ENTRY_DIALOG_H
 #define INCLUDE_TAG_ENTRY_DIALOG_H
 
-#include "tag_map.h"
+#include "tagging/tag_map.h"
 #include <wx/checkbox.h>
 #include <wx/dialog.h>
 #include <wx/event.h>

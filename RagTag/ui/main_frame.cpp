@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU General Public License along with RagTag. If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "about_dialog.h"
-#include "main_frame.h"
-#include "rag_tag_util.h"
-#include "tag_entry_dialog.h"
+#include "ui/about_dialog.h"
+#include "ui/main_frame.h"
+#include "ui/rag_tag_util.h"
+#include "ui/tag_entry_dialog.h"
 #include <chrono>
 #include <wx/filedlg.h>
 #include <wx/splitter.h>

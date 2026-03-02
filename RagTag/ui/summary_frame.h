@@ -16,7 +16,7 @@
 #ifndef INCLUDE_SUMMARY_FRAME_H
 #define INCLUDE_SUMMARY_FRAME_H
 
-#include "tag_map.h"
+#include "tagging/tag_map.h"
 #include <optional>
 #include <vector>
 #include <wx/button.h>

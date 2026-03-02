@@ -1,25 +1,26 @@
 ﻿# Group source files
 set(SRC_FILES
-    about_dialog.h
-    about_dialog.cpp
-    main_frame.h
-    main_frame.cpp
-    rag_tag_app.h
-    rag_tag_app.cpp
-    rag_tag_util.h
-    rag_tag_util.cpp
-    summary_frame.h
-    summary_frame.cpp
-    tag_entry_dialog.h
-    tag_entry_dialog.cpp
-    tag_map.h
-    tag_map.cpp
-    tag_toggle_panel.h
-    tag_toggle_panel.cpp)
+    tagging/tag_map.h
+    tagging/tag_map.cpp
+    ui/about_dialog.h
+    ui/about_dialog.cpp
+    ui/main_frame.h
+    ui/main_frame.cpp
+    ui/rag_tag_app.h
+    ui/rag_tag_app.cpp
+    ui/rag_tag_util.h
+    ui/rag_tag_util.cpp
+    ui/summary_frame.h
+    ui/summary_frame.cpp
+    ui/tag_entry_dialog.h
+    ui/tag_entry_dialog.cpp
+    ui/tag_toggle_panel.h
+    ui/tag_toggle_panel.cpp)
 
 add_executable(RagTag WIN32 ${SRC_FILES} app.rc)
 
 target_include_directories(RagTag PRIVATE
+		           ${CMAKE_CURRENT_SOURCE_DIR}
                            "../libs/json/include"
                            "../libs/wxWidgets/include"
                            "../libs/wxWidgets/include/msvc")
