@@ -126,7 +126,7 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxPanel* p_filter_info = new wxPanel(p_main, wxID_ANY);
   wxBoxSizer* sz_filter_info = new wxBoxSizer(wxHORIZONTAL);
   p_filter_info->SetSizer(sz_filter_info);
-  wxButton* b_reset_filters = new wxButton(p_filter_info, wxID_ANY, "Reset Filters");
+  wxButton* b_reset_filters = new wxButton(p_filter_info, wxID_ANY, "Reset filters");
   b_reset_filters->Bind(wxEVT_BUTTON, &SummaryFrame::OnResetFilters, this);
   sz_filter_info->Add(b_reset_filters, 0, wxEXPAND | wxALL, 5);
   st_filtered_file_count_ = new wxStaticText(p_filter_info, wxID_ANY, wxEmptyString);
@@ -146,22 +146,22 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   wxPanel* p_summary_buttons = new wxPanel(p_main, wxID_ANY);
   wxBoxSizer* sz_summary_buttons = new wxBoxSizer(wxHORIZONTAL);
   p_summary_buttons->SetSizer(sz_summary_buttons);
-  wxButton* b_select_all_files = new wxButton(p_summary_buttons, wxID_ANY, "Select All Files");
+  wxButton* b_select_all_files = new wxButton(p_summary_buttons, wxID_ANY, "Select all files");
   b_select_all_files->Bind(wxEVT_BUTTON, &SummaryFrame::OnSelectAllFiles, this);
   sz_summary_buttons->Add(b_select_all_files, 0, wxALL, 5);
-  wxButton* b_deselect_all_files = new wxButton(p_summary_buttons, wxID_ANY, "Deselect All Files");
+  wxButton* b_deselect_all_files = new wxButton(p_summary_buttons, wxID_ANY, "Deselect all files");
   b_deselect_all_files->Bind(wxEVT_BUTTON, &SummaryFrame::OnDeselectAllFiles, this);
   sz_summary_buttons->Add(b_deselect_all_files, 0, wxALL, 5);
   sz_summary_buttons->AddStretchSpacer(1);  // Stretch spacer at center to separate button groups
-  b_delete_files_ = new wxButton(p_summary_buttons, wxID_ANY, "Delete Selected Files");
+  b_delete_files_ = new wxButton(p_summary_buttons, wxID_ANY, "Delete selected files");
   b_delete_files_->Bind(wxEVT_BUTTON, &SummaryFrame::OnDeleteFiles, this);
   sz_summary_buttons->Add(b_delete_files_, 0, wxALL, 5);
   b_remove_from_project_ = new wxButton(p_summary_buttons, wxID_ANY,
-    "Remove Selected Files from Project");
+    "Remove selected files from project");
   b_remove_from_project_->Bind(wxEVT_BUTTON, &SummaryFrame::OnRemoveFromProject, this);
   sz_summary_buttons->Add(b_remove_from_project_, 0, wxALL, 5);
   b_copy_selections_ = new wxButton(p_summary_buttons, wxID_ANY,
-    "Copy Selected Files to Directory...");
+    "Copy selected files to directory...");
   b_copy_selections_->Bind(wxEVT_BUTTON, &SummaryFrame::OnCopySelections, this);
   sz_summary_buttons->Add(b_copy_selections_, 0, wxALL, 5);
   sz_main->Add(p_summary_buttons, 0, wxEXPAND | wxALL, 0);
