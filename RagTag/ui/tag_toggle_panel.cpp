@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License along with RagTag. If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "tag_toggle_panel.h"
+#include "ui/tag_toggle_panel.h"
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/sizer.h>

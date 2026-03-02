@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License along with RagTag. If not, see
 // <https://www.gnu.org/licenses/>.
 
-#include "main_frame.h"
-#include "rag_tag_app.h"
+#include "ui/main_frame.h"
+#include "ui/rag_tag_app.h"
 
 bool RagTagApp::OnInit() {
   // Dark mode is gorgeous but induces bad flickering that appears to be a rendering bug.

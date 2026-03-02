@@ -16,9 +16,9 @@
 #ifndef INCLUDE_MAIN_FRAME_H
 #define INCLUDE_MAIN_FRAME_H
 
-#include "summary_frame.h"
-#include "tag_map.h"
-#include "tag_toggle_panel.h"
+#include "tagging/tag_map.h"
+#include "ui/tag_toggle_panel.h"
+#include "ui/summary_frame.h"
 #include <filesystem>
 #include <optional>
 #include <wx/checkbox.h>
