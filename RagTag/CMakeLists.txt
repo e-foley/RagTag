@@ -1,4 +1,5 @@
 ﻿# Group source files
+# NOTE: Inclusion of header files here is for convenience in Visual Studio
 set(SRC_FILES
     tagging/tag_map.h
     tagging/tag_map.cpp
