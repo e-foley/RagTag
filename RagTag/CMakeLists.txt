@@ -18,7 +18,7 @@ set(SRC_FILES
     ui/tag_toggle_panel.h
     ui/tag_toggle_panel.cpp)
 
-add_executable(RagTag WIN32 ${SRC_FILES} app.rc)
+add_executable(RagTag WIN32 ${SRC_FILES} resources/app.rc)
 
 target_include_directories(RagTag PRIVATE
 		           ${CMAKE_CURRENT_SOURCE_DIR}
