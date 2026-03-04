@@ -264,6 +264,13 @@ private:
   //! (for us, hiding) the project summary window.
   void OnKeyPressed(wxKeyEvent& event);
 
+  //! Invoked when the user right-clicks a file in the directory listing.
+  //! 
+  //! Opens a context window providing the user with actions to perform on the file.
+  //! 
+  //! @param event The wxListEvent of type wxEVT_LIST_ITEM_RIGHT_CLICK describing the action.
+  void OnRightClickFile(wxListEvent& event);
+
   //! Invoked when the user attempts to close the window.
   //! 
   //! Hides the window, but does not actually destroy it.
