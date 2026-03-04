@@ -318,7 +318,7 @@ private:
   //! @returns True if the rating is removed from the active file within the active project.
   bool clearRatingOfActiveFile();
 
-  //! Attemps to set the rating on the active file and update user interface elements accordingly.
+  //! Attempts to set the rating on the active file and update user interface elements accordingly.
   //! 
   //! @param rating The rating to assign the file.
   //! @returns True if the rating is set on the active file within the active project.
