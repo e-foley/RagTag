@@ -381,6 +381,16 @@ private:
   //! the path is not present.
   std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
 
+  //! Retrieves the path corresponding to the file identified by a given index within the file
+  //! listing.
+  //! 
+  //! Use this with the indices provided by wxListEvent.
+  //! 
+  //! @pre SetItemData() must have been used to assign a path to the list control item beforehand.
+  //! 
+  //! @param index 
+  std::optional<ragtag::path_t> fileListIndexToPath(long index) const;
+
   // MENU EVENTS ===================================================================================
   // All functions are invoked upon selecting them via the window's menu or executing the
   // corresponding accelerator. Function signature is dictated by wxEvtHandler::Bind() requirements
