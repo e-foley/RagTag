@@ -488,12 +488,24 @@ std::optional<ragtag::path_t> SummaryFrame::getPathForItemIndex(long index) cons
   // This isn't as simple as invoking file_paths_[i], since list control indices shift around during
   // sorting operations. Thankfully, the item data (where we placed a pointer to the actual path)
   // moves along with the item.
-  wxUIntPtr p_data_nominal = lc_summary_->GetItemData(index);
-  if (p_data_nominal == 0) {
+
+  // User data is a pointer to the path corresponding to the list control entry.
+  const wxUIntPtr user_data = lc_summary_->GetItemData(index);
+
+  if (user_data == 0) {
+    // Default value indicates unsuccessful attempt to GetItem(). See listctrl.cpp.
+    // Item with this index not found.
     return {};
   }
 
-  return *reinterpret_cast<ragtag::path_t*>(p_data_nominal);
+  const ragtag::path_t* p_path = reinterpret_cast<ragtag::path_t*>(user_data);
+
+  if (p_path == nullptr) {
+    // Unsuccessful reinterpretation.
+    return {};
+  }
+
+  return *p_path;
 }
 
 void SummaryFrame::OnClickHeading(wxListEvent& event)

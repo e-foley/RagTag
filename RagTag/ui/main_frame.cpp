@@ -1169,6 +1169,10 @@ std::optional<long> MainFrame::getPathListCtrlIndex(const ragtag::path_t& path) 
 
 std::optional<ragtag::path_t> MainFrame::getPathForItemIndex(const long index) const
 {
+  // This isn't as simple as invoking file_paths_[i], since list control indices shift around during
+  // sorting operations. Thankfully, the item data (where we placed a pointer to the actual path)
+  // moves along with the item.
+
   // User data is a pointer to the path corresponding to the list control entry.
   const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(index);
 
