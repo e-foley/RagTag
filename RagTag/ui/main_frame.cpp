@@ -19,6 +19,7 @@
 #include "ui/tag_entry_dialog.h"
 #include <chrono>
 #include <wx/filedlg.h>
+#include <wx/menu.h>
 #include <wx/splitter.h>
 #include <wx/statusbr.h>
 #include <wx/stdpaths.h>
@@ -210,6 +211,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
   lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
   lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
+  lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_RIGHT_CLICK, &MainFrame::OnRightClickFile, this);
   refreshDirectoryView();
   sz_directory->Add(lc_files_in_directory_, 1, wxEXPAND | wxALL, 5);
 
@@ -1592,6 +1594,20 @@ void MainFrame::OnFocusFile(wxListEvent& event)
   const auto path_lookup = fileListIndexToPath(event.GetIndex());
   if (!path_lookup || !loadFileAndSetAsActive(*path_lookup)) {
     // TODO: Log error.
+  }
+}
+
+void MainFrame::OnRightClickFile(wxListEvent& event) {
+  wxMenu context_menu;
+  context_menu.Append(ID_SHOW_IN_EXPLORER, "&Show in Explorer");
+  const auto selection = GetPopupMenuSelectionFromUser(context_menu);
+  if (selection == ID_SHOW_IN_EXPLORER) {
+    const auto path_lookup = fileListIndexToPath(event.GetIndex());
+    if (!path_lookup) {
+      SetStatusText(L"Could not identify file to show.");
+    } else if (!RagTagUtil::showFileInExplorer(*path_lookup)) {
+      SetStatusText(L"Could not show file '" + path_lookup->wstring() + L"'.");
+    }
   }
 }
 

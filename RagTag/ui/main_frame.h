@@ -77,7 +77,8 @@ private:
     ID_TOGGLE_MUTE,
     ID_NO_RATING,
     ID_RATING_0,
-    ID_RATING_MAX = ID_RATING_0 + 5  // Implied ratings 1-5
+    ID_RATING_MAX = ID_RATING_0 + 5,  // Implied ratings 1-5
+    ID_SHOW_IN_EXPLORER,
   };
 
   //! User's intended action based on their response to a dialog.
@@ -632,6 +633,13 @@ private:
   //! 
   //! @param event The wxListEvent of type wxEVT_LIST_ITEM_FOCUSED describing the user's action.
   void OnFocusFile(wxListEvent& event);
+
+  //! Invoked when the user right-clicks a file in the directory listing.
+  //! 
+  //! Opens a context window providing the user with actions to perform on the file.
+  //! 
+  //! @param event The wxListEvent of type wxEVT_LIST_ITEM_RIGHT_CLICK describing the action.
+  void OnRightClickFile(wxListEvent& event);
 
   // MEDIA EVENTS ==================================================================================
   // Events invoked by media controls.
