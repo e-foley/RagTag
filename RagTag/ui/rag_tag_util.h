@@ -67,6 +67,12 @@ bool isStaticMedia(const ragtag::path_t& path);
 //! @returns The newline-delimited string of the paths.
 std::wstring getPathsAsNewlineDelimitedString(const std::vector<ragtag::path_t>& paths);
 
+//! Opens the directory of the indicated file in Explorer and selects it.
+//! 
+//! @param path The file to show in Explorer.
+//! @returns True if the operation was successful.
+bool showFileInExplorer(const ragtag::path_t& path);
+
 //! Attempts to move the given file to the Windows Recycle Bin without a prompt.
 //! 
 //! @param path The path of the file to move to the Recycle Bin.

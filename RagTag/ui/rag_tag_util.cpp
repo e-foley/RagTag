@@ -16,6 +16,7 @@
 #include "ui/rag_tag_util.h"
 #include <format>
 #include <wx/wx.h>
+#include <ShlObj_core.h>  // Required for ILCreateFromPath() and similar.
 
 // The font used by wxWidgets does not display half-star characters as of writing.
 // #define HALF_STAR_GLYPH_SUPPORTED
@@ -81,6 +82,19 @@ std::wstring RagTagUtil::getPathsAsNewlineDelimitedString(const std::vector<ragt
     building += paths[i].wstring();
   }
   return building;
+}
+
+// Approach modeled after SO user flashk: https://stackoverflow.com/a/3010871
+// Modified with insight from SO user IInspectable: https://stackoverflow.com/q/42304078
+bool RagTagUtil::showFileInExplorer(const ragtag::path_t& path) {
+  LPCTSTR filename = path.c_str();
+  PIDLIST_ABSOLUTE pidl = ILCreateFromPath(filename);
+  if (pidl) {
+    SHOpenFolderAndSelectItems(pidl, 0, 0, 0);
+    ILFree(pidl);
+    return true;
+  }
+  return false;
 }
 
 // Approach from SO user Zeltrax: https://stackoverflow.com/a/70258061
