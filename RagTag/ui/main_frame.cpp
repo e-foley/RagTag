@@ -19,6 +19,7 @@
 #include "ui/tag_entry_dialog.h"
 #include <chrono>
 #include <wx/filedlg.h>
+#include <wx/menu.h>
 #include <wx/splitter.h>
 #include <wx/statusbr.h>
 #include <wx/stdpaths.h>
@@ -210,6 +211,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosi
   lc_files_in_directory_->InsertColumn(COLUMN_RATING, "Rating", wxLIST_FORMAT_LEFT, 80);
   lc_files_in_directory_->InsertColumn(COLUMN_TAG_COVERAGE, "Tag Coverage", wxLIST_FORMAT_LEFT, 85);
   lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_FOCUSED, &MainFrame::OnFocusFile, this);
+  lc_files_in_directory_->Bind(wxEVT_LIST_ITEM_RIGHT_CLICK, &MainFrame::OnRightClickFile, this);
   refreshDirectoryView();
   sz_directory->Add(lc_files_in_directory_, 1, wxEXPAND | wxALL, 5);
 
@@ -1156,14 +1158,38 @@ std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigator(
 std::optional<long> MainFrame::getPathListCtrlIndex(const ragtag::path_t& path) const
 {
   for (long i = 0; i < lc_files_in_directory_->GetItemCount(); ++i) {
-    // User data is a pointer to the path corresponding to the list control entry.
-    const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(i);
-    if (path == *reinterpret_cast<ragtag::path_t*>(user_data)) {
+    const auto path_lookup = getPathForItemIndex(i);
+    if (path_lookup && *path_lookup == path) {
       return i;
     }
   }
 
   return {};
+}
+
+std::optional<ragtag::path_t> MainFrame::getPathForItemIndex(const long index) const
+{
+  // This isn't as simple as invoking file_paths_[i], since list control indices shift around during
+  // sorting operations. Thankfully, the item data (where we placed a pointer to the actual path)
+  // moves along with the item.
+
+  // User data is a pointer to the path corresponding to the list control entry.
+  const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(index);
+
+  if (user_data == 0) {
+    // Default value indicates unsuccessful attempt to GetItem(). See listctrl.cpp.
+    // Item with this index not found.
+    return {};
+  }
+
+  const ragtag::path_t* p_path = reinterpret_cast<ragtag::path_t*>(user_data);
+
+  if (p_path == nullptr) {
+    // Unsuccessful reinterpretation.
+    return {};
+  }
+
+  return *p_path;
 }
 
 void MainFrame::OnNewProject(wxCommandEvent& event) {
@@ -1569,13 +1595,23 @@ void MainFrame::OnFocusFile(wxListEvent& event)
   }
 
   // Load and display the file.
-  // 
-  // Gross, but the best I could come up with given wxListCtrl's limitations.
-  // Goal is to reinterpret the user data as a pointer leading to the path name that was set for
-  // this item in refreshDirectoryView().
-  const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(event.GetIndex());
-  if (!loadFileAndSetAsActive(*reinterpret_cast<ragtag::path_t*>(user_data))) {
+  const auto path_lookup = getPathForItemIndex(event.GetIndex());
+  if (!path_lookup || !loadFileAndSetAsActive(*path_lookup)) {
     // TODO: Log error.
+  }
+}
+
+void MainFrame::OnRightClickFile(wxListEvent& event) {
+  wxMenu context_menu;
+  context_menu.Append(ID_SHOW_IN_EXPLORER, "&Show in Explorer");
+  const auto selection = GetPopupMenuSelectionFromUser(context_menu);
+  if (selection == ID_SHOW_IN_EXPLORER) {
+    const auto path_lookup = getPathForItemIndex(event.GetIndex());
+    if (!path_lookup) {
+      SetStatusText(L"Could not identify file to show.");
+    } else if (!RagTagUtil::showFileInExplorer(*path_lookup)) {
+      SetStatusText(L"Could not show file '" + path_lookup->wstring() + L"'.");
+    }
   }
 }
 

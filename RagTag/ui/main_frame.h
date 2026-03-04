@@ -77,7 +77,8 @@ private:
     ID_TOGGLE_MUTE,
     ID_NO_RATING,
     ID_RATING_0,
-    ID_RATING_MAX = ID_RATING_0 + 5  // Implied ratings 1-5
+    ID_RATING_MAX = ID_RATING_0 + 5,  // Implied ratings 1-5
+    ID_SHOW_IN_EXPLORER,
   };
 
   //! User's intended action based on their response to a dialog.
@@ -318,7 +319,7 @@ private:
   //! @returns True if the rating is removed from the active file within the active project.
   bool clearRatingOfActiveFile();
 
-  //! Attemps to set the rating on the active file and update user interface elements accordingly.
+  //! Attempts to set the rating on the active file and update user interface elements accordingly.
   //! 
   //! @param rating The rating to assign the file.
   //! @returns True if the rating is set on the active file within the active project.
@@ -380,6 +381,14 @@ private:
   //! @returns The index of the path within the directory view list control or an empty optional if
   //! the path is not present.
   std::optional<long> getPathListCtrlIndex(const ragtag::path_t& path) const;
+
+  //! Gets the file path for a file listing entry with given index.
+  //! 
+  //! @pre Path must be set on the wxListCtrl item using SetItemData() beforehand.
+  //! @param index The file listing index to procure the corresponding path for.
+  //! @returns The path of the file at the given index or an empty optional if the path cannot be
+  //! determined (e.g., if the provided index indicates an entry that doesn't exist).
+  std::optional<ragtag::path_t> getPathForItemIndex(long index) const;
 
   // MENU EVENTS ===================================================================================
   // All functions are invoked upon selecting them via the window's menu or executing the
@@ -622,6 +631,13 @@ private:
   //! 
   //! @param event The wxListEvent of type wxEVT_LIST_ITEM_FOCUSED describing the user's action.
   void OnFocusFile(wxListEvent& event);
+
+  //! Invoked when the user right-clicks a file in the directory listing.
+  //! 
+  //! Opens a context window providing the user with actions to perform on the file.
+  //! 
+  //! @param event The wxListEvent of type wxEVT_LIST_ITEM_RIGHT_CLICK describing the action.
+  void OnRightClickFile(wxListEvent& event);
 
   // MEDIA EVENTS ==================================================================================
   // Events invoked by media controls.

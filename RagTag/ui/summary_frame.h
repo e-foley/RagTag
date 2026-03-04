@@ -138,10 +138,11 @@ private:
 
   //! Gets the file path for a file listing entry with given index.
   //! 
+  //! @pre Path must be set on the wxListCtrl item using SetItemData() beforehand.
   //! @param index The file listing index to procure the corresponding path for.
   //! @returns The path of the file at the given index or an empty optional if the path cannot be
   //! determined (e.g., if the provided index indicates an entry that doesn't exist).
-  std::optional<ragtag::path_t> getPathForItemIndex(int index) const;
+  std::optional<ragtag::path_t> getPathForItemIndex(long index) const;
 
   // EVENT FUNCTIONS ===============================================================================
   //! Invoked when the user clicks a heading of the file listing.
@@ -262,6 +263,13 @@ private:
   //! the file listing is performed, or the user presses Ctrl+W, which is equivalent to "closing"
   //! (for us, hiding) the project summary window.
   void OnKeyPressed(wxKeyEvent& event);
+
+  //! Invoked when the user right-clicks a file in the directory listing.
+  //! 
+  //! Opens a context window providing the user with actions to perform on the file.
+  //! 
+  //! @param event The wxListEvent of type wxEVT_LIST_ITEM_RIGHT_CLICK describing the action.
+  void OnRightClickFile(wxListEvent& event);
 
   //! Invoked when the user attempts to close the window.
   //! 

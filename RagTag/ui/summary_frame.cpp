@@ -19,6 +19,7 @@
 #include <functional>
 #include <wx/dcclient.h>
 #include <wx/dirdlg.h> 
+#include <wx/menu.h>
 #include <wx/msgdlg.h>
 #include <wx/panel.h>
 #include <wx/progdlg.h>
@@ -141,6 +142,7 @@ SummaryFrame::SummaryFrame(wxWindow* parent) : wxFrame(parent, wxID_ANY, "Projec
   lc_summary_->Bind(wxEVT_LIST_ITEM_UNCHECKED, &SummaryFrame::OnFileUnchecked, this);
   lc_summary_->Bind(wxEVT_LIST_ITEM_FOCUSED, &SummaryFrame::OnFileFocused, this);
   lc_summary_->Bind(wxEVT_LIST_COL_DRAGGING, &SummaryFrame::OnResizeColumn, this);
+  lc_summary_->Bind(wxEVT_LIST_ITEM_RIGHT_CLICK, &SummaryFrame::OnRightClickFile, this);
   sz_main->Add(lc_summary_, 1, wxEXPAND | wxALL, 5);
 
   wxPanel* p_summary_buttons = new wxPanel(p_main, wxID_ANY);
@@ -483,17 +485,29 @@ std::vector<ragtag::path_t> SummaryFrame::getPathsOfSelectedFiles() const
   return returning;
 }
 
-std::optional<ragtag::path_t> SummaryFrame::getPathForItemIndex(int index) const
+std::optional<ragtag::path_t> SummaryFrame::getPathForItemIndex(long index) const
 {
   // This isn't as simple as invoking file_paths_[i], since list control indices shift around during
   // sorting operations. Thankfully, the item data (where we placed a pointer to the actual path)
   // moves along with the item.
-  wxUIntPtr p_data_nominal = lc_summary_->GetItemData(index);
-  if (p_data_nominal == 0) {
+
+  // User data is a pointer to the path corresponding to the list control entry.
+  const wxUIntPtr user_data = lc_summary_->GetItemData(index);
+
+  if (user_data == 0) {
+    // Default value indicates unsuccessful attempt to GetItem(). See listctrl.cpp.
+    // Item with this index not found.
     return {};
   }
 
-  return *reinterpret_cast<ragtag::path_t*>(p_data_nominal);
+  const ragtag::path_t* p_path = reinterpret_cast<ragtag::path_t*>(user_data);
+
+  if (p_path == nullptr) {
+    // Unsuccessful reinterpretation.
+    return {};
+  }
+
+  return *p_path;
 }
 
 void SummaryFrame::OnClickHeading(wxListEvent& event)
@@ -739,6 +753,19 @@ void SummaryFrame::OnKeyPressed(wxKeyEvent& event)
   }
   else {
     event.Skip();
+  }
+}
+
+void SummaryFrame::OnRightClickFile(wxListEvent& event) {
+  const int ID_SHOW_IN_EXPLORER = 42;  // Arbitrary key to differentiate from default.
+  wxMenu context_menu;
+  context_menu.Append(ID_SHOW_IN_EXPLORER, "&Show in Explorer");
+  const auto selection = GetPopupMenuSelectionFromUser(context_menu);
+  if (selection == ID_SHOW_IN_EXPLORER) {
+    const auto path_lookup = getPathForItemIndex(event.GetIndex());
+    if (!path_lookup || !RagTagUtil::showFileInExplorer(*path_lookup)) {
+      // TODO: Log error? No status bar in the summary view to write it out.
+    }
   }
 }
 
