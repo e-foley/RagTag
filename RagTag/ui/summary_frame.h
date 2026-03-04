@@ -138,10 +138,11 @@ private:
 
   //! Gets the file path for a file listing entry with given index.
   //! 
+  //! @pre Path must be set on the wxListCtrl item using SetItemData() beforehand.
   //! @param index The file listing index to procure the corresponding path for.
   //! @returns The path of the file at the given index or an empty optional if the path cannot be
   //! determined (e.g., if the provided index indicates an entry that doesn't exist).
-  std::optional<ragtag::path_t> getPathForItemIndex(int index) const;
+  std::optional<ragtag::path_t> getPathForItemIndex(long index) const;
 
   // EVENT FUNCTIONS ===============================================================================
   //! Invoked when the user clicks a heading of the file listing.

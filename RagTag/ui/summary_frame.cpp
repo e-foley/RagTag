@@ -483,7 +483,7 @@ std::vector<ragtag::path_t> SummaryFrame::getPathsOfSelectedFiles() const
   return returning;
 }
 
-std::optional<ragtag::path_t> SummaryFrame::getPathForItemIndex(int index) const
+std::optional<ragtag::path_t> SummaryFrame::getPathForItemIndex(long index) const
 {
   // This isn't as simple as invoking file_paths_[i], since list control indices shift around during
   // sorting operations. Thankfully, the item data (where we placed a pointer to the actual path)

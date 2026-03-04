@@ -1158,7 +1158,7 @@ std::optional<ragtag::path_t> MainFrame::qualifiedFileNavigator(
 std::optional<long> MainFrame::getPathListCtrlIndex(const ragtag::path_t& path) const
 {
   for (long i = 0; i < lc_files_in_directory_->GetItemCount(); ++i) {
-    const auto path_lookup = fileListIndexToPath(i);
+    const auto path_lookup = getPathForItemIndex(i);
     if (path_lookup && *path_lookup == path) {
       return i;
     }
@@ -1167,7 +1167,7 @@ std::optional<long> MainFrame::getPathListCtrlIndex(const ragtag::path_t& path) 
   return {};
 }
 
-std::optional<ragtag::path_t> MainFrame::fileListIndexToPath(const long index) const
+std::optional<ragtag::path_t> MainFrame::getPathForItemIndex(const long index) const
 {
   // User data is a pointer to the path corresponding to the list control entry.
   const wxUIntPtr user_data = lc_files_in_directory_->GetItemData(index);
@@ -1591,7 +1591,7 @@ void MainFrame::OnFocusFile(wxListEvent& event)
   }
 
   // Load and display the file.
-  const auto path_lookup = fileListIndexToPath(event.GetIndex());
+  const auto path_lookup = getPathForItemIndex(event.GetIndex());
   if (!path_lookup || !loadFileAndSetAsActive(*path_lookup)) {
     // TODO: Log error.
   }
@@ -1602,7 +1602,7 @@ void MainFrame::OnRightClickFile(wxListEvent& event) {
   context_menu.Append(ID_SHOW_IN_EXPLORER, "&Show in Explorer");
   const auto selection = GetPopupMenuSelectionFromUser(context_menu);
   if (selection == ID_SHOW_IN_EXPLORER) {
-    const auto path_lookup = fileListIndexToPath(event.GetIndex());
+    const auto path_lookup = getPathForItemIndex(event.GetIndex());
     if (!path_lookup) {
       SetStatusText(L"Could not identify file to show.");
     } else if (!RagTagUtil::showFileInExplorer(*path_lookup)) {
